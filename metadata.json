@@ -1,0 +1,8 @@
+{
+  "name": "Boulevard1st (DigiPort ed.)",
+  "description": "A distraction-free tool displaying full-screen design layouts for rapid web structure brainstorming and visualization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

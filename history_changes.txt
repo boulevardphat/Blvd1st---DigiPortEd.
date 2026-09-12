@@ -1,0 +1,836 @@
+LỊCH SỬ THAY ĐỔI CẤU HÌNH VÀ THÔNG SỐ CỦA HỆ THỐNG
+Thời điểm cập nhật: 2026-07-18 09:33:00 (Múi giờ local của Agent)
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 1: KHỞI TẠO DỰ ÁN VÀ TÍCH HỢP HÌNH ẢNH NỀN
+- Thời gian: 16/07/2026 10:00:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Khởi tạo dự án React cơ bản với Vite và TailwindCSS.
+  + Tích hợp hiển thị các hình ảnh nền chính (`young.jpg`, `ultrayoung.jpg`, `vespertine.png`).
+  + Thiết lập logic hiển thị và ẩn các ảnh nền dựa trên state của ứng dụng.
+- Tham số điều chỉnh: Cấu trúc dự án ban đầu.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 2: THIẾT LẬP CƠ CHẾ TÍNH TOÁN VIEWPORT (--vh) VÀ CĂN CHỈNH SAFEZONE
+- Thời gian: 16/07/2026 20:34:50 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Thêm logic JavaScript để tính toán biến `--vh` dựa trên `window.innerHeight` nhằm khắc phục lỗi thanh địa chỉ (URL bar) trên trình duyệt di động.
+  + Tạo một khung an toàn (safezone) để hiển thị hình ảnh chuẩn xác mà không bị cắt xén.
+- Tham số điều chỉnh: window.innerHeight * 0.01, --vh.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 3: XÂY DỰNG BỐ CỤC ĐỘC LẬP CHO GIAO DIỆN DỌC (PORTRAIT) VÀ NGANG (LANDSCAPE)
+- Thời gian: 17/07/2026 07:09:41 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Sử dụng CSS Media Queries (`landscape:` và `portrait:`) của Tailwind để tách biệt hoàn toàn 2 bố cục hiển thị.
+  + Căn chỉnh vị trí các nút bấm (contact, booking, history...) cho phù hợp với từng hướng màn hình.
+- Tham số điều chỉnh: landscape:flex, portrait:flex.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 4: XÂY DỰNG CHUỖI HOẠT CẢNH INTRO (SCENE SEQUENCE)
+- Thời gian: 17/07/2026 17:44:32 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Xây dựng hệ thống state `scene` để quản lý các màn hình từ lúc bắt đầu đến khi vào giao diện chính.
+  + Tích hợp các component intro (`IntroClock`, `VespertineBackground`).
+- Tham số điều chỉnh: setTimeout, SceneState.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 5: CHỮ "PHÁT" TẠI INTRO CHÍNH
+- Thời gian: 18/07/2026 04:19:23 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Từ:
+    ```tsx
+    <div
+      id="intro-phat-text"
+      className="font-phat text-[clamp(2.5rem,8vw,5rem)] text-white/90 uppercase select-none tracking-[-0.12em]"
+    >
+      phát
+    </div>
+    ```
+  + Thành:
+    ```tsx
+    <div
+      id="intro-phat-text"
+      className="font-sans text-[clamp(2.5rem,8vw,5rem)] text-white/90 select-none tracking-normal font-normal"
+    >
+      phát
+    </div>
+    ```
+- Tham số điều chỉnh: Loại bỏ lớp `uppercase`, đổi font `font-phat` thành `font-sans`, loại bỏ tracking hẹp `tracking-[-0.12em]` chuyển thành `tracking-normal font-normal`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 6: HIỆU ỨNG BAY XUỐNG CỦA 3 THẺ CONTACT GIAO DIỆN NGANG
+- Thời gian: 18/07/2026 14:54:14 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/LandscapeContactScreen.tsx
+- Chi tiết thay đổi:
+  + Đổi giá trị `y` ban đầu từ `10` thành `-15` ở cả 3 thẻ (Socials, Personal Email, School Email):
+    ```tsx
+    // Card 1, 2, 3
+    initial={{ opacity: 0, y: -15 }}
+    animate={{ opacity: 1, y: 0 }}
+    ```
+- Tham số điều chỉnh: `initial.y` chuyển từ `10` sang `-15` để tạo hiệu ứng bay từ trên xuống dưới thay vì bay từ dưới lên.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 7: CĂN GIỮA NÚT BOOKING VÀ FRIENDS GIAO DIỆN DỌC (PORTRAIT)
+- Thời gian: 19/07/2026 01:29:05 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/PortraitContactScreen.tsx & /src/App.tsx
+- Chi tiết thay đổi:
+  + Trong /src/components/PortraitContactScreen.tsx: Thêm các class tuyệt đối `absolute left-1/2 -translate-x-1/2 bottom-0` và `absolute left-1/2 -translate-x-1/2 top-0` cho các thẻ hiển thị văn bản động để chúng luôn căn chính giữa chiều rộng màn hình.
+  + Trong /src/App.tsx: Áp dụng tương tự cho các nút tĩnh `btn-booking-portrait` và `btn-friends-portrait`.
+- Tham số điều chỉnh: Căn chỉnh vị trí tuyệt đối (absolute) theo trục X để đảm bảo tính cân đối hoàn hảo trong layout dọc, loại bỏ sự lệch khi so với hai nút hai bên.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 8: THIẾT KẾ SHADOW CỦA FOOTER VÀ HIỆU ỨNG MƯỢT MÀ GIAO DIỆN CHÍNH
+- Thời gian: 19/07/2026 12:03:56 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/Footer.tsx & /src/App.tsx
+- Chi tiết thay đổi:
+  + Trong /src/components/Footer.tsx: Thay đổi chiều rộng footer lên `w-[150vw]` và căn giữa bằng `left-1/2 -translate-x-1/2` để dải bóng thẳng tắp, dài hơn chiều rộng tab.
+  + Tăng cường dải bóng đổ lên `shadow-[0_-12px_40px_rgba(0,0,0,1)]`.
+  + Tách phần shadow này vào một `motion.div` riêng biệt với hiệu ứng fade-in mượt mà (`duration: 1.5`, `delay: 0.3`), đảm bảo các nút logo xuất hiện ngay lập tức mà không có hiệu ứng cản trở.
+  + Trong /src/App.tsx: Loại bỏ hiệu ứng fade-in toàn trang của `scene === 'main-app'` để giữ tính chất aesthetic tức thời của các logo và nút bấm, chỉ cho phép bóng mờ của footer xuất hiện mượt mà.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 9: HIỆU ỨNG XUẤT HIỆN VÀ THOÁT RA CỦA MỤC CONTACT (CẢ HAI GIAO DIỆN)
+- Thời gian: 19/07/2026 22:38:47 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/LandscapeContactScreen.tsx & /src/components/PortraitContactScreen.tsx
+- Chi tiết thay đổi:
+  + Giao diện ngang (/src/components/LandscapeContactScreen.tsx): Thay thế cơ chế trigger `--dummy` thành animation opacity thực thụ:
+    ```tsx
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+    ```
+  + Giao diện dọc (/src/components/PortraitContactScreen.tsx): Đổi sang cơ chế animate mượt mà tương ứng:
+    ```tsx
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+    ```
+- Tham số điều chỉnh: Thiết lập `initial.opacity = 0`, `animate.opacity = 1`, `exit.opacity = 0` với thời gian `0.8s` giúp quá trình mở và đóng contact diễn ra vô cùng êm ái.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 10: KHÔI PHỤC HOẠT ẢNH CONTACT GỐC VÀ SỬA LỖI GIẬT HÌNH NỀN
+- Thời gian: 20/07/2026 09:13:38 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/LandscapeContactScreen.tsx & /src/components/PortraitContactScreen.tsx
+- Chi tiết thay đổi:
+  + Giao diện ngang (/src/components/LandscapeContactScreen.tsx):
+    Khôi phục cơ chế `--dummy` ở thẻ root `motion.div` để loại bỏ hiệu ứng fade-in mờ nhạt bao trùm toàn bộ component, giữ nguyên trạng thái xuất hiện tức thời của ảnh nền giả.
+    Chỉnh sửa vị trí cắt ảnh: `object-[49%_center]` thành `portrait:object-[49%_center]` để đồng bộ tỷ lệ với ảnh gốc trong App.tsx, khắc phục hiện tượng giật/lệch hình khi mở contact.
+  + Giao diện dọc (/src/components/PortraitContactScreen.tsx):
+    Khôi phục `opacity: 1` tĩnh ở thẻ root `motion.div` nhằm đảm bảo hiệu ứng tách đôi màn hình (tearing) vốn dĩ ở 2 nửa trên dưới diễn ra một cách mượt mà và sắc nét nhất (hiệu ứng bóng mờ gốc làm hỏng hiệu ứng tách màn hình).
+    Sửa đồng bộ vị trí ảnh: `object-[49%_center]` thành `portrait:object-[49%_center]` ở 2 nửa mảnh cắt.
+- Tham số điều chỉnh: `initial` và `animate` tại thẻ cha cao nhất được khôi phục về trạng thái hack transition thời gian để duy trì vòng đời exit animation của các thẻ con bên trong mà không làm mờ hình nền tổng thể.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 11: ĐỒNG BỘ HOẠT ẢNH CHO 2 NÚT BOOKING VÀ FRIENDS TRÊN GIAO DIỆN DỌC
+- Thời gian: 20/07/2026 19:48:29 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/PortraitContactScreen.tsx
+- Chi tiết thay đổi:
+  + Thêm thuộc tính `relative` vào thẻ div bọc Logo (mt-[3px]) và Bottom Row (mt-[6px]) để thiết lập đúng bối cảnh định vị (positioning context) cho thẻ `absolute` bên trong (nút "friends").
+  + Tạo riêng `bookingVariants` cho nút "booking" với initial color là `rgba(255, 255, 255, 0.5)` thay vì 0.9 để khớp chuẩn xác với độ mờ khởi tạo ban đầu của nút đó trên giao diện App chính (`text-white/50`).
+- Tham số điều chỉnh: Chỉnh sửa CSS layout bằng cách thêm `relative` để nút "friends" không còn bị văng lên trên. Thay đổi tham số `color` trong initial object của biến animation mới `bookingVariants` sang opacity 0.5.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 12: THÊM HIỆU ỨNG XUẤT HIỆN SHADOW CỦA FOOTER VÀ DỌN DẸP CODE
+- Thời gian: 21/07/2026 06:23:20 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx, /src/components/Footer.tsx, /src/components/IntroClock.tsx
+- Chi tiết thay đổi:
+  + Thêm biến `isPopupOpen` truyền từ `App.tsx` sang `Footer.tsx` để điều khiển shadow của footer biến mất khi bật contact screen, và từ từ hiện ra lại khi tắt.
+  + Tách toàn bộ logic đồng hồ đếm ngược (`ClockAudio` và `IntroClock`) từ `App.tsx` ra riêng một file `IntroClock.tsx` ở trong thư mục `components`. Rút gọn 160 dòng code bên trong `App.tsx` để chuẩn bị cho việc mở rộng layout.
+- Tham số điều chỉnh: Chỉnh `opacity: isPopupOpen ? 0 : 1` và `delay: isPopupOpen ? 0 : 0.3` cho shadow.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 13: TÁCH LỚP HÌNH ẢNH NỀN CHÍNH THÀNH BACKGROUND VÀ SUBJECT
+- Thời gian: 21/07/2026 16:58:10 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/VespertineBackground.tsx (mới), /src/App.tsx, /src/components/LandscapeContactScreen.tsx, /src/components/PortraitContactScreen.tsx
+- Chi tiết thay đổi:
+  + Tạo component mới `VespertineBackground.tsx` để xử lý logic tách lớp hình ảnh nền (vespertine). 
+  + Component này tải 2 lớp hình ảnh mới: lớp nền (`vespertine-bg.png`) và lớp chủ thể (`vespertine-sj.png`), để chừa một `div` trống (`id="middle-layer"`) ở giữa cho các hiệu ứng sau này.
+  + Hình ảnh gốc (`vespertine.png`) vẫn được sử dụng làm "lốp" (fallback) hiển thị ngay lập tức. Sau khi 2 lớp BG và SJ tải xong (`onLoad`), lớp lốp gốc sẽ từ từ mờ đi (`opacity: 0` với `duration: 1.5s`) để lộ ra 2 lớp đã tách một cách mượt mà hoàn hảo.
+  + Thay thế tất cả các thẻ `img` tham chiếu đến `vespertine.png` trong `App.tsx`, `LandscapeContactScreen.tsx`, và `PortraitContactScreen.tsx` bằng component `<VespertineBackground />`.
+- Tham số điều chỉnh: Chỉnh `transition={{ duration: 1.5, ease: 'easeInOut' }}` cho hiệu ứng mờ dần của ảnh lốp.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 14: SỬA LỖI COMPONENT VESPERTINE KHÔNG ĐƯỢC ÁP DỤNG Ở MAIN APP VÀ KHẮC PHỤC HIỆN TƯỢNG XÊ DỊCH
+- Thời gian: 22/07/2026 03:33:01 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx, /src/components/VespertineBackground.tsx
+- Chi tiết thay đổi:
+  + Phát hiện `<VespertineBackground />` ở lần sửa trước mới chỉ được thay thế ở lớp ảnh preload ẩn phía dưới, trong khi màn intro thứ 3 (KC6) và màn hình chính (main-app) vẫn đang dùng thẻ `img` cũ trỏ trực tiếp vào ảnh `vespertine.png`. Đã thay thế triệt để các thẻ `img` còn sót lại bằng `<VespertineBackground />`.
+  + Thêm thuộc tính `z-0` và `referrerPolicy="no-referrer"` vào wrapper của `VespertineBackground.tsx` để "tệp" tuyệt đối 100% với cách hiển thị của bản gốc cũ. Thuật toán dịch chuyển tỉ lệ ngang dọc (`portrait:object-[49%_center]`) giờ đây sẽ hoạt động hoàn hảo cho cả hai lớp ảnh background (`bg`) và subject (`sj`).
+- Tham số điều chỉnh: Chỉnh `z-0` và `referrerPolicy="no-referrer"` vào các layer ảnh tách rời.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 15: THÊM HIỆU ỨNG CHẠY CHỮ "THUAN PHAT"
+- Thời gian: 22/07/2026 14:07:52 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx (mới), /src/components/VespertineBackground.tsx
+- Chi tiết thay đổi:
+  + Tạo component mới `ThuanPhatVisual` với hiệu ứng chữ "THUAN PHAT" đỏ phát sáng mang phong cách club visual.
+  + Chữ được chia thành 12 hàng dọc (`NUM_ROWS = 12`).
+  + Hiệu ứng xuất hiện chạy nhanh liên tục từ hàng dưới cùng (index 11) lên hàng trên cùng (index 0).
+  + Hiệu ứng biến mất chạy nhanh từ hàng trên cùng (index 0) xuống hàng dưới cùng (index 11).
+  + Thêm component này vào giữa thẻ `middle-layer` trong `VespertineBackground.tsx` để chữ xuất hiện phía sau chủ thể và phía trước nền, giống như bản phác thảo.
+- Tham số điều chỉnh: Chỉnh `duration: 0.08` và `delay` dãn cách là `0.06` cho mỗi hàng, font chữ màu `#FF2A2A` kèm shadow phát sáng.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 16: ĐIỀU CHỈNH STYLE VÀ ANIMATION CỦA CHỮ "THUANPHAT"
+- Thời gian: 23/07/2026 00:42:43 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Chữ được thu hẹp khoảng cách các ký tự (`tracking-tighter` thay vì `tracking-widest`).
+  + Các hàng có khoảng cách giãn ra nhờ thuộc tính `gap-[1.5vh]` trên vùng chứa.
+  + Font chữ đậm lên một chút (`font-medium` và `wght 500`).
+  + Màu sắc chuyển từ đỏ phát sáng sang xám tối đơn sắc (`#111111`) và loại bỏ hiệu ứng phát sáng `textShadow`, bỏ `mix-blend-screen`.
+  + Tốc độ hiệu ứng được đẩy lên nhanh hơn (giảm `delay` xuất hiện từng dòng còn `0.03s`, thời gian xuất hiện còn `0.05s`).
+  + Văn bản thay đổi từ "THUAN PHAT" thành "THUANPHAT" không có khoảng trắng.
+  + Tăng kích thước phông chữ lên khoảng 30% nhưng CHỈ ÁP DỤNG TRÊN GIAO DIỆN NGANG (landscape).
+- Tham số điều chỉnh: Kích thước được thêm `landscape:text-[clamp(3.25rem,7.8vw,5.85rem)]`, tốc độ delay giảm từ 0.06 xuống 0.03, thêm `gap-[1.5vh]`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 17: ĐIỀU CHỈNH LẠI STYLE CHỮ THUANPHAT THEO YÊU CẦU MỚI
+- Thời gian: 23/07/2026 11:17:34 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Giảm số dòng hiển thị (`NUM_ROWS`) từ 12 xuống 7.
+  + Tăng font size ở cả 2 giao diện:
+    * Giao diện dọc (Portrait): `text-[18vw]` để scale trực tiếp theo chiều rộng safe zone giúp chữ nổi bật.
+    * Giao diện ngang (Landscape): `landscape:text-[clamp(4.5rem,10.5vw,8rem)]`.
+  + Ép font chữ "béo" hơn theo chiều dọc bằng CSS transform `scale-y-[0.8] scale-x-[1.05]` cùng `origin-center`.
+  + Chuyển class từ `font-sans` sang `font-archivo` để đồng bộ font Archivo có hỗ trợ các trục weight/width, sử dụng `fontVariationSettings: '"wdth" 100, "wght" 500'`.
+  + Tăng khoảng cách các hàng lên `gap-[3.5vh] landscape:gap-[4.5vh]`.
+  + Ép các chữ cái sát nhau hơn nữa bằng `tracking-[-0.07em]`.
+  + Tốc độ xuất hiện và biến mất được đẩy lên nhanh hơn (`delay = 0.02`, `duration = 0.03`).
+- Tham số điều chỉnh: Chỉnh `scale-y-[0.8]`, `scale-x-[1.05]`, `text-[18vw]`, `tracking-[-0.07em]`, `font-archivo`, `NUM_ROWS = 7`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 18: TIẾT CHẾ ĐỘ "BÉO" CỦA CHỮ THUANPHAT
+- Thời gian: 23/07/2026 21:52:25 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Giảm mức độ ép ngang/dọc của chữ bằng cách bỏ `scale-x-[1.05]` và đổi `scale-y-[0.8]` thành `scale-y-[0.9]`.
+  + Nới lỏng khoảng cách chữ một chút từ `tracking-[-0.07em]` thành `tracking-[-0.05em]` để phù hợp với tỷ lệ mới.
+- Tham số điều chỉnh: Xóa `scale-x`, chỉnh `scale-y` lên `0.9`, chỉnh tracking thành `-0.05em`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 19: TIẾP TỤC TIẾT CHẾ ĐỘ "BÉO" CỦA CHỮ THUANPHAT
+- Thời gian: 24/07/2026 08:27:16 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Nâng `scale-y` từ `0.9` lên `0.95` để chữ gần với tỷ lệ gốc hơn nữa, bớt bị lùn và bè.
+  + Nới nhẹ tracking từ `-0.05em` thành `-0.04em`.
+- Tham số điều chỉnh: `scale-y-[0.95]`, `tracking-[-0.04em]`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 20: CĂN CHỈNH LẠI SAFE ZONE VÀ PHÂN BỔ DỌC
+- Thời gian: 24/07/2026 19:02:07 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Chỉnh font size giao diện dọc từ `18vw` xuống `12.5vw` để nằm gọn trong vùng an toàn (safe zone) tương tự chiều rộng logo Boulevard1st.
+  + Đổi cách dàn hàng ở giao diện dọc sang `justify-between` với padding dọc `py-[8vh]`, giúp các dòng chữ rải đều và kéo giãn khắp màn hình theo đúng tinh thần visual club, tránh tình trạng bị co cụm "kẹt ở giữa".
+- Tham số điều chỉnh: Sửa class bao ngoài thành `justify-between landscape:justify-center py-[8vh] landscape:py-0 landscape:gap-[4.5vh]`, font size thành `text-[12.5vw]`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 21: TIẾT CHẾ OPACITY, LOẠI BỎ KHỞI TẠO FADE-IN VÀ CĂN CHỈNH GIÃN DÒC GIAO DIỆN DỌC (PORTRAIT)
+- Thời gian: 25/07/2026 05:36:58 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Giảm opacity cực đại (`MAX_OPACITY`) của chuỗi chữ "THUANPHAT" xuống còn `0.25` để chữ ẩn hiện nhẹ nhàng, không lấn át chủ thể (subject layer).
+  + Khắc phục hoàn toàn hiệu ứng fade-in chậm chạp lúc mới khởi tạo ứng dụng: đặt giá trị khởi tạo `phase = 'appearing'` và sử dụng `initial={false}` trên thẻ `motion.div` để chữ xuất hiện tức thì đầy đủ ngay khi mount mà không bị trễ hay mờ dần từ từ, sau đó vòng lặp ẩn hiện vẫn chạy mượt mà.
+  + Giao diện dọc (Portrait): Chuyển đổi cách dàn hàng từ `justify-between py-[8vh]` sang `justify-center` kết hợp `gap-[1.8vh]`, giúp các hàng chữ thu hẹp khoảng cách lại và tập trung ở trung tâm, đem lại trải nghiệm cân đối, đồng đều giống như trên Desktop (Landscape).
+- Tham số điều chỉnh: Chỉnh `MAX_OPACITY = 0.25`, đặt `initial={false}`, đổi `gap-[1.8vh]` và đồng bộ `justify-center` ở cả 2 hướng màn hình.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 22: TĂNG SỐ DÒNG PORTRAIT, THU HẸP GAP ĐỂ PHỦ TOÀN BỘ CHIỀU CAO MÀN HÌNH MÀ KHÔNG BỊ KẸT Ở GIỮA, TIẾT CHẾ THÊM OPACITY, VÀ BỎ HOÀN TOÀN HOẠT ẢNH FADE-IN KHI VÀO GIAO DIỆN CHÍNH
+- Thời gian: 25/07/2026 16:11:49 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx & /src/components/VespertineBackground.tsx
+- Chi tiết thay đổi:
+  + Giao diện dọc (Portrait): Tăng số dòng hiển thị (`numRows`) lên `13` dòng (so với `7` dòng ở giao diện ngang) và thu hẹp gap xuống `gap-[1.2vh]` để các hàng xếp sát nhau hơn giống như desktop, đồng thời bao phủ đều từ trên xuống dưới toàn bộ chiều cao của màn hình, giải quyết triệt để vấn đề "bị kẹt ở giữa" của 7 dòng trước đó.
+  + Giảm thêm `MAX_OPACITY` từ `0.25` xuống `0.12` để chuỗi chữ "THUANPHAT" mờ ảo cực kỳ tinh tế và hoàn toàn không lấn át lớp nhân vật chính (Subject layer).
+  + Bỏ hoàn toàn hoạt ảnh chuyển cảnh (fade-out) chậm chạp 1.5s của lớp ảnh nền gốc lúc mới tải xong hoặc khi mở giao diện chính bằng cách set `transition={{ duration: 0 }}` trong `VespertineBackground.tsx`.
+- Tham số điều chỉnh: Sửa `numRows` động (`isLandscape ? 7 : 13`), đặt `gap-[1.2vh]` trên portrait, set `MAX_OPACITY = 0.12`, đổi `duration: 0` của fallback background.
+
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 23: PHÁ VỠ GIỚI HẠN SAFEZONE Ở GIAO DIỆN DỌC (PORTRAIT)
+- Thời gian: 26/07/2026 02:46:40 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Giao diện dọc (Portrait): Tăng số dòng hiển thị (`numRows`) từ `13` lên `22` dòng, kết hợp với khoảng cách giữa các hàng `gap-[1.8vh]`.
+  + Sự kết hợp này kéo giãn dải chữ ra toàn bộ chiều cao màn hình, chủ động tràn vượt quá cả mép trên lẫn mép dưới của khung nhìn (viewport), hoàn toàn "phá vỡ" ranh giới safezone và giải quyết triệt để cảm giác "bị kẹt ở giữa" mà người dùng phản hồi.
+- Tham số điều chỉnh: Sửa `numRows` động thành (`isLandscape ? 7 : 22`), tăng gap lên `gap-[1.8vh]`.
+
+
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 24: TÍCH HỢP GIAO DIỆN HISTORY SỬ DỤNG COMPONENT FLOWINGMENU THEO YÊU CẦU CỦA NGƯỜI DÙNG
+- Thời gian: 26/07/2026 13:21:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx, /src/components/FlowingMenu.tsx, /src/components/FlowingMenu.css, package.json
+- Chi tiết thay đổi:
+  + Cài đặt thêm thư viện `gsap` và `lucide-react`.
+  + Khởi tạo 2 file mới `/src/components/FlowingMenu.css` và `/src/components/FlowingMenu.tsx` sao chép nguyên mẫu do người dùng cung cấp.
+  + Sửa `App.tsx`: Import `X` từ `lucide-react` và `FlowingMenu`.
+  + Sửa `App.tsx`: Khởi tạo state `showHistoryDetail`.
+  + Sửa `App.tsx`: Thay thế giao diện History màn hình đen bằng popup hoàn chỉnh có sử dụng FlowingMenu với data `items` chuẩn: 'pre-BLVD', '#BLVD15', '#BLVD16', '#BLVD17', '#BLVD18'.
+  + Sửa `App.tsx`: Thêm popup detail blank block `history-detail-screen` cho action onClick của menu.
+- Tham số điều chỉnh: Cài gsap, render FlowingMenu với options `speed={4}`, `textColor="#a6a6a6"`, `marqueeTextColor="#ffffff"`, `marqueeBgColor="#1a1a1a"`, `borderColor="rgba(255,255,255,0.1)"`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 25: THÊM SHADOW TẠO CHIỀU SÂU CHO CÁC THANH MENU (FLOWING MENU) Ở GIAO DIỆN NGANG
+- Thời gian: 26/07/2026 23:56:21 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/FlowingMenu.css
+- Chi tiết thay đổi:
+  + Thêm `box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 1)` cho các `menu__item` ở giao diện ngang (`@media (orientation: landscape)`).
+  + Bổ sung phân cấp `z-index` giảm dần cho các thanh (từ 10 xuống 1) bằng `:nth-child` để đảm bảo thanh bên trên luôn đè (cả content lẫn shadow) lên thanh bên dưới, giúp bóng đổ (drop shadow) rơi đúng xuống thanh liền kề phía dưới. Khi hover và dải marquee (background `#1a1a1a`) xuất hiện, shadow này sẽ in hằn rõ tạo cảm giác không gian 3D và các layer chồng lên nhau.
+- Tham số điều chỉnh: `box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 1)`, `:nth-child(n) { z-index: 11-n }`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 26: ĐẢO NGƯỢC CHIỀU SHADOW VÀ Z-INDEX CHO MENU (FLOWING MENU) Ở GIAO DIỆN NGANG
+- Thời gian: 27/07/2026 10:31:12 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/FlowingMenu.css
+- Chi tiết thay đổi:
+  + Đảo ngược `box-shadow` thành `0 -20px 50px -10px rgba(0, 0, 0, 0.8)` để hướng shadow hắt lên trên (âm trục Y).
+  + Đảo ngược phân cấp `z-index` tăng dần cho các thanh (từ 1 lên 10) bằng `:nth-child` để thanh bên dưới sẽ đè shadow lên cạnh dưới (bottom edge) của thanh bên trên nó, tạo đúng cảm giác thanh bên dưới đang lồng và hắt bóng lên thanh liền kề phía trên.
+- Tham số điều chỉnh: `box-shadow: 0 -20px 50px -10px rgba(0, 0, 0, 0.8)`, `:nth-child(n) { z-index: n }`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 27: TỐI ƯU HÓA TRẢI NGHIỆM HOVER TRÊN MOBILE CHO MENU HISTORY
+- Thời gian: 27/07/2026 21:06:03 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/FlowingMenu.tsx
+- Chi tiết thay đổi:
+  + Bổ sung xử lý sự kiện cảm ứng (`onTouchStart`, `onTouchEnd`) trên mobile cho các `menu__item-link`.
+  + Trích xuất vị trí tọa độ `clientX`, `clientY` từ `ev.touches[0]` (đối với onTouchStart) và `ev.changedTouches[0]` (đối với onTouchEnd) để hàm tính toán `findClosestEdge` của FlowingMenu vẫn hoạt động bình thường như trên desktop.
+  + Giải quyết tình trạng phải nhấn giữ rất lâu thiết bị mobile mới nhận diện là trạng thái "hover": giờ đây chỉ cần chạm (touch) là dải marquee sẽ xuất hiện ngay lập tức tương tự như khi lia chuột (mouse enter).
+- Tham số điều chỉnh: Thêm `onTouchStart={handleMouseEnter}` và `onTouchEnd={handleMouseLeave}`, lấy `touches[0].clientX` thay thế.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 28: KẾT HỢP CHỮ BLVD STRETCH VÀO THUANPHAT VISUAL VỚI CHU KỲ LUÂN PHIÊN
+- Thời gian: 28/07/2026 07:40:54 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Cấu trúc lại component để hỗ trợ 2 chế độ (mode): `'thuanphat'` và `'blvd'`.
+  + Sau khi chuỗi chữ `THUANPHAT` (chế độ `'thuanphat'`) kết thúc chu kì xuất hiện và biến mất (cộng thêm 600ms delay), component sẽ chuyển sang chế độ `'blvd'`.
+  + Ở chế độ `'blvd'`, một phiên bản tàng hình (invisible) của chữ THUANPHAT được render để thiết lập kích thước chiều dài (width) chuẩn xác tuyệt đối, bọc trong một thẻ flex `h-full`.
+  + Lớp chữ `BLVD` (được vẽ bằng SVG `preserveAspectRatio="none"`) được overlay absolute (`inset-0`) lên trên thẻ tàng hình đó, nhận đúng width của chuỗi THUANPHAT và height của safezone container (sử dụng margin safezone: `py-[8vh] landscape:py-[4.5vh]`). Kết quả là chữ BLVD bị kéo giãn dọc toàn bộ safezone và có chiều rộng khớp y chang khối chữ THUANPHAT (để trải nghiệm được cân mắt).
+  + Chữ BLVD hiện lên trong 1.5s, sau đó mờ dần và chuyển lại sang chu kì THUANPHAT.
+- Tham số điều chỉnh: Bổ sung state `mode`, luân phiên cycle timeout, setup wrapper cấu trúc DOM `flex h-full` và text tàng hình.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 29: ĐIỀU CHỈNH LẠI CHỮ BLVD STRETCH CHO DỄ NHÌN HƠN
+- Thời gian: 28/07/2026 18:15:45 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Tăng độ mờ (opacity) của chữ BLVD từ `0.12` lên `0.35` để nổi bật hơn, do chữ dạng rỗng (hollow) và nằm ở lớp nền (sau nhân vật) rất dễ bị chìm.
+  + Tăng độ dày viền chữ (strokeWidth) từ `3.2` lên `4.5` để tăng độ rõ nét.
+  + Chuyển thuộc tính `fontVariationSettings` vào thẻ `style` hợp lệ của React SVG text.
+- Tham số điều chỉnh: `opacity: 0.35`, `strokeWidth="4.5"`, sửa lỗi attribute `fontVariationSettings`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 30: KHẮC PHỤC CHỮ BLVD STRETCH KHÔNG HIỂN THỊ & CHUẨN HOÁ VISUAL
+- Thời gian: 29/07/2026 04:50:36 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Áp dụng `w-fit` vào thẻ wrapper của chữ BLVD để giới hạn chiều rộng chính xác với kích thước nội dung, cho phép thẻ SVG `w-full h-full` bên trong bám sát tỷ lệ.
+  + Thêm lớp `scale-y-[0.95]` vào chữ tàng hình (invisible text) để đồng bộ tuyệt đối kích thước với chuỗi chữ THUANPHAT.
+  + Đổi màu stroke của chữ BLVD thành trắng rỗng `rgba(255, 255, 255, 0.95)` với `strokeWidth="3.2"` và `opacity: 1` để giống hệt visual ở màn hình intro theo yêu cầu.
+- Tham số điều chỉnh: `w-fit`, `scale-y-[0.95]`, `stroke="rgba(255, 255, 255, 0.95)"`, `opacity: 1`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 31: SỬA LỖI VÒNG LẶP CHU KỲ CHỮ VÀ HIỆU ỨNG APPEAR
+- Thời gian: 29/07/2026 15:25:27 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Phát hiện lỗi vòng lặp `useEffect` bị ngắt sớm do dependency `phase` làm trigger cleanup function liên tục. Đã cấu trúc lại bằng cách sử dụng `useRef` để track các timeouts, và chỉ phụ thuộc vào `[mode, numRows]`.
+  + Đổi `initial={{ opacity: 0 }}` cho chữ THUANPHAT để mỗi khi kết thúc vòng lặp BLVD và quay lại THUANPHAT, chuỗi chữ sẽ có hiệu ứng xuất hiện dần từ dưới lên trên, tránh việc bị render giật cục ở `MAX_OPACITY`.
+  + Đảm bảo logic lặp vĩnh viễn (infinite cycle) giữa `'thuanphat'` và `'blvd'` hoạt động trơn tru.
+- Tham số điều chỉnh: Chuyển logic timeouts sang `useRef<NodeJS.Timeout[]>([])`, sửa mảng dependency, `initial={{ opacity: 0 }}`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 32: KIẾN TRÚC LẠI TIMEOUT LOOP & STRETCH BLVD
+- Thời gian: 30/07/2026 02:00:18 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Phát hiện lỗi vòng lặp phụ thuộc state React `useEffect` dẫn đến việc sau 1 chu kỳ thì render bị hụt. Đã viết lại sử dụng một hàm đệ quy `runSequence()` bên trong `useEffect` với biến cờ `active = true` (không phụ thuộc vào state `mode` hay `phase`). Điều này đảm bảo chu kỳ THUANPHAT -> BLVD sẽ chạy trơn tru vĩnh viễn không bị can thiệp bởi render cycle.
+  + Đã thêm thuộc tính `textLength="400"` và `lengthAdjust="spacingAndGlyphs"` vào thẻ `<text>` SVG của chữ BLVD. Vì vùng viewBox là 400 và SVG wrapper có width đúng bằng chữ THUANPHAT tàng hình, thuộc tính này ép chữ BLVD phải dãn khoảng cách giữa các kí tự ra lấp đầy tuyệt đối 100% không gian (kết quả là 2 chuỗi sẽ dài bằng hệt nhau đến từng pixel).
+  + Bỏ hoàn toàn hiệu ứng fade-in/fade-out của chữ BLVD theo yêu cầu, render trực tiếp thẻ `<svg>` dựa trên điều kiện `phase === 'appearing'`, xuất hiện và biến mất tức thì.
+- Tham số điều chỉnh: Xoá `motion.svg`, dùng `svg` thường, thêm `textLength="400" lengthAdjust="spacingAndGlyphs"`, cấu trúc lại timeout loop bằng đệ quy.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 33: RÚT NGẮN THỜI GIAN CHỜ GIỮA CÁC ANIMATION ĐỂ TĂNG ĐỘ "DỒN DẬP"
+- Thời gian: 30/07/2026 12:35:09 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Giảm `stay duration` của THUANPHAT từ 800ms xuống 300ms.
+  + Giảm thời gian chờ trước khi BLVD xuất hiện từ 600ms xuống 150ms.
+  + Giảm thời gian hiển thị của BLVD từ 1500ms xuống 500ms.
+  + Giảm thời gian chờ trước khi vòng lặp quay lại THUANPHAT từ 600ms xuống 150ms.
+  + Mục tiêu: Tối ưu hoá nhịp độ (pacing) để visual dồn dập, mạnh mẽ và khớp với nhịp độ của intro ban đầu mà không can thiệp vào bất kỳ visual/layout nào hiện tại.
+- Tham số điều chỉnh: Các giá trị delay trong `setTimeout` của hàm `runSequence()`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 34: THÊM MÀN HÌNH PRE-INTRO (TRẮNG CHUYỂN ĐEN KHI LOAD XONG ẢNH) VÀ TỐI ƯU MÃ NGUỒN
+- Thời gian: 30/07/2026 23:19:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Thêm một scene state mới là `pre-intro` đóng vai trò là màn hình loading đầu tiên.
+  + Màn hình pre-intro hiển thị màu trắng hoàn toàn (`#ffffff`), che phủ toàn bộ web (`z-[100]`).
+  + Thiết lập một `useEffect` để tạo `new Image()` và chủ động preload toàn bộ 5 hình ảnh nền (`vespertine-bg.png`, `vespertine-sj.png`, `vespertine.png`, `young.jpg`, `ultrayoung.jpg`) không phụ thuộc vào render cycle của DOM.
+  + Khi tất cả ảnh được tải thành công, màn hình sẽ từ từ chuyển sang màu đen (`#000000`) qua một animation mượt mà kéo dài 1.5s, đảm bảo người dùng chỉ thấy quá trình transition khi ảnh đã sẵn sàng.
+  + Sau đó, cảnh sẽ tự động nhường chỗ cho `intro-play` (intro gốc).
+  + Khắc phục, dọn dẹp các type không dùng (khai báo các SceneState thiếu) để tối ưu build trên Vercel và đẩy lên GitHub mượt mà, không gặp lỗi Type-Check.
+- Tham số điều chỉnh: Bổ sung `imagesLoaded` state, thêm type `pre-intro`, `intro-blvd`, `intro-clock`, transition fade to black.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 35: KHẮC PHỤC LỖI MÀN HÌNH ĐEN Ở PRE-INTRO
+- Thời gian: 30/07/2026 23:23:15 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Phát hiện lỗi ở dependency array của `useEffect` quản lý scene transition: biến `imagesLoaded` bị bỏ quên. Điều này dẫn tới khi `imagesLoaded` thay đổi thành `true`, component render lại nhưng `useEffect` không chạy lại => timeout chuyển scene không bao giờ được thiết lập, khiến màn hình bị kẹt ở trạng thái đen vĩnh viễn (do overlay `pre-intro` đen xì đã che lấp). Đã thêm `imagesLoaded` vào mảng dependency `[scene, imagesLoaded]`.
+  + Gỡ bỏ thẻ bọc `<AnimatePresence>` quanh `pre-intro` overlay. Do thẻ `motion.div` của `pre-intro` không có thuộc tính `exit`, việc gỡ bỏ thẻ bọc đảm bảo khi `scene` chuyển sang `intro-play`, màn hình đen sẽ bị gỡ bỏ (unmount) lập tức ngay khoảnh khắc chuyển scene (không có bất cứ độ trễ hay fade-out nào), thoả mãn chính xác yêu cầu "chi chạy sang đen hoàn toàn thì ảnh (overlay) mất luôn, không fade, intro chơi ngay lúc đó".
+  + Đổi thứ tự gán thuộc tính ảnh (`img.onload` rồi mới tới `img.src`) để đề phòng trường hợp cache làm sự kiện tải ảnh nhảy (fire) quá nhanh trên một số trình duyệt.
+- Tham số điều chỉnh: Bổ sung `[scene, imagesLoaded]`, bỏ `<AnimatePresence>`, đổi thứ tự `.src`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 36: SỬA LỖI HỎNG BỐ CỤC TRÊN TABLET KHI ẨN HIỆN URL BAR & TỐI ƯU setVh
+- Thời gian: 30/07/2026 23:26:12 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx, /src/components/FlowingMenu.css, /src/components/ThuanPhatVisual.tsx
+- Chi tiết thay đổi:
+  + Phát hiện nguyên nhân thực sự gây lỗi bố cục trên tablet (landscape) khi ẩn hiện thanh công cụ: tuy container gốc đã dùng `--vh` để cố định, nhưng các component bên trong (`ThuanPhatVisual` và `FlowingMenu`) lại sử dụng đơn vị `vh` thô (raw `vh` như `12vh`, `4.5vh`). Khi URL bar ẩn đi, các đơn vị `vh` thô này phình to ra bên trong một container không đổi kích thước, dẫn đến bố cục bị vỡ, lệch.
+  + Đã thay thế toàn bộ các đơn vị `vh` thô bằng `calc(var(--vh, 1vh) * X)` ở Tailwind classes (`ThuanPhatVisual.tsx`) và CSS file (`FlowingMenu.css`).
+  + Tối ưu hoá thuật toán tính `--vh` trong `App.tsx`: Bổ sung thêm biến `lastHeight`, thuật toán giờ đây sẽ tính toán lại `--vh` nếu `innerWidth` thay đổi (khi xoay màn hình/resize) HOẶC nếu `innerHeight` thay đổi một lượng lớn hơn 150px (để cover các trường hợp bật/tắt bàn phím ảo, split-screen trên iPad), đồng thời bỏ qua các thay đổi nhỏ (như ẩn/hiện URL bar) để bảo toàn sự ổn định tuyệt đối của bố cục.
+  + Bổ sung thêm listener cho sự kiện `orientationchange` để tối đa hoá độ nhạy khi xoay thiết bị.
+- Tham số điều chỉnh: `gap-[calc(var(--vh,1vh)*4.5)]`, `Math.abs(window.innerHeight - lastHeight) > 150`, `orientationchange`.
+
+LẦN THAY ĐỔI THỨ 33: LOẠI BỎ HIỂN THỊ POPUP CONTACT VÀ INFO, CHUYỂN SANG MÀN HÌNH ĐEN & SAO LƯU COMPONENT
+- Thời gian: 30/07/2026 10:02:40 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx, tạo folder backup_components_for_recap
+- Chi tiết thay đổi:
+  + Người dùng không còn thấy phần hiển thị nội dung pop-up của Contact (cả ngang và dọc) cũng như Info (LedDotBoard) phù hợp nữa.
+  + Đã loại bỏ hoàn toàn việc gọi render `<LandscapeContactScreen>`, `<PortraitContactScreen>`, và `<LedDotBoard>` trong `App.tsx`.
+  + Gỡ bỏ các `import` tương ứng ở đầu file `App.tsx` để tối ưu mã nguồn.
+  + Thay thế bằng các `<div className="fixed inset-0 bg-black z-[100] cursor-pointer" onClick={() => setShow...(false)} />` (màn hình đen xì có chức năng tắt khi click).
+  + Để phục vụ cho mục đích recap và khôi phục ở dự án khác sau này, toàn bộ source code của 3 component nói trên đã được copy nguyên vẹn và lưu trữ cẩn thận vào thư mục `backup_components_for_recap/` ở thư mục gốc của dự án.
+- Tham số điều chỉnh: Bỏ `<AnimatePresence>` của contact, thay `<LedDotBoard />` bằng `<div className="bg-black" />`, `z-[100]`.
+
+LẦN THAY ĐỔI THỨ 34: MỞ RỘNG SCENE INTRO ĐỒNG HỒ THEO YÊU CẦU NGƯỜI DÙNG
+- Thời gian: 30/07/2026 10:10:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx, /src/components/IntroClock.tsx
+- Chi tiết thay đổi:
+  + Mở rộng scene đồng hồ số (clock) từ 1 scene đơn giản thành chuỗi 4 scene liên tiếp: `intro-clock-normal` (chạy bình thường), `intro-clock-reverse` (chạy ngược thời gian với tốc độ x5), `intro-clock-mirrored` (lật ngược đồng hồ), và `intro-clock-multiple` (nhân bản thành nhiều hàng giống giao diện THUANPHAT).
+  + Tuỳ biến lại Component `IntroClock` để có thể nhận `mode` prop. Dựa vào `mode` mà component sẽ thay đổi cách tính toán thời gian, style scale, và map ra lưới nhiều hiển thị (render list).
+  + Tối ưu hoá việc kích hoạt lại clock: Nhờ tách mỗi bước thành component riêng biệt trên React Tree (`<IntroClock mode="..." />`), mỗi khi mount component mới, context thời gian được làm mới tự nhiên, không gây lỗi logic tràn biến.
+- Tham số điều chỉnh: SceneState: `intro-clock-normal`, `reverse`, `mirrored`, `multiple`. Transform: `scaleY(-1) scaleX(-1)`, Array.from({ length: 9 }).
+
+LẦN THAY ĐỔI THỨ 35: ĐIỀU CHỈNH CHI TIẾT CÁC NHỊP ĐỒNG HỒ THEO YÊU CẦU
+- Thời gian: 30/07/2026 10:12:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/IntroClock.tsx
+- Chi tiết thay đổi:
+  + Nhịp 4 (Reverse Clock): Đưa tốc độ lùi thời gian về lại tốc độ bình thường (không nhân 5 lần).
+  + Nhịp 5 (Mirrored Clock): Chỉ lật ngược chiều ngang (scaleX(-1)), không lật ngược chiều dọc nữa.
+  + Nhịp 6 (Multiple Clocks): Tăng số lượng hàng đồng hồ (từ 9 lên 25) và giảm khoảng cách (gap) giữa các hàng (xuống còn 0.5vh trên mobile, 1.5vh trên màn ngang) để tạo cảm giác chật chội, dồn dập.
+- Tham số điều chỉnh: nowMs = startTimeMs - diff, scaleX(-1), Array.from({ length: 25 }), gap 0.5vh / 1.5vh.
+
+LẦN THAY ĐỔI THỨ 36: GỘP NHỊP ĐỒNG HỒ NGƯỢC VÀ LẬT THÀNH MỘT
+- Thời gian: 30/07/2026 10:14:20 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx, /src/components/IntroClock.tsx
+- Chi tiết thay đổi:
+  + Gộp `intro-clock-reverse` và `intro-clock-mirrored` thành một scene duy nhất là `intro-clock-reverse-mirrored` (nhịp 4 của intro).
+  + Ở nhịp này, đồng hồ sẽ đồng thời thực hiện 2 hiệu ứng: lật ngược theo chiều ngang và đếm lùi thời gian với tốc độ chuẩn.
+  + Nhịp 5 (Multiple Clocks) giữ nguyên số lượng hàng (25) và khoảng cách hẹp, tiếp nối ngay sau nhịp 4.
+  + Cập nhật lại `SceneState` và rút gọn các mốc timeout trong `App.tsx` cho đồng nhất.
+- Tham số điều chỉnh: `mode="reverse-mirrored"`, scaleX(-1), SceneState.
+
+LẦN THAY ĐỔI THỨ 37: TỐI ƯU HIỆU ỨNG GIAO DIỆN HISTORY VÀ BỔ SUNG MÀU SẮC ĐẶC TRƯNG
+- Thời gian: 30/07/2026 10:28:40 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx, /src/components/FlowingMenu.tsx
+- Chi tiết thay đổi:
+  + Khắc phục triệt để lỗi hiệu ứng trượt xuất hiện không nhất quán (đôi khi từ trên xuống, đôi khi từ dưới lên) trên màn hình cảm ứng: Cập nhật `FlowingMenu.tsx` để bỏ qua các sự kiện chuột mô phỏng (simulated mouse events) sau khi chạm, đồng thời ép hướng xuất hiện của hover animation luôn luôn là từ dưới lên (`bottom`) đối với các thiết bị cảm ứng hoặc khi phát hiện thao tác chạm.
+  + Áp dụng mã màu tĩnh đặc trưng cho từng nhịp tuổi BLVD (khi chưa hover) như yêu cầu: #BLVD15 (`#EFDD7C`), #BLVD16 (`#8ACE00`), #BLVD17 (`#9d9ea1`), #BLVD18 (`#705fa3`).
+  + Riêng với #BLVD18: bổ sung thuộc tính `hoverText: 'COMINGSOON'` để thay thế label khi đưa chuột vào, và `dimOnHover: true` để tổng thể thanh menu mờ đi (opacity giảm còn 0.5) khi ở trạng thái hover.
+- Tham số điều chỉnh: `ev.type.startsWith('touch')`, `window.matchMedia('(hover: none) and (pointer: coarse)')`, customColor prop, `opacity: 0.5`.
+
+LẦN THAY ĐỔI THỨ 38: CHỈNH LẠI MÀU SẮC RIÊNG CHO PHẦN SỐ & HIỆU ỨNG MỜ TỨC THÌ
+- Thời gian: 30/07/2026 10:33:40 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/FlowingMenu.tsx
+- Chi tiết thay đổi:
+  + Tách chuỗi `#BLVDXX` thành hai phần riêng biệt: `#BLVD` và `XX` (số). Màu sắc mặc định (`textColor`) được giữ cho phần `#BLVD`, còn mã màu tuỳ chỉnh (`customColor`) chỉ được áp dụng cho phần số tuổi để tạo điểm nhấn khác biệt. Logic này được áp dụng đồng bộ trên cả HTML (desktop) và SVG (mobile).
+  + Tuỳ chỉnh lại hiệu ứng mờ (dimOnHover) cho thanh menu `#BLVD18`: Sửa đổi duration của GSAP animation từ `0.3s` xuống `0s` để hiệu ứng mờ (opacity giảm xuống 0.5) diễn ra lập tức ngay khi hover, thay vì từ từ như trước đây.
+- Tham số điều chỉnh: Text splitting `match = text.match(/^(#BLVD)(\d+)$/)`, `gsap.to({ ... duration: 0 })`, SVG `<tspan>` mapping.
+
+LẦN THAY ĐỔI THỨ 39: TINH CHỈNH MÀU SẮC RIÊNG CHO SỐ VÀ THÊM HIỆU ỨNG GRADIENT
+- Thời gian: 30/07/2026 10:37:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx, /src/components/FlowingMenu.tsx
+- Chi tiết thay đổi:
+  + Cập nhật lại logic FlowingMenu. Màu sắc tùy chỉnh (`customColor`) giờ đây chỉ giới hạn tác dụng trong trạng thái CHƯA hover (bình thường). Khi ở trạng thái hover (xuất hiện marquee), phần chữ trượt sẽ không bị ảnh hưởng bởi `customColor` mà sử dụng màu sắc đồng bộ, hoặc sử dụng nội dung thay thế (`hoverText`) nếu có.
+  + Sửa màu chỉ định cho thanh `#BLVD17`: Cập nhật `customColor` sang `#ffffff` (Màu trắng) để tách bạch rõ hơn với phần text `#BLVD` gốc.
+  + Thêm hiệu ứng Gradient chữ cho thanh `#BLVD18`: Bổ sung tham số `gradientColor` truyền vào `<FlowingMenu>` component. Áp dụng CSS `linear-gradient(to right, ...)` kết hợp `background-clip: text` cho thành phần HTML (desktop). Đối với thành phần SVG (mobile), sử dụng `<defs><linearGradient>` và `<tspan fill="url(#...)">` để đảm bảo dải màu gradient mượt mà từ `#705fa3` sang `#FE00A1` trên mọi nền tảng.
+- Tham số điều chỉnh: `gradientColor="#FE00A1"`, `<linearGradient>`, `background-clip: text`.
+
+LẦN THAY ĐỔI THỨ 40: ĐIỀU CHỈNH HƯỚNG VÀ TỶ LỆ MÀU GRADIENT CỦA #BLVD18
+- Thời gian: 30/07/2026 10:40:20 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/FlowingMenu.tsx
+- Chi tiết thay đổi:
+  + Chỉnh sửa hướng của hiệu ứng gradient cho #BLVD18 thành hướng Đông Nam (`135deg` đối với CSS và `x1="0%" y1="0%" x2="100%" y2="100%"` đối với SVG).
+  + Thay đổi tỷ lệ chuyển màu từ hồng (`#FE00A1`) sang tím (`#705fa3`), thiết lập các mốc điểm dừng (stop-color offset) sao cho màu tím chiếm phần lớn diện tích (hồng chiếm khoảng 10% bắt đầu và chuyển hẳn sang tím từ 60% trở đi).
+- Tham số điều chỉnh: `linear-gradient(135deg, ${gradientColor} 10%, ${customColor} 60%)`, `x2="100%" y2="100%"`, `offset="10%"`, `offset="60%"`.
+
+LẦN THAY ĐỔI THỨ 41: NHẬP VÀ KHAI BÁO CÁC FONT CHỮ RIÊNG THEO YÊU CẦU
+- Thời gian: 31/07/2026 11:31:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/index.css
+- Chi tiết thay đổi:
+  + Thêm quy tắc `@font-face` để import các font chữ tuỳ chỉnh từ thư mục `/fonts/` (sẽ được người dùng thêm vào sau): `Turista` cho #BLVD15, `ArialCustom` (pack riêng của Arial) cho #BLVD16, và `Vespertine` cho #BLVD17.
+  + Cập nhật `@theme` trong Tailwind để có thể gọi nhanh thông qua CSS variables: `--font-turista`, `--font-arial` (kèm fallback "Arial" chuẩn), `--font-vespertine`.
+  + Theo yêu cầu, chỉ thực hiện việc khai báo font để chuẩn bị cho các bước sau, không áp dụng font trực tiếp vào giao diện trong lần thay đổi này.
+- Tham số điều chỉnh: `@font-face` urls `/fonts/turista.ttf`, `/fonts/arial.ttf`, `/fonts/vespertine.ttf`, css vars `--font-turista`, `--font-arial`, `--font-vespertine`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 42: CẬP NHẬT TÊN FILE FONT TRONG INDEX.CSS
+- Thời gian: 31/07/2026 18:39:56 (Giờ TPHCM)
+- File ảnh hưởng: /src/index.css
+- Chi tiết thay đổi:
+  + Cập nhật đường dẫn đường dẫn các font chữ `@font-face` khớp với tên file thực tế trong thư mục `/public/fonts`: `Turista Gorda NF W01 Regular.ttf`, `ARIAL.TTF`, `vespertine Regular.ttf`.
+- Tham số điều chỉnh: `url('/fonts/Turista Gorda NF W01 Regular.ttf')`, `url('/fonts/ARIAL.TTF')`, `url('/fonts/vespertine Regular.ttf')`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 43: CẬP NHẬT CHỨC NĂNG TAB CONTACT (GIAO DIỆN NGANG - LANDSCAPE)
+- Thời gian: 31/07/2026 19:02:28 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx, /src/components/VespertineBackground.tsx
+- Chi tiết thay đổi:
+  + Bỏ hiệu ứng fade của các nút và logo khi mở Contact (ẩn lập tức các overlay chính khi bấm nút contact).
+  + Thêm tab Contact trượt từ cạnh phải màn hình vào với kích thước `w-[50vw]`, chiều cao full màn hình `h-full`, nền màu đen `#000000`, có viền bên trái `border-l border-white/20`.
+  + Thêm prop `shiftLeft={boolean}` cho `VespertineBackground`: di chuyển hình nền sang trái 25% (`x: '-25%'`) bằng animation `motion.div` mượt mà (`duration: 0.6s`) để giữ trọng tâm điểm nhìn ở nửa trái màn hình.
+- Tham số điều chỉnh: `shiftLeft={showContactLandscape}`, `x: '-25%'`, transition duration `0.6s`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 44: TỐI ƯU GIAO DIỆN TAB CONTACT CHO MOBILE (PORTRAIT)
+- Thời gian: 31/07/2026 19:05:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Thiết lập tab Contact ở chế độ Portrait trượt từ dưới lên (`initial={{ y: '100%' }}`, `animate={{ y: 0 }}`), chiếm 50% chiều cao màn hình (`h-[50vh]`, `w-full`), nền màu đen `#000000` với viền trên `border-t border-white/20`.
+  + Giữ nguyên hình nền không dịch chuyển ở chế độ Portrait, đồng thời phủ một lớp overlay tối màu `bg-black/60` với animation mờ mượt mà phía trên hình nền.
+- Tham số điều chỉnh: `h-[50vh]`, `y: '100%'` -> `0`, `bg-black/60`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 45: THAY NÚT ĐÓNG BẰNG CHỮ "CLOSE" TRONG TAB CONTACT
+- Thời gian: 31/07/2026 19:08:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Thay thế biểu tượng nút X bằng chữ "close" cho cả giao diện Landscape và Portrait.
+  + Định dạng font chữ `font-archivo` (không narrow), khoảng cách chữ hẹp `tracking-tighter`, kích thước `text-2xl`, hiệu ứng hover nghiêng `hover-italic-transition`.
+- Tham số điều chỉnh: `<span className="font-archivo text-2xl tracking-tighter leading-none">close</span>`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 46: ĐIỀU CHỈNH ĐỘ DÀY FONT CỦA NÚT "CLOSE"
+- Thời gian: 31/07/2026 19:11:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Tăng độ dày chữ "close" từ `wght: 200` lên `wght: 300` ở cả 2 tab Contact (Landscape và Portrait) để chữ nổi bật và rõ ràng hơn.
+- Tham số điều chỉnh: `fontVariationSettings: '"wght" 300'`.
+
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 51: TRÌNH BÀY LẠI MỤC INFO VỚI NỘI DUNG DEMO
+- Thời gian: 01/08/2026 11:06:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Áp dụng layout mẫu cho mục `info`: Các phần thông tin được xếp từ trên xuống, căn lề trái khớp với chữ "info" (`left-[6.5%]`).
+  + Theo yêu cầu: tên mục nhỏ (dùng `text-white/50 text-[clamp(...)] uppercase tracking-[0.2em]`), nội dung bên dưới chữ lớn (dùng `font-archivo text-white text-[clamp(...)]`).
+  + Các nội dung hiện đang để tạm (Location, Hours, Music) vì chưa có nội dung gốc.
+- Tham số điều chỉnh: Bổ sung layout chi tiết vào bên trong `<SlideTab title="info">`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 52: KHÔI PHỤC NỘI DUNG MỤC INFO TỪ BẢN CŨ
+- Thời gian: 01/08/2026 11:09:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Cập nhật lại các nội dung text của mục `info` cho đúng với bản gốc "ngày xưa" (từ bản màn hình LED cũ).
+  + Áp dụng vào layout hiện tại: tiêu đề nhỏ (name, blvd, birth, zodiac, mbti) phía trên, nội dung chữ to ở phía dưới.
+- Tham số điều chỉnh: Sửa text tĩnh từ `Location`, `Hours`, `Music` thành `Phat Nguyen Thuan`, `Boulevard`, `26/09/2008`, `Libra ♎`, `INFP-T`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 53: CẬP NHẬT LẠI MỤC INFO (THU NHỎ KHOẢNG CÁCH, XÓA BỚT THÔNG TIN, THÊM KHUNG ẢNH)
+- Thời gian: 01/08/2026 11:19:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Đã loại bỏ mục `blvd` (Boulevard) và biểu tượng `♎` ở mục zodiac.
+  + Đã thêm thuộc tính `items-start` vào các container để đảm bảo tất cả các nội dung đều được canh lề trái hoàn toàn (trước đó có thể bị dịch chuyển nhẹ do đặc tính của flex).
+  + Thu nhỏ lại khoảng cách giữa các mục thông tin (điều chỉnh từ `gap-[clamp(2rem,5vw,4rem)]` xuống `gap-[clamp(1.2rem,3vw,2.5rem)]`).
+  + Chừa một khoảng không gian trống phía trên mục "Họ tên" (hình vuông có nền trắng trong suốt rất nhẹ) để làm vị trí cho ảnh sau này, ảnh cũng được canh lề trái.
+- Tham số điều chỉnh: Sửa layout trong `<SlideTab title="info">`, thêm `<div className="w-[clamp(4rem,10vw,6rem)] h-[clamp(4rem,10vw,6rem)] bg-white/5 rounded-md mb-2"></div>`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 54: THÊM ẢNH VÀO MỤC INFO VÀ ĐIỀU CHỈNH CHIỀU CAO TAB TRÊN MOBILE
+- Thời gian: 01/08/2026 11:26:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Cập nhật hình ảnh vào mục info (sử dụng đường dẫn https://i.ibb.co/TxrtFvPZ/info.webp). Hình ảnh được căn lề trái như yêu cầu.
+  + Điều chỉnh chiều cao của tất cả các SlideTab trên thiết bị di động (khi ở chế độ portrait). Tăng từ nửa màn hình (50vh) lên 8 phần 10 màn hình (80vh) để hiển thị được nhiều nội dung hơn, phù hợp với yêu cầu.
+- Tham số điều chỉnh: `h-[50vh]` đổi thành `h-[80vh]`. Sửa thẻ `div` trống thành `<img src="..." />`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 55: ĐIỀU CHỈNH KÍCH THƯỚC VÀ KIỂU DÁNG ẢNH TRONG MỤC INFO
+- Thời gian: 01/08/2026 11:28:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Cập nhật kích thước ảnh to hơn (width thay đổi từ `w-[clamp(4rem,12vw,7rem)]` thành `w-[clamp(12rem,35vw,24rem)]`).
+  + Bỏ bo góc (`rounded-sm`).
+  + Thêm tỉ lệ ảnh (`aspect-[1439/959]`) để đảm bảo ảnh giữ đúng tỷ lệ độ phân giải gốc của ảnh.
+- Tham số điều chỉnh: Sửa class `<img ... className="w-[clamp(12rem,35vw,24rem)] aspect-[1439/959] object-cover mb-2" />`
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 56: THU NHỎ ẢNH Ở GIAO DIỆN NGANG VÀ CHUYỂN TẤT CẢ NÚT THÀNH TAB
+- Thời gian: 01/08/2026 11:33:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Giảm kích thước hình ảnh mục info 20% riêng ở giao diện ngang (thêm `landscape:w-[clamp(9.6rem,28vw,19.2rem)]`).
+  + Chuyển tất cả các nút còn lại trên giao diện chính (`booking`, `friends`, `archive`) thành dạng tab trượt SlideTab đồng bộ với `info`, `contact` và `his-tory`.
+  + Mở khóa nút `booking` (cho phép tương tác `pointer-events-auto`, đổi màu text sang `text-white/90 hover:text-white`).
+- Tham số điều chỉnh:
+  + Sửa state tab: `<'contact' | 'info' | 'history' | 'booking' | 'friends' | 'archive' | null>`.
+  + Bổ sung 3 `<SlideTab>` cho `booking`, `friends`, và `archive`.
+  + Sửa class ảnh: `w-[clamp(12rem,35vw,24rem)] landscape:w-[clamp(9.6rem,28vw,19.2rem)] aspect-[1439/959] object-cover mb-2`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 57: CÂN BẰNG KHOẢNG CÁCH TRÊN VÀ DƯỚI TIÊU ĐỀ "INFO"
+- Thời gian: 01/08/2026 11:35:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Khoảng cách từ mép trên cửa sổ đến mép trên tiêu đề "info" là 6.5%.
+  + Đã điều chỉnh khoảng cách từ mép dưới tiêu đề "info" đến khu vực nội dung bằng đúng 6.5% (đổi thuộc tính `top` của container nội dung từ `top-[20%]` thành `top-[calc(13%+1.5rem)]`).
+  + Tăng `max-h` của container nội dung từ `75%` lên `80%` để tận dụng diện tích hiển thị.
+- Tham số điều chỉnh: Sửa class container thành `className="absolute top-[calc(13%+1.5rem)] left-[6.5%] right-[6.5%] flex flex-col gap-[clamp(1.2rem,3vw,2.5rem)] items-start overflow-y-auto no-scrollbar pb-10 max-h-[80%]"`.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 58: CĂN CHỈNH ĐỒNG ĐỀU MỤC INFO VÀ SỬA LỖI ĐƠ WEB KHI XOAY MÀN HÌNH TABLET
+- Thời gian: 01/08/2026 11:42:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + (1) Lỗi căn lề: Kiểm tra lại toàn bộ file, điều chỉnh để lề trái của hình ảnh, text content và tiêu đề "info" đồng bộ và cân bằng. Đảm bảo toàn bộ nội dung trong mục Info được canh chuẩn xác `left-[6.5%]`.
+  + (2) Lỗi đơ màn hình khi xoay máy: Khắc phục lỗi bằng cách gộp trạng thái đóng/mở tab trên 2 giao diện (`activeLandscapeTab` và `activePortraitTab`) thành một trạng thái duy nhất là `activeTab`. 
+    -> Nhờ vậy, khi xoay từ màn hình dọc (portrait) sang ngang (landscape) hoặc ngược lại, thành phần giao diện không bị giấu nhầm (display: none) gây kẹt tương tác, giúp website chuyển đổi hoạt ảnh mượt mà, người dùng có thể thấy và đóng tab dễ dàng ở cả hai chiều.
+- Tham số điều chỉnh: Gộp state thành `activeTab`, sửa tất cả tham số gọi mở tab liên quan để cùng truy xuất từ 1 nguồn trạng thái đồng nhất.
+
+---------------------------------------------------------
+
+LẦN THAY ĐỔI THỨ 59: KHẮC PHỤC ẢNH NỀN BỊ DỊCH TRÁI KHI Ở CHẾ ĐỘ DỌC
+- Thời gian: 01/08/2026 11:44:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Thêm trạng thái nhận diện giao diện ngang dọc (`isLandscape`).
+  + Ràng buộc hiệu ứng dịch ảnh nền sang trái (`shiftLeft`) chỉ kích hoạt khi màn hình ở chế độ ngang (`isLandscape === true`) và có tab đang mở.
+  + Nhờ đó, thao tác mở tab ở chế độ dọc không còn gây ra hiện tượng ảnh nền bị lệch ngang sai thiết kế gốc.
+- Tham số điều chỉnh: Cập nhật biến `shiftLeft={activeTab !== null && isLandscape}`.
+
+LẦN THAY ĐỔI: DỌN DẸP MÃ NGUỒN VÀ TỐI ƯU CODE
+- Thời gian: 02/08/2026 16:15:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx, /src/components/Footer.tsx, /src/components/IntroClock.tsx, /src/components/VespertineBackground.tsx
+- Chi tiết thay đổi:
+  + Xoá toàn bộ các component, state và logic thừa không còn sử dụng (ví dụ: các biến state `activeTab`, `isLandscape`, `isAnyPopupOpen`, component `SlideTab`).
+  + Gỡ bỏ hoàn toàn logic pop-up ở `Footer.tsx` (`isPopupOpen`).
+  + Sửa lỗi Type cho `ClockDisplay` trong `IntroClock.tsx` để sửa lỗi biên dịch.
+  + Loại bỏ `ThuanPhatVisual` khỏi `VespertineBackground` và xoá luôn các file component không sử dụng như `FlowingMenu.tsx`, `FlowingMenu.css`, `ThuanPhatVisual.tsx`.
+- Tham số điều chỉnh: Xoá các state không sử dụng, làm gọn code `App.tsx` và `Footer.tsx`.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: BỎ FOOTER VÀ ĐIỀU CHỈNH UX CUỘN (DIGIPORT ED.)
+- Thời gian: 02/08/2026 16:21:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx, /src/components/Footer.tsx
+- Chi tiết thay đổi:
+  + Gỡ bỏ hoàn toàn component Footer (`Footer.tsx`).
+  + Ở giao diện ngang (landscape), chặn cuộn trang (`landscape:overflow-hidden`).
+  + Ở giao diện dọc (portrait), giữ tính năng cuộn (`portrait:overflow-y-auto`) xuống một trang 100vh đen hoàn toàn kèm shadow gradient đen phủ lên trên cùng để làm hiệu ứng nối tiếp.
+- Tham số điều chỉnh: Xoá thẻ `<Footer />`, thêm khối div h-[100vh] màu đen có shadow-[0_-20px_40px_20px_rgba(0,0,0,1)], thay đổi thuộc tính cuộn của khung bọc chính.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: SỬA LỖI PROPS REACT TEXTTRANSFORM TRÊN SVG (DIGIPORT ED.)
+- Thời gian: 02/08/2026 16:20:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Chuyển đổi thuộc tính `textTransform="uppercase"` thành `style={{ textTransform: 'uppercase' }}` trên thẻ SVG `<text>` để loại bỏ cảnh báo prop DOM không hợp lệ của React.
+- Tham số điều chỉnh: `style={{ textTransform: 'uppercase' }}`.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: THAY ĐỔI NỘI DUNG VÀ FONT WEIGHT SUB-LOGO (DIGITAL PORTFOLIO)
+- Thời gian: 02/08/2026 16:22:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Sửa text "DigiPort ed." thành "DIGITAL PORTFOLIO" ở cả giao diện ngang và dọc.
+  + Giảm font-weight từ 900 xuống 300.
+  + Với text dài hơn (17 ký tự so với 12 ký tự), việc giữ nguyên textLength="400" sẽ tự động làm giảm khoảng cách giữa các chữ cái (và/hoặc thu hẹp chữ cái lại) để khớp với chiều rộng tổng thể, đáp ứng yêu cầu giảm khoảng cách.
+- Tham số điều chỉnh: text="DIGITAL PORTFOLIO", fontWeight="300".
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: CHỈNH SỬA CĂN LỀ D VÀ O CHO SUB-LOGO (DIGITAL PORTFOLIO)
+- Thời gian: 02/08/2026 16:24:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Tăng `textLength` từ `400` lên `412` và giảm `x` từ `0` xuống `-6` trong thẻ `<text>`.
+  + Việc này làm giãn nhẹ khung hiển thị text ra ngoài khoảng viewBox 400 ban đầu để bù trừ (compensation) lại padding/bearing ẩn của font Archivo. 
+  + Nhờ vậy, cạnh trái chữ D sẽ được căn bằng chính xác với cạnh trái chữ B ở trên, và cạnh phải chữ O sẽ bằng với cạnh phải chữ t.
+- Tham số điều chỉnh: x="-6", textLength="412" cho cả hai màn hình portrait và landscape.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TINH CHỈNH LẠI CĂN LỀ D VÀ O CHO SUB-LOGO (DIGITAL PORTFOLIO) LẦN 2
+- Thời gian: 02/08/2026 16:32:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Tiếp tục tăng `textLength` từ `412` lên `428` và giảm `x` từ `-6` xuống `-14` trong thẻ `<text>`.
+  + Do tracking của font và left/right bearing của kí tự, `-6` vẫn chưa đủ để đưa mép trái chữ D chạm đúng mép trái chữ B (và O chạm mép phải chữ t). Chuyển sang offset lớn hơn để bù trừ hoàn toàn.
+- Tham số điều chỉnh: x="-14", textLength="428".
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: KHÔI PHỤC VỊ TRÍ SUB-LOGO DO LỖI CACHE DEV SERVER
+- Thời gian: 02/08/2026 16:41:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Phát hiện dev server bị kẹt cache ở port cũ khiến các thay đổi trước đó chưa được cập nhật trên giao diện.
+  + Đã khởi động lại server và khôi phục giá trị căn lề về x="-6", textLength="412" (giá trị chuẩn xác để bù đắp sai số) cho cả 2 màn hình.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐIỀU CHỈNH CHÍNH XÁC CĂN LỀ SUB-LOGO (DIGITAL PORTFOLIO) LẦN 3
+- Thời gian: 02/08/2026 16:43:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Tinh chỉnh lại giá trị `x` và `textLength` sau khi phân tích kỹ tỷ lệ và padding của font Archivo.
+  + Do `x="0", textLength="400"` làm chữ thụt vào trong và `x="-6", textLength="412"` làm chữ hơi thò ra ngoài một chút, ta lấy mốc ở giữa là `x="-2", textLength="404"` để D và O căn thẳng hàng mép trái và mép phải so với chữ B và chữ t ở trên.
+- Tham số điều chỉnh: x="-2", textLength="404" cho cả màn hình portrait và landscape.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐIỀU CHỈNH CĂN LỀ SUB-LOGO (DIGITAL PORTFOLIO) LẦN 4
+- Thời gian: 02/08/2026 16:44:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Dựa trên phản hồi người dùng, chữ D và O vẫn bị thụt vào trong so với chữ B và t. 
+  + Do tracking của h1 (-tracking-tighter) khiến bề rộng tổng thể của Boulevard1st khá hẹp so với khoảng trống font. Việc đưa x=-2 là chưa đủ.
+  + Đã tăng bù trừ biên lớn hơn nữa bằng cách đưa x="-18" và textLength="436" để bù đắp hoàn toàn khoảng trắng dư thừa trong viewbox 400.
+- Tham số điều chỉnh: x="-18", textLength="436".
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TỐI ƯU CĂN LỀ MÉP TRÁI CHỮ D VÀ MÉP PHẢI CHỮ O
+- Thời gian: 02/08/2026 16:52:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Điều chỉnh x="-8" và textLength="416" trong thẻ SVG <text> chứa "DIGITAL PORTFOLIO" ở cả 2 layout (landscape & portrait).
+  + Mức bù trừ x="-8" giúp cạnh trái của chữ 'D' căn chỉnh chính xác theo đường gióng đứng của chữ 'B' (Boulevard1st), và cạnh phải của chữ 'O' căn thẳng hàng với mép phải chữ 't'.
+- Tham số điều chỉnh: x="-8", textLength="416".
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐIỀU CHỈNH CHÍNH XÁC CĂN LỀ MÉP TRÁI CHỮ D VÀ MÉP PHẢI CHỮ O
+- Thời gian: 02/08/2026 16:53:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Dựa trên hình ảnh thực tế, giá trị x="-8" và textLength="416" khiến chữ DIGITAL PORTFOLIO bị nhô ra ngoài 2 bên cạnh B và t.
+  + Đã tinh chỉnh lại x="-3" và textLength="406" cho cả màn hình landscape và portrait.
+  + Giúp chữ 'D' thu lề vào 5px vừa sát mép thẳng đứng của chữ 'B', và chữ 'O' thu lề vào 5px vừa sát mép thẳng đứng của chữ 't'.
+- Tham số điều chỉnh: x="-3", textLength="406".
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: BÙ TRỪ KHOẢNG TRỐNG INSET PHÍA PHẢI CHỮ t TRONG LOGO BOULEVARD1ST
+- Thời gian: 02/08/2026 16:56:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Dựa trên phân tích chính xác của người dùng: Bounding box của `h1` ("Boulevard1st") có khoảng hở không đều do glyph 't' ở cuối từ bị thụt lùi vào trong khung box (inset bên phải) dưới tác động của font tracking (`-tracking-tighter`).
+  + Để chữ "DIGITAL PORTFOLIO" gióng thẳng hàng tuyệt đối với mép mực thực tế của chữ 'B' (bên trái) và chữ 't' (bên phải) thay vì gióng theo bounding box vuông, ta thu hẹp vùng phủ của SVG `<text>`:
+  + Đặt `x="1"` (căn vừa đúng vạch mép thẳng đứng của 'B') và `textLength="383"` (kết thúc ở x=384, vừa đúng mép viền bên phải của 't').
+- Tham số điều chỉnh: x="1", textLength="383" cho cả màn hình portrait và landscape.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: SỬA LỆCH INSET VÀ CĂN THẲNG LỀ MÉP CHỮ D VÀ O VỚI CHỮ B VÀ t
+- Thời gian: 02/08/2026 16:58:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Dựa trên ảnh chụp thực tế từ công cụ Inspect Element của người dùng, cạnh trái của SVG text (chữ D) bị dịch quá nhiều sang trái (lòi ra ngoài chữ B) và cạnh phải (chữ O) bị dịch quá nhiều về bên trái (thiếu khoảng 3% so với mép chữ t).
+  + Đã điều chỉnh tọa độ trong SVG viewBox (400px):
+    1. Dịch điểm bắt đầu `x` từ `1` sang `11` (+10px tương đương 2.5% chiều rộng viewBox) để lề trái của chữ D nằm thẳng hàng chính xác bên dưới đường dóng thẳng đứng của chữ 'B'.
+    2. Đã tăng `textLength` từ `383` lên `386` (tổng độ rộng phủ từ x=11 đến x=397) giúp mép phải chữ 'O' chạm sát đường dóng thẳng đứng mép bên phải của chữ 't'.
+- Tham số điều chỉnh: x="11", textLength="386" cho cả màn hình portrait và landscape.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: VI TỈNH LẠI CĂN LỀ HAI BÊN CỦA CHỮ DIGITAL PORTFOLIO
+- Thời gian: 02/08/2026 17:01:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Dựa trên ảnh chụp thực tế lần trước (x=11, textLength=386), mép trái của 'D' bị thụt vào trong (lệch sang phải) quá nhiều so với 'B', và mép phải của 'O' lại thụt vào trong (lệch sang trái) quá nhiều so với 't'.
+  + Tính toán lại theo tỷ lệ hình ảnh: Dịch trái `x` 8 pixel (về vị trí 3) và mở rộng `textLength` thêm 12 pixel (thành 398) để kéo mép phải ra xa thêm 4 pixel (từ 397 lên 401).
+  + Khoảng bù trừ trái gấp đôi khoảng bù trừ phải để khớp với bounding box thực tế của phông chữ.
+- Tham số điều chỉnh: x="3", textLength="398" cho cả hai SVG.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TÍCH HỢP CHỌN CHẾ ĐỘ (INDIVIDUAL VÀ EMPLOYER / CLUB) TẠI GIAO DIỆN TRẮNG KHỞI ĐẦU
+- Thời gian: 12/09/2026 20:41:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/types.ts, /src/components/ModeSelector.tsx, /src/App.tsx
+- Chi tiết thay đổi:
+  + Tạo kiểu dữ liệu `PortfolioMode` ('individual' | 'employer-club') trong /src/types.ts.
+  + Thiết kế component `ModeSelector` hiển thị ở màn hình trắng (`pre-intro`) ban đầu với phong cách Brutalist sắc nét, góc vuông tuyệt đối (`rounded-none`), tương phản trắng đen cao cấp:
+    * Chế độ 1: "Individual" - Trải nghiệm đầy đủ (Full Access / Toàn bộ dự án).
+    * Chế độ 2: "Employer / Club" - Dự án trọng điểm (Curated Highlights / Tuyển chọn).
+  + Logic chuyển cảnh: Khi người dùng bấm chọn một trong 2 mode, hệ thống lưu state `portfolioMode` (và đồng bộ `localStorage`), kích hoạt hiệu ứng fade sang nền đen (0.8s) rồi tự động phát chuỗi intro (phát -> BLVD -> Clock -> Tinted images -> Main App).
+  + Tại màn hình chính (`main-app`), bố trí nút báo trạng thái/chuyển đổi nhanh giữa 2 chế độ ở góc trên bên trái, sẵn sàng kết nối bộ lọc hiển thị dự án trong các bước tiếp theo.
+- Quy chuẩn tuân thủ: Hoàn toàn không bo góc (`rounded-none`), không sử dụng gradient AI slop, responsive chuẩn trên Desktop và Mobile.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TINH CHỈNH NÚT CHUYỂN MODE VÀ GIAO DIỆN CHỌN GÓC NHÌN (LOGO BOULEVARD1ST ĐEN + ICON)
+- Thời gian: 12/09/2026 20:50:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/ModeSelector.tsx, /src/App.tsx
+- Chi tiết thay đổi:
+  + Nút chuyển đổi mode tại màn hình chính:
+    * Đã bỏ hoàn toàn khung border, nền đen và chấm vuông.
+    * Đặt tại góc safezone: `landscape:top-[6.5%] landscape:left-[6.5%] portrait:top-6 portrait:left-6`.
+    * Desktop/màn hình ngang: Chỉ hiển thị đúng 1 dòng text tên mode viết thường (`individual` hoặc `employer / club`), phông chữ nhỏ tinh tế `text-xs font-archivo`.
+    * Mobile/màn hình dọc: Chỉ hiển thị 1 icon vector từ `lucide-react` (`User` cho individual, `Briefcase` cho employer/club).
+  + Màn hình chọn góc nhìn (`ModeSelector`):
+    * Bỏ dòng tiêu đề cũ `Boulevard1st • Perspective` và `Select Mode`.
+    * Thay bằng logo chữ `Boulevard1st` màu đen (`font-archivo font-black tracking-tighter`) nằm trực tiếp phía trên dòng chữ `select mode`.
+    * Ở 2 ô lựa chọn: Bỏ số thứ tự `[01]` và `[02]` ở góc, thay thế bằng các icon vector tinh tế từ `lucide-react` (`User` và `Briefcase`), giữ nguyên quy tắc `rounded-none`.
+---------------------------------------------------------

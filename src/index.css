@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..100,100..900;1,62..100,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@900&display=swap');
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Turista';
+  src: url('/fonts/Turista Gorda NF W01 Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ArialCustom';
+  src: url('/fonts/ARIAL.TTF') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Vespertine';
+  src: url('/fonts/vespertine Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+@theme {
+  --font-archivo: "Archivo", sans-serif;
+  --font-be-vietnam: "Be Vietnam Pro", sans-serif;
+  --font-turista: "Turista", sans-serif;
+  --font-arial: "ArialCustom", "Arial", sans-serif;
+  --font-vespertine: "Vespertine", sans-serif;
+}
+
+.font-archivo-narrow {
+  font-family: "Archivo", sans-serif;
+  font-variation-settings: "wdth" 62;
+}
+
+.font-archivo-wide {
+  font-family: "Archivo", sans-serif;
+  font-variation-settings: "wdth" 100;
+}
+
+.hover-italic-transition {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
+  transform-origin: center;
+}
+
+.hover-italic-transition:hover {
+  transform: skewX(-11deg);
+}
+
+.text-stroke-white {
+  -webkit-text-stroke: 3px rgba(255, 255, 255, 0.95);
+  color: transparent;
+}
+
+.font-phat {
+  font-family: "Archivo", sans-serif;
+  font-variation-settings: "wdth" 62, "wght" 100;
+  letter-spacing: -0.08em;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in-custom {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hide scrollbars but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+@keyframes ledFlicker {
+  0%, 79%, 81%, 85%, 89%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.4);
+  }
+  80% {
+    opacity: 0.85;
+    filter: brightness(0.85);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+  }
+  82% {
+    opacity: 0.95;
+    filter: brightness(0.95);
+  }
+  86% {
+    opacity: 0.75;
+    filter: brightness(0.75);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+  }
+  88% {
+    opacity: 0.98;
+    filter: brightness(0.98);
+  }
+}
+
+.animate-led-flicker {
+  animation: ledFlicker 4s infinite alternate;
+}
+
+/* Styling for the split-flap board */
+hotfx-split-flap {
+  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+  font-size: 32px !important;
+  display: block !important;
+  width: fit-content !important;
+  height: fit-content !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
