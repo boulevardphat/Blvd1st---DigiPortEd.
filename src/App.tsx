@@ -11,7 +11,6 @@ import { motion } from 'motion/react';
 import { IntroClock } from './components/IntroClock';
 import { VespertineBackground } from './components/VespertineBackground';
 import { ModeSelector } from './components/ModeSelector';
-import { User, Briefcase } from 'lucide-react';
 import { PortfolioMode, SceneState } from './types';
 
 export default function App() {
@@ -343,7 +342,7 @@ export default function App() {
 
       {/* Main App Screen (Background Image & Interactive Interface Layouts) */}
       {scene === 'main-app' && (
-        <div className="absolute inset-0 z-10 overflow-x-hidden no-scrollbar scroll-smooth landscape:overflow-hidden portrait:overflow-y-auto">
+        <div className="absolute inset-0 z-10 overflow-x-hidden overflow-y-auto no-scrollbar scroll-smooth">
           <div className="w-full flex flex-col overflow-x-hidden">
             {/* The 100vh Main Screen View */}
             <div className="relative w-full h-[calc(var(--vh,1vh)*100)] shrink-0 flex items-center justify-center overflow-hidden ">
@@ -368,26 +367,23 @@ export default function App() {
                   className="bg-transparent border-0 p-0 text-white/70 hover:text-white transition-colors cursor-pointer flex items-center select-none focus:outline-none"
                   title={`Current mode: ${portfolioMode === 'individual' ? 'individual' : 'employer / club'}. Click to switch.`}
                 >
-                  {/* Desktop / Landscape: 1 dòng text tên mode viết thường */}
-                  <span className="hidden sm:inline font-archivo text-xs tracking-wider lowercase">
+                  {/* Single unified mode name in lowercase for both mobile and desktop */}
+                  <span className="font-archivo text-xs tracking-wider lowercase">
                     {portfolioMode === 'individual' ? 'individual' : 'employer / club'}
-                  </span>
-
-                  {/* Mobile / Portrait: Chỉ 1 icon vector */}
-                  <span className="inline sm:hidden flex items-center justify-center p-2.5 -m-2.5">
-                    {portfolioMode === 'individual' ? (
-                      <User className="w-4 h-4 text-white/80" />
-                    ) : (
-                      <Briefcase className="w-4 h-4 text-white/80" />
-                    )}
                   </span>
                 </button>
               </div>
 
+              {/* Seamless Bottom Shadow (Rich, full-range smooth gradient transition, solid #000000 strictly in the final 1px) */}
+              <div 
+                id="hero-bottom-fade"
+                className="absolute bottom-0 left-0 right-0 h-24 sm:h-28 md:h-32 pointer-events-none z-[5] bg-[linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(0,0,0,0.08)_20%,rgba(0,0,0,0.25)_40%,rgba(0,0,0,0.52)_60%,rgba(0,0,0,0.75)_75%,rgba(0,0,0,0.92)_88%,#000000_calc(100%-1px),#000000_100%)]" 
+              />
+
               {/* Landscape Layout (Visible only in landscape / horizontal viewports) */}
               <div 
                 id="safezone-overlay-landscape" 
-                className="hidden landscape:flex absolute inset-0 flex-col justify-end p-[6.5%] pointer-events-none"
+                className="hidden landscape:flex absolute inset-0 flex-col justify-end p-[6.5%] pointer-events-none z-10"
               >
                 {/* Bottom Row */}
                 <div className="relative flex justify-center items-baseline w-full">
@@ -432,7 +428,7 @@ export default function App() {
               {/* Portrait Layout (Visible only in portrait / vertical viewports) */}
               <div 
                 id="safezone-overlay-portrait" 
-                className="hidden portrait:flex absolute inset-0 pointer-events-none"
+                className="hidden portrait:flex absolute inset-0 pointer-events-none z-10"
               >
                 {/* Anchor point exactly at 66.5vh, centered horizontally */}
                 <div className="absolute left-1/2 -translate-x-1/2 w-fit pointer-events-auto flex flex-col items-center" style={{ top: 'calc(var(--vh, 1vh) * 66.5)' }}>
@@ -473,11 +469,11 @@ export default function App() {
               </div>
             </div>
 
-            {/* Blank Black Page (Only visible and scrollable in portrait) */}
-            <div className="hidden portrait:block relative w-full h-[calc(var(--vh,1vh)*100)] bg-black shrink-0 z-20">
-              {/* Upward casting shadow */}
-              <div className="absolute top-0 left-0 w-full h-[1px] pointer-events-none shadow-[0_-20px_40px_20px_rgba(0,0,0,1)] z-10" />
-            </div>
+            {/* Blank Black Page (Scrollable content on both desktop and mobile) */}
+            <div 
+              id="page-black-blank"
+              className="relative w-full h-[calc(var(--vh,1vh)*100)] bg-black shrink-0 z-20"
+            />
           </div>
         </div>
       )}

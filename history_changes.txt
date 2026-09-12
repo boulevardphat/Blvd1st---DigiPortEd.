@@ -834,3 +834,98 @@ LẦN THAY ĐỔI: TINH CHỈNH NÚT CHUYỂN MODE VÀ GIAO DIỆN CHỌN GÓC N
     * Thay bằng logo chữ `Boulevard1st` màu đen (`font-archivo font-black tracking-tighter`) nằm trực tiếp phía trên dòng chữ `select mode`.
     * Ở 2 ô lựa chọn: Bỏ số thứ tự `[01]` và `[02]` ở góc, thay thế bằng các icon vector tinh tế từ `lucide-react` (`User` và `Briefcase`), giữ nguyên quy tắc `rounded-none`.
 ---------------------------------------------------------
+
+LẦN THAY ĐỔI: TỐI ƯU SHADOW CHUYỂN SẮC LIỀN MẠCH VÀ KÍCH HOẠT CUỘN TRANG XUỐNG TRÊN DESKTOP
+- Thời gian: 12/09/2026 21:02:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Khắc phục đường cắt sắc cạnh (hard cut line) và shadow bị đặt sai chỗ ở mobile:
+    * Gỡ bỏ hoàn toàn thẻ div shadow 1px cũ (`shadow-[0_-20px_40px_20px_rgba(0,0,0,1)]`) đặt ở top trang đen thứ 2 - vốn là nguyên nhân tạo ra dải đen cục bộ và để lộ vạch cắt đáy ảnh.
+    * Thêm dải chuyển sắc `hero-bottom-fade` ở đáy màn hình 1 (`h-48 sm:h-64 md:h-80`) với hiệu ứng `bg-gradient-to-b from-transparent via-black/40 via-25% via-black/80 via-65% to-black` (z-[5], nằm dưới text logo z-10 nhưng nằm trên background ảnh z-0).
+    * Giúp bức ảnh Vespertine chìm dần và chuyển sắc hoàn toàn sang màu đen thuần 100% (#000000) trước khi chạm đáy mép màn hình, tạo sự kết nối liền mạch tuyệt đối 100% với trang đen phía dưới.
+  + Đưa tính năng cuộn trang xuống (scroll down) lên giao diện Desktop:
+    * Thay đổi thuộc tính container cuộn từ `landscape:overflow-hidden portrait:overflow-y-auto` sang `overflow-y-auto overflow-x-hidden no-scrollbar scroll-smooth` cho toàn bộ các thiết bị.
+    * Bỏ class `hidden portrait:block` ở trang đen thứ hai (`#page-black-blank`), cho phép người dùng cuộn mượt mà xuống trang thứ hai trên cả Desktop và Mobile.
+- Quy chuẩn tuân thủ: Hoàn toàn không bo góc (`rounded-none`), không sử dụng shadow giả AI slop, responsive chuẩn trên Desktop và Mobile.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: THU GỌN ĐỘ DÀI VÀ TINH CHỈNH ĐIỂM CHẠM 000000 CỦA SHADOW ĐÁY
+- Thời gian: 12/09/2026 21:04:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Giảm độ cao dải shadow đáy từ `h-48 sm:h-64 md:h-80` xuống `h-14 sm:h-16` (56px trên mobile, 64px trên desktop) để shadow không lan quá sâu lên chủ thể.
+  + Cấu hình chính xác dải tuyến tính: `linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 50%, #000000 82%, #000000 100%)`.
+  + Shadow đạt màu đen thuần #000000 ở mốc 82% và duy trì khoảng 10px đen tuyệt đối cuối cùng trước khi chạm ranh giới trang thứ hai, đảm bảo kết nối liền mạch và không bị dài.
+- Tham số điều chỉnh: h-14 sm:h-16, linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.5)_50%,#000000_82%,#000000_100%).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TỐI ƯU ĐỘ MƯỢT SHADOW DESKTOP VỚI ĐƯỜNG CONG SCRIM (BẮT ĐẦU TỪ TRONG SUỐT 100%)
+- Thời gian: 12/09/2026 21:05:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Khắc phục hiện tượng shadow trên desktop bị gắt và trông giống "1 cục đen đen":
+    * Nâng cấp gradient sang đường cong suy giảm quang học (Scrim Easing Curve) 9 điểm dừng: bắt đầu từ `rgba(0,0,0,0)` (100% trong suốt tuyệt đối).
+    * Trong 30% đầu tiên, độ mờ chỉ tăng nhẹ từ 0 lên 0.015 và 0.06, hoàn toàn loại bỏ đường biên gãy hay cảm giác vệt đen đột ngột.
+    * Tăng không gian chuyển sắc trên desktop lên `landscape:h-32` (128px) và mobile `h-20` (80px).
+    * Chạm sắc đen thuần `#000000` tại 94% và duy trì 6% cuối cùng (khoảng 8px trên desktop) làm vùng đệm liên kết hoàn hảo với trang đen bên dưới.
+- Tham số điều chỉnh: h-20 landscape:h-32, linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(0,0,0,0.015)_15%,rgba(0,0,0,0.06)_30%,rgba(0,0,0,0.15)_45%,rgba(0,0,0,0.32)_60%,rgba(0,0,0,0.58)_75%,rgba(0,0,0,0.85)_88%,#000000_94%,#000000_100%).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐỒNG BỘ NÚT CHUYỂN MODE MOBILE GIỐNG DESKTOP VÀ GIẢM ĐỆM SHADOW ĐÁY CÒN ĐÚNG 3PX
+- Thời gian: 12/09/2026 21:07:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Nút chuyển mode ở giao diện chính mobile:
+    * Đồng bộ hiển thị giống hệt desktop: bỏ icon `User` / `Briefcase`, hiển thị đúng 1 dòng chữ tên mode viết thường (`individual` hoặc `employer / club`), phông chữ `font-archivo text-xs tracking-wider`.
+    * Gỡ bỏ các import icon thừa (`User`, `Briefcase`) trong App.tsx.
+  + Shadow đáy:
+    * Giảm vùng đệm đen #000000 từ 8px xuống chính xác 3px bằng cách cấu hình `#000000 calc(100% - 3px), #000000 100%` trong dải gradient scrim curve.
+    * Gradient bắt đầu từ trong suốt tuyệt đối (`rgba(0,0,0,0)`), chuyển sắc êm ái và chỉ chạm màu đen tuyền đúng 3 pixel trước khi chạm đáy trang.
+- Tham số điều chỉnh: `#000000 calc(100% - 3px), #000000 100%`, đồng bộ `<span className="font-archivo text-xs tracking-wider lowercase">`.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: THU GỌN MẠNH BỀ RỘNG VÀ ĐỘ DÀY CỦA SHADOW ĐÁY (ULTRA-SLIM EDGE FADE)
+- Thời gian: 12/09/2026 21:09:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Khắc phục hiện tượng dải shadow màu đen quá dày (chiếm nhiều diện tích theo hình ảnh thực tế phản hồi):
+    * Giảm mạnh chiều cao tổng thể của khối `hero-bottom-fade` từ `h-20 landscape:h-32` (80px - 128px) xuống còn `h-7 sm:h-8` (chỉ 28px trên mobile, 32px trên desktop).
+    * Cấu hình lại tỷ lệ gradient: 35% đầu tiên hoàn toàn trong suốt tuyệt đối (`rgba(0,0,0,0)` đến `rgba(0,0,0,0.02)`).
+    * Vùng chuyển sắc chỉ diễn ra cô đọng trong ~10px cuối cùng trước khi chạm màu đen thuần `#000000` đúng 3px trước mép đáy (`#000000 calc(100% - 3px)`).
+    * Phần màu đen không còn bị lan rộng hay tạo thành dải đen dày, giữ cho bức ảnh nền hiển thị trọn vẹn và thanh thoát nhất.
+- Tham số điều chỉnh: h-7 sm:h-8, linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(0,0,0,0.02)_35%,rgba(0,0,0,0.15)_60%,rgba(0,0,0,0.5)_80%,#000000_calc(100%-3px),#000000_100%).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: MỞ RỘNG VÙNG CHUYỂN SẮC MƯỢT MÀ VÀ GIỮ PHẦN ĐEN XÌ CÔ ĐỌNG ĐÚNG 3PX SÁT ĐÁY
+- Thời gian: 12/09/2026 21:11:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Tối ưu phân bổ không gian dải shadow đáy:
+    * Khôi phục chiều cao tổng thể của dải chuyển sắc lên `h-28 sm:h-36 md:h-44` (112px trên mobile, 144px - 176px trên desktop) để mắt người cảm nhận được độ chuyển êm dịu, tự nhiên, không bị bóp ngắn cũn cỡn.
+    * Tinh chỉnh lại đường cong mật độ quang học: hơn 80% chiều cao phía trên được giữ rất sáng và trong suốt (opacity chỉ từ 0% đến 20%), giữ nguyên vẹn chi tiết bức ảnh nền mà không bị một mảng xám đen lớn đè lên.
+    * Vùng tối chỉ tăng tốc ở 10% - 15% cuối cùng và phần đen xì thực sự (`#000000`) chỉ cô đọng ở đúng 3 pixel cuối cùng sát mép đáy (`#000000 calc(100% - 3px), #000000 100%`).
+- Tham số điều chỉnh: h-28 sm:h-36 md:h-44, linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(0,0,0,0.02)_40%,rgba(0,0,0,0.08)_65%,rgba(0,0,0,0.20)_80%,rgba(0,0,0,0.42)_90%,rgba(0,0,0,0.75)_96%,#000000_calc(100%-3px),#000000_100%).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐIỀU CHỈNH ĐỘ DÀY THỰC TẾ CỦA VÙNG CHUYỂN SẮC SHADOW ĐÁY (FULL-RANGE SMOOTH GRADIENT)
+- Thời gian: 12/09/2026 21:14:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Dựa trên đối chiếu changelog và phản hồi thực tế:
+    * Ở lần trước, dải gradient bị giữ opacity dưới 0.08 tới tận 65% chiều cao, khiến toàn bộ vùng chuyển sắc thực tế có thể nhìn thấy bị ép vào đoạn đáy chỉ khoảng 20px (quá mỏng).
+    * Đã tái cấu trúc đường cong chuyển sắc: phân bổ đều và dày dặn khắp chiều cao `h-24 sm:h-28 md:h-32` (96px - 128px): 0% (0.00) -> 20% (0.08) -> 40% (0.25) -> 60% (0.52) -> 75% (0.75) -> 88% (0.92).
+    * Vùng chuyển sắc (feathering) giờ đây dày dặn, mượt mà và êm ái thực sự, mắt thường cảm nhận rõ ràng độ chuyển liên tục từ trong suốt đến tối dần.
+    * Riêng vùng màu đen xì (#000000) tuyệt đối thì không bị dày cộm, mà được khóa cứng ở đúng 3 pixel cuối cùng sát mép đáy (`#000000 calc(100% - 3px)`).
+- Tham số điều chỉnh: h-24 sm:h-28 md:h-32, linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(0,0,0,0.08)_20%,rgba(0,0,0,0.25)_40%,rgba(0,0,0,0.52)_60%,rgba(0,0,0,0.75)_75%,rgba(0,0,0,0.92)_88%,#000000_calc(100%-3px),#000000_100%).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: GIẢM VÙNG ĐỆM ĐEN THUẦN #000000 TỪ 3PX XUỐNG CÒN ĐÚNG 1PX
+- Thời gian: 12/09/2026 21:15:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Tinh chỉnh điểm dừng cuối cùng của dải gradient `hero-bottom-fade`:
+    * Chuyển `#000000 calc(100% - 3px)` thành `#000000 calc(100% - 1px)`.
+    * Vùng màu đen tuyền tuyệt đối (#000000) giờ chỉ tồn tại ở đúng 1 pixel cuối cùng sát mép đáy màn hình để tạo điểm tiếp giáp kín khít hoàn hảo với trang 2.
+    * Giữ nguyên toàn bộ dải chuyển sắc mềm mại phân bổ rộng rãi ở phía trên.
+- Tham số điều chỉnh: `#000000_calc(100%-1px),#000000_100%`.
+---------------------------------------------------------
