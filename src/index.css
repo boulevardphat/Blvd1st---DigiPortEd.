@@ -7,13 +7,16 @@
   src: url('/fonts/Turista Gorda NF W01 Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'ArialCustom';
-  src: url('/fonts/ARIAL.TTF') format('truetype');
+  src: url('/fonts/ARIAL.TTF') format('truetype'),
+       url('/fonts/ArialCE.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -21,6 +24,7 @@
   src: url('/fonts/vespertine Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 
@@ -30,6 +34,50 @@
   --font-turista: "Turista", sans-serif;
   --font-arial: "ArialCustom", "Arial", sans-serif;
   --font-vespertine: "Vespertine", sans-serif;
+}
+
+.font-turista {
+  font-family: 'Turista', sans-serif;
+}
+
+.font-arial-custom {
+  font-family: 'ArialCustom', Arial, Helvetica, sans-serif;
+}
+
+.font-vespertine {
+  font-family: 'Vespertine', sans-serif;
+}
+
+.brat-box {
+  /* The signature Charli XCX Brat green */
+  background-color: #8ace00; 
+  
+  /* Layout to perfectly center the text */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  /* Square proportions */
+  width: min(500px, 90vw);
+  height: min(500px, 90vw);
+}
+
+.brat-box span {
+  /* Font styling */
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: clamp(3rem, 10vw, 85px);
+  letter-spacing: -3.5px;
+  color: #000000;
+
+  /* The "Brat Blur" low-res effect */
+  filter: blur(1.8px);
+  
+  /* Optional: Stretches the text slightly vertical to match the cover */
+  transform: scaleY(1.08); 
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .font-archivo-narrow {

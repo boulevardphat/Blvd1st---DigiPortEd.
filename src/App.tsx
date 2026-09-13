@@ -534,26 +534,42 @@ export default function App() {
         </div>
       )}
 
-      {/* BLVD 3 Solid Color Scenes: #474c5a, #89CC04, #FF3BF1 */}
+      {/* BLVD 3 Visual Color Scenes */}
+      {/* 1. font turista: "#BLVD15" (#BLVD in white, 15 in #EAD478) on #474c5a */}
       {scene === 'blvd-color-1' && (
         <div 
           id="scene-blvd-color-1"
-          className="absolute inset-0 bg-[#474c5a] z-50 select-none"
-        />
+          className="absolute inset-0 bg-[#474c5a] z-50 select-none flex items-center justify-center overflow-hidden px-4"
+        >
+          <div className="font-turista text-[clamp(3.5rem,11vw,8rem)] select-none leading-none tracking-normal flex items-baseline">
+            <span className="text-white">#BLVD</span>
+            <span className="text-[#EAD478]">15</span>
+          </div>
+        </div>
       )}
 
+      {/* 2. font arial: "#blvd16" with Charli XCX Brat signature green & blur effect */}
       {scene === 'blvd-color-2' && (
         <div 
           id="scene-blvd-color-2"
-          className="absolute inset-0 bg-[#89CC04] z-50 select-none"
-        />
+          className="absolute inset-0 bg-[#8ace00] z-50 select-none flex items-center justify-center overflow-hidden"
+        >
+          <div className="brat-box">
+            <span>#blvd16</span>
+          </div>
+        </div>
       )}
 
+      {/* 3. font vespertine: "BLVD17" on #E6E6E6 background */}
       {scene === 'blvd-color-3' && (
         <div 
           id="scene-blvd-color-3"
-          className="absolute inset-0 bg-[#FF3BF1] z-50 select-none"
-        />
+          className="absolute inset-0 bg-[#E6E6E6] z-50 select-none flex items-center justify-center overflow-hidden px-4"
+        >
+          <div className="font-vespertine text-[clamp(3.5rem,11vw,8rem)] text-black select-none leading-none tracking-normal">
+            BLVD17
+          </div>
+        </div>
       )}
 
       {/* BLVD Complete: Màn hình đen xì, không có gì cả */}

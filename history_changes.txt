@@ -1359,3 +1359,20 @@ LẦN THAY ĐỔI: TÁCH RIÊNG HOÀN TOÀN INTRO #BLVD VÀ THIẾT KẾ CÁC SC
   + Sau khi chạy xong 3 màu trên:
     * Chuyển thẳng sang scene `blvd-black`: màn hình đen xì toàn bộ (`bg-black`), không có bất kỳ chữ hay UI nào, hoàn tất theo đúng chỉ dẫn.
 ---------------------------------------------------------
+
+LẦN THAY ĐỔI: THIẾT KẾ VĂN BẢN VÀ FONT CHO 3 MÀN NỀN INTRO #BLVD
+- Thời gian: 13/09/2026 10:33:25 (Giờ TPHCM)
+- File ảnh hưởng: /src/index.css, /src/App.tsx
+- Chi tiết thay đổi:
+  + Cảnh 1 (Nền #474c5a):
+    * Áp dụng font Turista (`Turista Gorda NF W01 Regular.ttf`).
+    * Nội dung hiển thị: "#BLVD15" với phần "#BLVD" màu trắng (`text-white`) và phần "15" màu vàng kim `#EAD478`.
+  + Cảnh 2 (Hiệu ứng Brat Charli XCX):
+    * Màu nền chuyển sang xanh lá Brat `#8ace00`.
+    * Căn giữa khối .brat-box với chữ "#blvd16" dùng font Arial (`font-family: Arial, Helvetica, sans-serif`).
+    * Áp dụng trọn vẹn hiệu ứng Brat blur (`filter: blur(1.8px)`), kéo dãn nhẹ chiều dọc (`transform: scaleY(1.08)`), khoảng cách chữ hẹp (`letter-spacing: -3.5px`), màu đen `#000000`.
+  + Cảnh 3 (Font Vespertine, nền xám nhạt):
+    * Chuyển màu nền sang xám nhạt `#E6E6E6`.
+    * Áp dụng font Vespertine (`vespertine Regular.ttf`).
+    * Nội dung hiển thị: chữ "BLVD17" màu đen tương phản rõ ràng, sắc nét.
+---------------------------------------------------------
