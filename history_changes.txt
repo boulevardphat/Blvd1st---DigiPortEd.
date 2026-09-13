@@ -1326,3 +1326,36 @@ LẦN THAY ĐỔI: ĐỒNG BỘ CỠ SỐ GIAO DIỆN NGANG VÀ TỐI ƯU HIỂN
     * Giữ định dạng 2 chữ số (`##`: 01, 02, 03, 04, 05) nằm trên tên mục với kích cỡ nhỏ gọn, tinh tế (`text-[0.62em] sm:text-[0.68em]`) để không làm phình chiều cao danh sách.
     * Bổ sung khoảng cách tách bạch (`portrait:mt-2.5 portrait:pt-1.5`) cho mục "Khác" / "Others" (mục không đánh số duy nhất), giúp phân định rõ ràng 5 mục dự án/hoạt động chính bên trên và mục danh mục mở rộng bên dưới.
 ---------------------------------------------------------
+
+LẦN THAY ĐỔI: TÍCH HỢP TƯƠNG TÁC CHO MỤC #BLVD (CHẠY INTRO VỚI 3 MÀU TRƠN Ở CUỐI)
+- Thời gian: 13/09/2026 10:04:45 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Bổ sung state `introVariant` ('default' | 'blvd') để phân biệt luồng intro mặc định và luồng intro của #BLVD.
+  + Gắn sự kiện `onClick={handleBlvdClick}` vào mục 04 (#BLVD) trong Mục lục:
+    * Khi click vào #BLVD: Bỏ qua hoàn toàn màn chọn mode/chuyển màu trắng sang đen ban đầu (`pre-intro`).
+    * Chạy thẳng vào intro gốc bắt đầu từ cảnh chữ "phát" (`intro-play` 500ms) -> chữ "BLVD" rỗng (`intro-blvd` 500ms) -> đồng hồ đếm nhịp gốc (`intro-clock-normal`, `intro-clock-reverse-mirrored`, `intro-clock-multiple`).
+    * Ở 3 màn cảnh ở cuối intro (1, 2, 3), thay vì hiển thị các ảnh nền kèm lớp phủ màu thì chuyển đổi sang đúng 3 màn hình màu trơn theo yêu cầu:
+      - Cảnh 1: Màu trơn #474c5a (`bg-[#474c5a]`)
+      - Cảnh 2: Màu trơn #89CC04 (`bg-[#89CC04]`)
+      - Cảnh 3: Màu trơn #EF0E25 (`bg-[#EF0E25]`)
+    * Sau khi hoàn tất 3 cảnh màu trơn, hệ thống quay trở lại giao diện chính và sẵn sàng cho các chỉ dẫn tiếp theo.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TÁCH RIÊNG HOÀN TOÀN INTRO #BLVD VÀ THIẾT KẾ CÁC SCENE MỚI
+- Thời gian: 13/09/2026 10:17:15 (Giờ TPHCM)
+- File ảnh hưởng: /src/types.ts, /src/App.tsx
+- Chi tiết thay đổi:
+  + Tách riêng hoàn toàn luồng Intro của mục #BLVD khỏi Intro chính của website:
+    * Intro chính (khi vào app) giữ nguyên 100% bản gốc (không bị ảnh hưởng).
+    * Bổ sung các SceneState độc lập: `blvd-play`, `blvd-text`, `blvd-clock-normal`, `blvd-clock-reverse-mirrored`, `blvd-title-1`, `blvd-title-2`, `blvd-color-1`, `blvd-color-2`, `blvd-color-3`, `blvd-black`.
+  + Bỏ scene nhiều dòng "DIGITAL PORTFOLIO", thay bằng 2 scene tiêu đề mới với thời lượng bằng bản gốc (600ms mỗi scene):
+    * Scene 1 (600ms): Hiện dòng trên `#BLVD` (font bình thường `font-archivo font-normal not-italic text-white`). Dòng dưới ẩn giữ vị trí để không bị nhảy layout.
+    * Scene 2 (600ms): Hiện đầy đủ cả 2 dòng: dòng trên `#BLVD`, dòng dưới `CHANGE IN MIND` (xếp chồng cân đối, căn giữa giống ảnh mẫu tham khảo).
+  + Đổi màu trơn thứ 3 từ `#EF0E25` sang `#FF3BF1`:
+    * Cảnh màu 1 (500ms): Màu trơn `#474c5a`
+    * Cảnh màu 2 (500ms): Màu trơn `#89CC04`
+    * Cảnh màu 3 (500ms): Màu trơn `#FF3BF1`
+  + Sau khi chạy xong 3 màu trên:
+    * Chuyển thẳng sang scene `blvd-black`: màn hình đen xì toàn bộ (`bg-black`), không có bất kỳ chữ hay UI nào, hoàn tất theo đúng chỉ dẫn.
+---------------------------------------------------------

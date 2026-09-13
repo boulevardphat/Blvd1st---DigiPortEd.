@@ -66,6 +66,10 @@ export default function App() {
     }, 800);
   };
 
+  const handleBlvdClick = () => {
+    setScene('blvd-play');
+  };
+
   useEffect(() => {
     const imageUrls = [
       "https://i.ibb.co/tP3rK5bg/ultrayoung.jpg",
@@ -259,6 +263,62 @@ export default function App() {
       }, 500); // 0.5s for KC6 (tinted background #8375B3)
       return () => clearTimeout(t);
     }
+
+    // --- Isolated BLVD Sequence Transitions ---
+    if (scene === 'blvd-play') {
+      const t = setTimeout(() => {
+        setScene('blvd-text');
+      }, 500); // 0.5s for "phát"
+      return () => clearTimeout(t);
+    }
+    if (scene === 'blvd-text') {
+      const t = setTimeout(() => {
+        setScene('blvd-clock-normal');
+      }, 500); // 0.5s for "BLVD"
+      return () => clearTimeout(t);
+    }
+    if (scene === 'blvd-clock-normal') {
+      const t = setTimeout(() => {
+        setScene('blvd-clock-reverse-mirrored');
+      }, 600); // 0.6s
+      return () => clearTimeout(t);
+    }
+    if (scene === 'blvd-clock-reverse-mirrored') {
+      const t = setTimeout(() => {
+        setScene('blvd-title-1');
+      }, 600); // 0.6s
+      return () => clearTimeout(t);
+    }
+    if (scene === 'blvd-title-1') {
+      const t = setTimeout(() => {
+        setScene('blvd-title-2');
+      }, 600); // 0.6s for scene 1 (#BLVD)
+      return () => clearTimeout(t);
+    }
+    if (scene === 'blvd-title-2') {
+      const t = setTimeout(() => {
+        setScene('blvd-color-1');
+      }, 600); // 0.6s for scene 2 (#BLVD + CHANGE IN MIND)
+      return () => clearTimeout(t);
+    }
+    if (scene === 'blvd-color-1') {
+      const t = setTimeout(() => {
+        setScene('blvd-color-2');
+      }, 500); // 0.5s for #474c5a
+      return () => clearTimeout(t);
+    }
+    if (scene === 'blvd-color-2') {
+      const t = setTimeout(() => {
+        setScene('blvd-color-3');
+      }, 500); // 0.5s for #89CC04
+      return () => clearTimeout(t);
+    }
+    if (scene === 'blvd-color-3') {
+      const t = setTimeout(() => {
+        setScene('blvd-black');
+      }, 500); // 0.5s for #FF3BF1
+      return () => clearTimeout(t);
+    }
   }, [scene, imagesLoaded]);
 
   return (
@@ -410,6 +470,98 @@ export default function App() {
           <div className="absolute inset-0 bg-[#89CC04] mix-blend-color opacity-95 pointer-events-none" />
           <div className="absolute inset-0 bg-[#89CC04]/35 mix-blend-multiply pointer-events-none" />
         </div>
+      )}
+
+      {/* --- SEPARATE #BLVD SEQUENCE --- */}
+      {scene === 'blvd-play' && (
+        <div 
+          id="scene-blvd-play"
+          className="absolute inset-0 flex items-center justify-center bg-black z-50 select-none"
+        >
+          <div
+            id="blvd-phat-text"
+            className="font-sans text-[clamp(2.5rem,8vw,5rem)] text-white/90 select-none tracking-normal font-normal"
+          >
+            phát
+          </div>
+        </div>
+      )}
+
+      {scene === 'blvd-text' && (
+        <div 
+          id="scene-blvd-outline-text"
+          className="absolute inset-0 flex items-center justify-center bg-black z-50 overflow-hidden select-none w-full h-full"
+        >
+          <svg 
+            viewBox="0 0 400 100" 
+            className="w-full h-full" 
+            preserveAspectRatio="none"
+          >
+            <text
+              x="50%"
+              y="50%"
+              dominantBaseline="central"
+              textAnchor="middle"
+              className="font-archivo font-black select-none pointer-events-none"
+              fontSize="110"
+              fill="none"
+              stroke="rgba(255, 255, 255, 0.95)"
+              strokeWidth="3.2"
+            >
+              BLVD
+            </text>
+          </svg>
+        </div>
+      )}
+
+      {scene === 'blvd-clock-normal' && <IntroClock mode="normal" />}
+      {scene === 'blvd-clock-reverse-mirrored' && <IntroClock mode="reverse-mirrored" />}
+
+      {/* BLVD Title Scenes (Scene 1: #BLVD, Scene 2: #BLVD + CHANGE IN MIND stacked like reference) */}
+      {(scene === 'blvd-title-1' || scene === 'blvd-title-2') && (
+        <div 
+          id="scene-blvd-title"
+          className="absolute inset-0 flex flex-col items-center justify-center bg-black z-50 select-none px-4"
+        >
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="font-archivo font-normal not-italic text-white text-[clamp(2.2rem,6.5vw,5.2rem)] tracking-wide leading-[1.15]">
+              #BLVD
+            </div>
+            <div className={`font-archivo font-normal not-italic text-white text-[clamp(2.2rem,6.5vw,5.2rem)] tracking-wide leading-[1.15] ${scene === 'blvd-title-2' ? 'opacity-100' : 'opacity-0 select-none pointer-events-none'}`}>
+              CHANGE IN MIND
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BLVD 3 Solid Color Scenes: #474c5a, #89CC04, #FF3BF1 */}
+      {scene === 'blvd-color-1' && (
+        <div 
+          id="scene-blvd-color-1"
+          className="absolute inset-0 bg-[#474c5a] z-50 select-none"
+        />
+      )}
+
+      {scene === 'blvd-color-2' && (
+        <div 
+          id="scene-blvd-color-2"
+          className="absolute inset-0 bg-[#89CC04] z-50 select-none"
+        />
+      )}
+
+      {scene === 'blvd-color-3' && (
+        <div 
+          id="scene-blvd-color-3"
+          className="absolute inset-0 bg-[#FF3BF1] z-50 select-none"
+        />
+      )}
+
+      {/* BLVD Complete: Màn hình đen xì, không có gì cả */}
+      {scene === 'blvd-black' && (
+        <div 
+          id="scene-blvd-black"
+          className="absolute inset-0 bg-black z-50 select-none"
+        />
       )}
 
       {/* Main App Screen (Background Image & Interactive Interface Layouts) */}
@@ -693,7 +845,10 @@ export default function App() {
                   </div>
 
                   {/* Item 04: #BLVD */}
-                  <div className="w-fit flex flex-col portrait:flex-col portrait:items-start portrait:gap-0.5 landscape:flex-row landscape:items-baseline landscape:gap-3.5 lg:landscape:gap-4.5">
+                  <div 
+                    onClick={handleBlvdClick}
+                    className="w-fit flex flex-col portrait:flex-col portrait:items-start portrait:gap-0.5 landscape:flex-row landscape:items-baseline landscape:gap-3.5 lg:landscape:gap-4.5 cursor-pointer group"
+                  >
                     <span className="font-archivo font-normal not-italic text-[#89CC04] text-[0.62em] sm:text-[0.68em] landscape:text-[1em] shrink-0 select-none">
                       04
                     </span>

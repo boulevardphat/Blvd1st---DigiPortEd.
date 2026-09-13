@@ -11,4 +11,14 @@ export type SceneState =
   | 'intro-image-1' 
   | 'intro-image-2' 
   | 'intro-image-3' 
-  | 'main-app';
+  | 'main-app'
+  | 'blvd-play'
+  | 'blvd-text'
+  | 'blvd-clock-normal'
+  | 'blvd-clock-reverse-mirrored'
+  | 'blvd-title-1'
+  | 'blvd-title-2'
+  | 'blvd-color-1'
+  | 'blvd-color-2'
+  | 'blvd-color-3'
+  | 'blvd-black';
