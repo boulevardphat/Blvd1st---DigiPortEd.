@@ -68,17 +68,17 @@ export default function App() {
 
   useEffect(() => {
     const imageUrls = [
-      "https://i.ibb.co/JFvk9wzr/vespertine-bg.png",
-      "https://i.ibb.co/jPHPJSG7/vespertine-sj.png",
-      "https://i.ibb.co/vy4ykmw/vespertine.png",
+      "https://i.ibb.co/tP3rK5bg/ultrayoung.jpg",
       "https://i.ibb.co/Nd6BpwZ2/young.jpg",
-      "https://i.ibb.co/tP3rK5bg/ultrayoung.jpg"
+      "https://i.ibb.co/vy4ykmw/vespertine.png",
+      "https://i.ibb.co/JFvk9wzr/vespertine-bg.png",
+      "https://i.ibb.co/jPHPJSG7/vespertine-sj.png"
     ];
 
     let loadedCount = 0;
     const handleImageLoad = () => {
       loadedCount++;
-      if (loadedCount === imageUrls.length) {
+      if (loadedCount >= imageUrls.length) {
         setImagesLoaded(true);
       }
     };
@@ -89,26 +89,36 @@ export default function App() {
       img.onerror = handleImageLoad;
       img.src = url;
     });
+
+    // Fallback safety timeout so experience never stalls
+    const safetyTimer = setTimeout(() => {
+      setImagesLoaded(true);
+    }, 3500);
+
+    return () => clearTimeout(safetyTimer);
   }, []);
 
-  // Preload all 6 tool icons and avatar right after the primary images finish loading
+  // Preload secondary tool icons & avatar ONLY after arriving in main-app, freeing all bandwidth for intro & main backgrounds
   useEffect(() => {
-    if (imagesLoaded) {
-      const toolIcons = [
-        "https://i.ibb.co/RTw2phXD/canva.jpg",
-        "https://i.ibb.co/pBXrq6cf/affinity.jpg",
-        "https://i.ibb.co/Pv9VfwzX/edits.webp",
-        "https://i.ibb.co/N66hJX5h/ibispaint.png",
-        "https://i.ibb.co/7JyGd3tX/google-AIstudio.png",
-        "https://i.ibb.co/v4h21FLG/filmora.png",
-        "https://i.ibb.co/TD9mb1pB/avatar.jpg"
-      ];
-      toolIcons.forEach(url => {
-        const img = new Image();
-        img.src = url;
-      });
+    if (scene === 'main-app') {
+      const timer = setTimeout(() => {
+        const secondaryIcons = [
+          "https://i.ibb.co/RTw2phXD/canva.jpg",
+          "https://i.ibb.co/pBXrq6cf/affinity.jpg",
+          "https://i.ibb.co/Pv9VfwzX/edits.webp",
+          "https://i.ibb.co/N66hJX5h/ibispaint.png",
+          "https://i.ibb.co/7JyGd3tX/google-AIstudio.png",
+          "https://i.ibb.co/v4h21FLG/filmora.png",
+          "https://i.ibb.co/TD9mb1pB/avatar.jpg"
+        ];
+        secondaryIcons.forEach(url => {
+          const img = new Image();
+          img.src = url;
+        });
+      }, 800);
+      return () => clearTimeout(timer);
     }
-  }, [imagesLoaded]);
+  }, [scene]);
 
   useEffect(() => {
     let lastWidth = window.innerWidth;
@@ -218,10 +228,18 @@ export default function App() {
       return () => clearTimeout(t);
     }
     if (scene === 'intro-clock-multiple') {
-      const t = setTimeout(() => {
-        setScene('intro-image-1');
-      }, 600); // KC6
-      return () => clearTimeout(t);
+      if (imagesLoaded) {
+        const t = setTimeout(() => {
+          setScene('intro-image-1');
+        }, 600); // KC6: Multiple clocks
+        return () => clearTimeout(t);
+      } else {
+        // Continue ticking clocks until critical visual assets finish caching, with max fallback
+        const t = setTimeout(() => {
+          setScene('intro-image-1');
+        }, 3000);
+        return () => clearTimeout(t);
+      }
     }
     if (scene === 'intro-image-1') {
       const t = setTimeout(() => {
@@ -273,6 +291,8 @@ export default function App() {
         src="https://i.ibb.co/tP3rK5bg/ultrayoung.jpg"
         alt="Boulevard1st Ultrayoung Background"
         referrerPolicy="no-referrer"
+        loading="eager"
+        fetchPriority="high"
         className="absolute inset-0 w-full h-full object-cover portrait:object-[49%_center] z-0 opacity-0 pointer-events-none"
       />
       <img
@@ -280,6 +300,8 @@ export default function App() {
         src="https://i.ibb.co/Nd6BpwZ2/young.jpg"
         alt="Boulevard1st Young Background"
         referrerPolicy="no-referrer"
+        loading="eager"
+        fetchPriority="high"
         className="absolute inset-0 w-full h-full object-cover portrait:object-[49%_center] z-0 opacity-0 pointer-events-none"
       />
       <VespertineBackground />
@@ -345,6 +367,8 @@ export default function App() {
             src="https://i.ibb.co/tP3rK5bg/ultrayoung.jpg"
             alt="Intro Background Reference 1"
             referrerPolicy="no-referrer"
+            loading="eager"
+            fetchPriority="high"
             className="absolute inset-0 w-full h-full object-cover portrait:object-[49%_center]"
           />
           {/* #8375B3 Tint Overlays */}
@@ -364,6 +388,8 @@ export default function App() {
             src="https://i.ibb.co/Nd6BpwZ2/young.jpg"
             alt="Intro Background Reference 2"
             referrerPolicy="no-referrer"
+            loading="eager"
+            fetchPriority="high"
             className="absolute inset-0 w-full h-full object-cover portrait:object-[49%_center]"
           />
           {/* #C54EAA Tint Overlays */}

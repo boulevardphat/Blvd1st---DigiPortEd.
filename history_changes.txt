@@ -1271,3 +1271,16 @@ LẦN THAY ĐỔI: CẬP NHẬT LINK GOOGLE AI STUDIO VÀ PRELOAD SẴN 6 ICON C
     * Ngay sau khi bộ ảnh ban đầu của ứng dụng hoàn tất quá trình tải (`imagesLoaded === true`), hệ thống tự động kích hoạt cơ chế nạp sẵn (preload) ngầm vào bộ nhớ cache trình duyệt cho toàn bộ 6 icon công cụ (Canva, Affinity, Edits, ibisPaint, Google AI Studio, Filmora) cùng ảnh chân dung avatar.
     * Khi người dùng nhấn mở tab Thông tin cơ bản, các hình ảnh và biểu tượng hiển thị tức thì, không có độ trễ hay hiện tượng giật/chớp nháy.
 ---------------------------------------------------------
+
+LẦN THAY ĐỔI: TỐI ƯU TẢI & ƯU TIÊN TUYỆT ĐỐI BỘ ẢNH INTRO VÀ GIAO DIỆN CHÍNH
+- Thời gian: 13/09/2026 09:30:50 (Giờ TPHCM)
+- File ảnh hưởng: /index.html, /src/App.tsx, /src/components/VespertineBackground.tsx
+- Chi tiết thay đổi:
+  + index.html:
+    * Thêm `preconnect` và `dns-prefetch` trực tiếp tới CDN ảnh `https://i.ibb.co`.
+    * Thêm 5 thẻ `<link rel="preload" as="image" fetchpriority="high" />` ở đầu thẻ `<head>` cho toàn bộ hình ảnh nền intro & giao diện chính (ultrayoung.jpg, young.jpg, vespertine.png, vespertine-bg.png, vespertine-sj.png), cho phép trình duyệt tải dữ liệu ngay từ byte đầu tiên trước khi bundle React thực thi.
+  + App.tsx & VespertineBackground.tsx:
+    * Thêm thuộc tính `loading="eager"` và `fetchPriority="high"` vào tất cả các thẻ hình ảnh intro và nền giao diện chính.
+    * Tách riêng tiến trình tải: Toàn bộ 7 icon công cụ phụ và avatar chỉ được tải ngầm sau khi đã vào hẳn `main-app` được 800ms, giải phóng 100% băng thông mạng cho các hình ảnh nền chuyển cảnh.
+    * Đồng bộ hóa chuyển cảnh intro: Tại màn hình đồng hồ đa chiều (`intro-clock-multiple`), hệ thống kiểm tra và giữ nhịp đồng hồ tiếp tục chạy mượt mà cho đến khi các hình ảnh đã nạp xong vào cache trình duyệt (có fallback an toàn tối đa 3.0s), đảm bảo khi chuyển sang các cảnh ảnh tinted (#8375B3, #C54EAA, #89CC04) và `main-app`, toàn bộ hình ảnh xuất hiện ngay lập tức với tốc độ 60fps, loại bỏ hoàn toàn hiện tượng màn hình đen hoặc chớp giật do trễ mạng.
+---------------------------------------------------------

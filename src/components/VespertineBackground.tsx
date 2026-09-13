@@ -23,6 +23,8 @@ export const VespertineBackground = ({ shiftLeft = false }: VespertineBackground
         src="https://i.ibb.co/JFvk9wzr/vespertine-bg.png"
         alt="Background layer"
         referrerPolicy="no-referrer"
+        loading="eager"
+        fetchPriority="high"
         className="absolute inset-0 w-full h-full object-cover portrait:object-[49%_center] pointer-events-none"
         onLoad={() => setBgLoaded(true)}
       />
@@ -37,6 +39,8 @@ export const VespertineBackground = ({ shiftLeft = false }: VespertineBackground
         src="https://i.ibb.co/jPHPJSG7/vespertine-sj.png"
         alt="Subject layer"
         referrerPolicy="no-referrer"
+        loading="eager"
+        fetchPriority="high"
         className="absolute inset-0 w-full h-full object-cover portrait:object-[49%_center] pointer-events-none"
         onLoad={() => setSjLoaded(true)}
       />
@@ -46,6 +50,8 @@ export const VespertineBackground = ({ shiftLeft = false }: VespertineBackground
         src="https://i.ibb.co/vy4ykmw/vespertine.png" 
         alt="Fallback background"
         referrerPolicy="no-referrer"
+        loading="eager"
+        fetchPriority="high"
         className="absolute inset-0 w-full h-full object-cover portrait:object-[49%_center] pointer-events-none z-10"
         initial={{ opacity: 1 }}
         animate={{ opacity: isLoaded ? 0 : 1 }}
