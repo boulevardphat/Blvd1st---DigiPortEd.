@@ -1219,3 +1219,55 @@ LẦN THAY ĐỔI: CẬP NHẬT 6 ICON CÔNG CỤ THEO URL HÌNH ẢNH DO NGƯ�
     * Kích thước đồng bộ `w-6 h-6 sm:w-7 sm:h-7 aspect-square overflow-hidden`.
     * Áp dụng thẻ `<img>` với `referrerPolicy="no-referrer"`, `object-cover` và tooltip `title` tương ứng từng công cụ.
 ---------------------------------------------------------
+
+LẦN THAY ĐỔI: CHUYỂN BỐ CỤC TAB INFO SANG TRÊN-DƯỚI Ở GIAO DIỆN DỌC/MOBILE
+- Thời gian: 13/09/2026 09:15:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Chuyển đổi linh hoạt bố cục tab thông tin (Info tab modal):
+    * Ở giao diện dọc / mobile: Bố cục xếp chồng trên-dưới (`flex-col items-center text-center`), khung ảnh nằm ở phía trên căn giữa (`w-28 xs:w-32 aspect-square mx-auto`), toàn bộ nội dung thông tin và danh sách icon công cụ xếp ngay bên dưới căn giữa tự nhiên.
+    * Ở giao diện ngang / tablet & desktop (`sm:` trở lên): Giữ nguyên bố cục ngang trái-phải (`sm:flex-row sm:items-center sm:text-left`).
+  + Tuân thủ nghiêm ngặt quy tắc kiến trúc Boulevard1st:
+    * Giữ nguyên thiết kế sắc cạnh không bo góc (`rounded-none`).
+    * Duy trì các thông số text và liên kết người dùng vừa cập nhật (`Ngành Báo chí/Nguyện vọng định hướng thiết kế`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: THÊM NÚT TIKTOK VÀO GIỮA INSTAGRAM VÀ PHONE VỚI GRADIENT NEON
+- Thời gian: 13/09/2026 09:18:25 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Cập nhật thanh liên hệ cạnh đáy tab thông tin (Info tab) từ 4 nút sang 5 nút (`grid-cols-5`):
+    * Vị trí: Đặt giữa nút `instagram` và nút `phone`.
+    * Nhãn: `tiktok` (font Archivo font-semibold lowercase, không bo góc `rounded-none`).
+    * Đường dẫn: `https://www.tiktok.com/@becamextokyubus?is_from_webapp=1&sender_device=pc` (mở tab mới `target="_blank" rel="noopener noreferrer"`).
+    * Hiệu ứng hover: Gradient 2 màu neon đặc trưng của logo TikTok từ xanh neon `#25F4EE` sang hồng neon `#FE2C55` (`hover:bg-gradient-to-r hover:from-[#25F4EE] hover:to-[#FE2C55] hover:text-black active:from-[#1ed7d2] active:to-[#d91e44] active:text-white`).
+    * Tinh chỉnh typography & spacing trên mobile: Đặt `text-[11px] xs:text-xs sm:text-sm px-1 whitespace-nowrap` giúp 5 nút hiển thị vừa vặn, không bị xuống dòng hay tràn viền trên mọi kích thước màn hình.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: THAY THẾ CAPCUT BẰNG GOOGLE AI STUDIO VÀ SẮP XẾP LẠI THỨ TỰ ICON CÔNG CỤ
+- Thời gian: 13/09/2026 09:22:40 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Thay thế công cụ CapCut bằng Google AI Studio:
+    * Image URL: https://i.ibb.co/2YtqXcdk/google-AIstudio.webp
+    * Tiêu đề / alt: "Google AI Studio"
+  + Sắp xếp lại danh sách các icon công cụ sử dụng theo đúng trình tự yêu cầu:
+    1. Canva (https://i.ibb.co/RTw2phXD/canva.jpg)
+    2. Affinity (https://i.ibb.co/pBXrq6cf/affinity.jpg)
+    3. Edits (https://i.ibb.co/Pv9VfwzX/edits.webp)
+    4. ibisPaint (https://i.ibb.co/N66hJX5h/ibispaint.png)
+    5. Google AI Studio (https://i.ibb.co/2YtqXcdk/google-AIstudio.webp)
+    6. Filmora (https://i.ibb.co/v4h21FLG/filmora.png)
+  + Tuân thủ chuẩn Boulevard1st: Viền sắc cạnh không bo góc (`rounded-none`), border neutral tối giản, giữ nguyên tooltip và hiệu ứng tương tác.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: CẬP NHẬT LINK GOOGLE AI STUDIO VÀ PRELOAD SẴN 6 ICON CÔNG CỤ
+- Thời gian: 13/09/2026 09:25:55 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Cập nhật URL hình ảnh của Google AI Studio từ dạng webp sang link png mới:
+    * Image URL: https://i.ibb.co/7JyGd3tX/google-AIstudio.png
+  + Tối ưu Preload (tải trước dữ liệu):
+    * Ngay sau khi bộ ảnh ban đầu của ứng dụng hoàn tất quá trình tải (`imagesLoaded === true`), hệ thống tự động kích hoạt cơ chế nạp sẵn (preload) ngầm vào bộ nhớ cache trình duyệt cho toàn bộ 6 icon công cụ (Canva, Affinity, Edits, ibisPaint, Google AI Studio, Filmora) cùng ảnh chân dung avatar.
+    * Khi người dùng nhấn mở tab Thông tin cơ bản, các hình ảnh và biểu tượng hiển thị tức thì, không có độ trễ hay hiện tượng giật/chớp nháy.
+---------------------------------------------------------

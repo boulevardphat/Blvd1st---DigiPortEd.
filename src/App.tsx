@@ -91,6 +91,25 @@ export default function App() {
     });
   }, []);
 
+  // Preload all 6 tool icons and avatar right after the primary images finish loading
+  useEffect(() => {
+    if (imagesLoaded) {
+      const toolIcons = [
+        "https://i.ibb.co/RTw2phXD/canva.jpg",
+        "https://i.ibb.co/pBXrq6cf/affinity.jpg",
+        "https://i.ibb.co/Pv9VfwzX/edits.webp",
+        "https://i.ibb.co/N66hJX5h/ibispaint.png",
+        "https://i.ibb.co/7JyGd3tX/google-AIstudio.png",
+        "https://i.ibb.co/v4h21FLG/filmora.png",
+        "https://i.ibb.co/TD9mb1pB/avatar.jpg"
+      ];
+      toolIcons.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+  }, [imagesLoaded]);
+
   useEffect(() => {
     let lastWidth = window.innerWidth;
     let lastHeight = window.innerHeight;
@@ -737,12 +756,12 @@ export default function App() {
               </div>
             </div>
 
-            {/* Modal Upper Content: Larger square photo frame + Information Rows & Tools */}
-            <div className="relative z-10 flex items-center gap-3.5 sm:gap-5 md:gap-6 w-full p-3.5 sm:p-5 md:p-6 pb-3 sm:pb-4 my-auto">
-              {/* Square Image Frame scaled larger, closer to frame edges */}
+            {/* Modal Upper Content: Stacked top-to-bottom on mobile/portrait, side-by-side on sm+ */}
+            <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-5 md:gap-6 w-full p-4 sm:p-5 md:p-6 pb-3 sm:pb-4 my-auto">
+              {/* Square Image Frame: Centered and sized comfortably on mobile, side-by-side on sm+ */}
               <div 
                 id="info-avatar-frame"
-                className="shrink-0 w-[36%] sm:w-[38%] md:w-[40%] max-w-[230px] aspect-square border border-neutral-700 bg-neutral-900 rounded-none overflow-hidden shadow-2xl"
+                className="shrink-0 w-28 xs:w-32 sm:w-[36%] md:w-[38%] max-w-[220px] aspect-square border border-neutral-700 bg-neutral-900 rounded-none overflow-hidden shadow-2xl mx-auto sm:mx-0"
               >
                 <img
                   src="https://i.ibb.co/TD9mb1pB/avatar.jpg"
@@ -752,15 +771,15 @@ export default function App() {
                 />
               </div>
 
-              {/* Right Content: left-aligned information rows */}
-              <div className="flex-1 flex flex-col items-start justify-center text-left py-0.5 select-text min-w-0">
+              {/* Content: Centered on mobile, left-aligned on sm+ */}
+              <div className="flex-1 w-full flex flex-col items-center sm:items-start justify-center text-center sm:text-left py-0.5 select-text min-w-0">
                 {/* Row 1: Name */}
-                <h3 className="font-archivo font-black text-base sm:text-2xl md:text-[1.65rem] text-white tracking-tight uppercase leading-tight mb-0.5 sm:mb-1 text-left truncate max-w-full">
+                <h3 className="font-archivo font-black text-lg sm:text-2xl md:text-[1.65rem] text-white tracking-tight uppercase leading-tight mb-0.5 sm:mb-1 text-center sm:text-left truncate max-w-full">
                   {language === 'vi' ? 'Nguyễn Thuận Phát' : 'Phat Nguyen Thuan'}
                 </h3>
 
                 {/* Row 2: Major */}
-                <p className="font-sans font-medium text-xs sm:text-sm md:text-base text-neutral-300 leading-snug mb-1 sm:mb-1.5 text-left">
+                <p className="font-sans font-medium text-xs sm:text-sm md:text-base text-neutral-300 leading-snug mb-1 sm:mb-1.5 text-center sm:text-left">
                   {language === 'vi' ? 'Ngành Báo chí/Nguyện vọng định hướng thiết kế' : 'Journalism/Design Track Preference'}
                 </p>
 
@@ -769,19 +788,19 @@ export default function App() {
                   href="https://hcmussh.edu.vn/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-sans text-[11px] sm:text-xs md:text-sm text-neutral-400 hover:text-white no-underline transition-colors duration-200 cursor-pointer text-left leading-normal inline-block mb-2 sm:mb-3"
+                  className="font-sans text-[11px] sm:text-xs md:text-sm text-neutral-400 hover:text-white no-underline transition-colors duration-200 cursor-pointer text-center sm:text-left leading-normal inline-block mb-2 sm:mb-3"
                   title={language === 'vi' ? 'Trường ĐH KHXH&NV, ĐHQG-HCM' : 'VNUHCM-USSH'}
                 >
                   {language === 'vi' ? 'Trường ĐH KHXH&NV, ĐHQG-HCM' : 'VNUHCM-USSH'}
                 </a>
 
                 {/* Row 4: Tools / Công cụ sử dụng */}
-                <div className="w-full flex flex-col items-start text-left pt-2 border-t border-neutral-800/90">
-                  <span className="font-archivo font-semibold text-[10px] sm:text-xs text-neutral-400 tracking-wider uppercase mb-1.5">
+                <div className="w-full flex flex-col items-center sm:items-start text-center sm:text-left pt-2 border-t border-neutral-800/90">
+                  <span className="font-archivo font-semibold text-[10px] sm:text-xs text-neutral-400 tracking-wider uppercase mb-1.5 text-center sm:text-left">
                     {language === 'vi' ? 'Công cụ sử dụng:' : 'Tools:'}
                   </span>
-                  {/* Tool Icons List: Canva, Affinity, Filmora, CapCut, Edits, ibisPaint */}
-                  <div className="flex items-center flex-wrap gap-1.5 sm:gap-2">
+                  {/* Tool Icons List: Canva, Affinity, Edits, ibisPaint, Google AI Studio, Filmora */}
+                  <div className="flex items-center justify-center sm:justify-start flex-wrap gap-1.5 sm:gap-2">
                     {/* Canva */}
                     <div 
                       className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-900 flex items-center justify-center shrink-0 rounded-none border border-neutral-700 hover:scale-105 transition-transform overflow-hidden" 
@@ -803,32 +822,6 @@ export default function App() {
                       <img 
                         src="https://i.ibb.co/pBXrq6cf/affinity.jpg" 
                         alt="Affinity" 
-                        className="w-full h-full object-cover rounded-none select-none pointer-events-none"
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
-
-                    {/* Filmora */}
-                    <div 
-                      className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-900 flex items-center justify-center shrink-0 rounded-none border border-neutral-700 hover:scale-105 transition-transform overflow-hidden" 
-                      title="Filmora"
-                    >
-                      <img 
-                        src="https://i.ibb.co/v4h21FLG/filmora.png" 
-                        alt="Filmora" 
-                        className="w-full h-full object-cover rounded-none select-none pointer-events-none"
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
-
-                    {/* CapCut */}
-                    <div 
-                      className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-900 flex items-center justify-center shrink-0 rounded-none border border-neutral-700 hover:scale-105 transition-transform overflow-hidden" 
-                      title="CapCut"
-                    >
-                      <img 
-                        src="https://i.ibb.co/4RPxzLzK/capcut.png" 
-                        alt="CapCut" 
                         className="w-full h-full object-cover rounded-none select-none pointer-events-none"
                         referrerPolicy="no-referrer"
                       />
@@ -859,6 +852,32 @@ export default function App() {
                         referrerPolicy="no-referrer"
                       />
                     </div>
+
+                    {/* Google AI Studio */}
+                    <div 
+                      className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-900 flex items-center justify-center shrink-0 rounded-none border border-neutral-700 hover:scale-105 transition-transform overflow-hidden" 
+                      title="Google AI Studio"
+                    >
+                      <img 
+                        src="https://i.ibb.co/7JyGd3tX/google-AIstudio.png" 
+                        alt="Google AI Studio" 
+                        className="w-full h-full object-cover rounded-none select-none pointer-events-none"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+
+                    {/* Filmora */}
+                    <div 
+                      className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-900 flex items-center justify-center shrink-0 rounded-none border border-neutral-700 hover:scale-105 transition-transform overflow-hidden" 
+                      title="Filmora"
+                    >
+                      <img 
+                        src="https://i.ibb.co/v4h21FLG/filmora.png" 
+                        alt="Filmora" 
+                        className="w-full h-full object-cover rounded-none select-none pointer-events-none"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -867,7 +886,7 @@ export default function App() {
             {/* Bottom Contact Buttons Bar (Spec-inspired from Boulevard1st, flush along bottom edge) */}
             <div 
               id="basic-info-contact-bar" 
-              className="relative z-20 w-full grid grid-cols-4 gap-0 border-t border-neutral-800 bg-black/60 select-none"
+              className="relative z-20 w-full grid grid-cols-5 gap-0 border-t border-neutral-800 bg-black/60 select-none"
             >
               {/* Button 1: Facebook */}
               <a
@@ -875,7 +894,7 @@ export default function App() {
                 target="_blank"
                 rel="noopener noreferrer"
                 id="info-btn-fb"
-                className="py-2.5 sm:py-3 min-h-[44px] flex items-center justify-center font-archivo font-semibold text-xs sm:text-sm text-white/90 lowercase border-r border-neutral-800 hover:bg-[#1877F2] hover:text-white active:bg-[#0c59be] active:text-white transition-colors cursor-pointer rounded-none no-underline text-center"
+                className="py-2.5 sm:py-3 min-h-[44px] px-1 flex items-center justify-center font-archivo font-semibold text-[11px] xs:text-xs sm:text-sm text-white/90 lowercase border-r border-neutral-800 hover:bg-[#1877F2] hover:text-white active:bg-[#0c59be] active:text-white transition-colors cursor-pointer rounded-none no-underline text-center whitespace-nowrap"
                 title="facebook"
               >
                 facebook
@@ -887,18 +906,30 @@ export default function App() {
                 target="_blank"
                 rel="noopener noreferrer"
                 id="info-btn-insta"
-                className="py-2.5 sm:py-3 min-h-[44px] flex items-center justify-center font-archivo font-semibold text-xs sm:text-sm text-white/90 lowercase border-r border-neutral-800 hover:bg-gradient-to-r hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] hover:text-white active:bg-gradient-to-r active:from-[#d87c1e] active:via-[#b81b34] active:to-[#910d68] active:text-white transition-all cursor-pointer rounded-none no-underline text-center"
+                className="py-2.5 sm:py-3 min-h-[44px] px-1 flex items-center justify-center font-archivo font-semibold text-[11px] xs:text-xs sm:text-sm text-white/90 lowercase border-r border-neutral-800 hover:bg-gradient-to-r hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] hover:text-white active:bg-gradient-to-r active:from-[#d87c1e] active:via-[#b81b34] active:to-[#910d68] active:text-white transition-all cursor-pointer rounded-none no-underline text-center whitespace-nowrap"
                 title="instagram"
               >
                 instagram
               </a>
 
-              {/* Button 3: Phone / Zalo */}
+              {/* Button 3: TikTok */}
+              <a
+                href="https://www.tiktok.com/@becamextokyubus?is_from_webapp=1&sender_device=pc"
+                target="_blank"
+                rel="noopener noreferrer"
+                id="info-btn-tiktok"
+                className="py-2.5 sm:py-3 min-h-[44px] px-1 flex items-center justify-center font-archivo font-semibold text-[11px] xs:text-xs sm:text-sm text-white/90 lowercase border-r border-neutral-800 hover:bg-gradient-to-r hover:from-[#25F4EE] hover:to-[#FE2C55] hover:text-black active:bg-gradient-to-r active:from-[#1ed7d2] active:to-[#d91e44] active:text-white transition-all cursor-pointer rounded-none no-underline text-center whitespace-nowrap"
+                title="tiktok"
+              >
+                tiktok
+              </a>
+
+              {/* Button 4: Phone / Zalo */}
               <button
                 type="button"
                 id="info-btn-phone"
                 onClick={handlePhoneClick}
-                className={`py-2.5 sm:py-3 min-h-[44px] flex items-center justify-center font-archivo font-semibold text-xs sm:text-sm lowercase border-r border-neutral-800 transition-colors cursor-pointer rounded-none border-t-0 border-b-0 border-l-0 text-center ${
+                className={`py-2.5 sm:py-3 min-h-[44px] px-1 flex items-center justify-center font-archivo font-semibold text-[11px] xs:text-xs sm:text-sm lowercase border-r border-neutral-800 transition-colors cursor-pointer rounded-none border-t-0 border-b-0 border-l-0 text-center whitespace-nowrap ${
                   phoneCopied 
                     ? '!bg-[#10B981] !text-black font-bold' 
                     : 'bg-transparent text-white/90 hover:bg-[#10B981] hover:text-black active:bg-[#047857] active:text-white'
@@ -908,12 +939,12 @@ export default function App() {
                 {phoneCopied ? 'copied' : 'phone'}
               </button>
 
-              {/* Button 4: Work Email */}
+              {/* Button 5: Work Email */}
               <button
                 type="button"
                 id="info-btn-email"
                 onClick={handleEmailClick}
-                className={`py-2.5 sm:py-3 min-h-[44px] flex items-center justify-center font-archivo font-semibold text-xs sm:text-sm lowercase transition-colors cursor-pointer rounded-none border-0 text-center ${
+                className={`py-2.5 sm:py-3 min-h-[44px] px-1 flex items-center justify-center font-archivo font-semibold text-[11px] xs:text-xs sm:text-sm lowercase transition-colors cursor-pointer rounded-none border-0 text-center whitespace-nowrap ${
                   emailCopied 
                     ? '!bg-[#EA4335] !text-white font-bold' 
                     : 'bg-transparent text-white/90 hover:bg-[#EA4335] hover:text-white active:bg-[#b31412] active:text-white'
