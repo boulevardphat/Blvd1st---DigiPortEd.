@@ -659,39 +659,62 @@ export default function App() {
               {/* Right Side: Project List - Centered and nicely spaced */}
               <div className="flex-1 flex flex-col justify-center pl-6 sm:pl-10 md:pl-16 lg:pl-24 max-w-4xl">
                 <div className="flex flex-col justify-center space-y-3 sm:space-y-4 md:space-y-6 lg:space-y-8 text-[clamp(1rem,2.6vw,2.35rem)] text-white/95 font-archivo font-medium tracking-tight leading-snug select-none">
-                  {/* Top Item: Thông tin cơ bản / Basic Info */}
-                  <div className="w-fit">
-                    <span 
-                      onClick={() => setIsBasicInfoOpen(true)}
-                      className="hover-force-italic hover:text-white cursor-pointer"
-                    >
+                  {/* Item 01: Thông tin cơ bản / Basic Info */}
+                  <div 
+                    onClick={() => setIsBasicInfoOpen(true)}
+                    className="w-fit flex flex-col portrait:flex-col portrait:items-start portrait:gap-0.5 landscape:flex-row landscape:items-baseline landscape:gap-3.5 lg:landscape:gap-4.5 cursor-pointer group"
+                  >
+                    <span className="font-archivo font-normal not-italic text-[#89CC04] text-[0.62em] sm:text-[0.68em] landscape:text-[1em] shrink-0 select-none">
+                      01
+                    </span>
+                    <span className="hover-force-italic hover:text-white cursor-pointer">
                       {language === 'vi' ? 'Thông tin cơ bản' : 'Basic Information'}
                     </span>
                   </div>
 
-                  <div className="w-fit">
+                  {/* Item 02: TNTN */}
+                  <div className="w-fit flex flex-col portrait:flex-col portrait:items-start portrait:gap-0.5 landscape:flex-row landscape:items-baseline landscape:gap-3.5 lg:landscape:gap-4.5">
+                    <span className="font-archivo font-normal not-italic text-[#89CC04] text-[0.62em] sm:text-[0.68em] landscape:text-[1em] shrink-0 select-none">
+                      02
+                    </span>
                     <span className="hover-force-italic hover:text-white cursor-pointer">
                       {language === 'vi' ? 'Đội Thanh niên Tình nguyện - Trường THPT Chuyên Hùng Vương' : 'TNTN Team - Hung Vuong for the gifted'}
                     </span>
                   </div>
-                  <div className="w-fit">
+
+                  {/* Item 03: Olympia */}
+                  <div className="w-fit flex flex-col portrait:flex-col portrait:items-start portrait:gap-0.5 landscape:flex-row landscape:items-baseline landscape:gap-3.5 lg:landscape:gap-4.5">
+                    <span className="font-archivo font-normal not-italic text-[#89CC04] text-[0.62em] sm:text-[0.68em] landscape:text-[1em] shrink-0 select-none">
+                      03
+                    </span>
                     <span className="hover-force-italic hover:text-white cursor-pointer">
                       {language === 'vi' ? 'Câu lạc bộ Olympia - Trường THPT Chuyên Hùng Vương' : 'Hung Vuong Olympia Club - Hung Vuong for the gifted'}
                     </span>
                   </div>
-                  <div className="w-fit">
+
+                  {/* Item 04: #BLVD */}
+                  <div className="w-fit flex flex-col portrait:flex-col portrait:items-start portrait:gap-0.5 landscape:flex-row landscape:items-baseline landscape:gap-3.5 lg:landscape:gap-4.5">
+                    <span className="font-archivo font-normal not-italic text-[#89CC04] text-[0.62em] sm:text-[0.68em] landscape:text-[1em] shrink-0 select-none">
+                      04
+                    </span>
                     <span className="hover-force-italic hover:text-white cursor-pointer">
                       #BLVD
                     </span>
                   </div>
-                  <div className="w-fit">
+
+                  {/* Item 05: [Reimagined] */}
+                  <div className="w-fit flex flex-col portrait:flex-col portrait:items-start portrait:gap-0.5 landscape:flex-row landscape:items-baseline landscape:gap-3.5 lg:landscape:gap-4.5">
+                    <span className="font-archivo font-normal not-italic text-[#89CC04] text-[0.62em] sm:text-[0.68em] landscape:text-[1em] shrink-0 select-none">
+                      05
+                    </span>
                     <span className="hover-force-italic hover:text-white cursor-pointer">
                       [Reimagined]
                     </span>
                   </div>
-                  {/* Reactively changes according to portfolioMode */}
+
+                  {/* Item: Khác / Others (không đánh số) - Reactively changes according to portfolioMode */}
                   <div 
-                    className="w-fit flex flex-col items-start"
+                    className="w-fit flex flex-col items-start portrait:mt-2.5 portrait:pt-1.5"
                     title={portfolioMode === 'individual' 
                       ? (language === 'vi' ? 'Khả dụng ở chế độ Cá nhân' : 'Available in Individual Mode') 
                       : (language === 'vi' ? 'Chỉ có ở chế độ Cá nhân. Bấm để chuyển mode.' : 'Only in Individual mode. Click to switch.')
@@ -700,7 +723,7 @@ export default function App() {
                     <span className={portfolioMode === 'individual' ? 'hover-force-italic text-white/95 hover:text-white cursor-pointer' : 'text-[#555555]'}>
                       {language === 'vi' ? 'Khác' : 'Others'}
                     </span>
-                    <span className="text-[0.48em] sm:text-[0.52em] font-light text-neutral-400 opacity-80 tracking-normal mt-1 flex items-center gap-1">
+                    <span className="text-[13px] sm:text-xs md:text-[0.52em] font-normal text-neutral-300/90 tracking-normal mt-1 flex items-center gap-1 flex-wrap">
                       {portfolioMode === 'individual' ? (
                         <span>{language === 'vi' ? '(Đang hiển thị)' : '(Active)'}</span>
                       ) : (

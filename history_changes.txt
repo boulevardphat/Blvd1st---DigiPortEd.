@@ -1284,3 +1284,45 @@ LẦN THAY ĐỔI: TỐI ƯU TẢI & ƯU TIÊN TUYỆT ĐỐI BỘ ẢNH INTRO V
     * Tách riêng tiến trình tải: Toàn bộ 7 icon công cụ phụ và avatar chỉ được tải ngầm sau khi đã vào hẳn `main-app` được 800ms, giải phóng 100% băng thông mạng cho các hình ảnh nền chuyển cảnh.
     * Đồng bộ hóa chuyển cảnh intro: Tại màn hình đồng hồ đa chiều (`intro-clock-multiple`), hệ thống kiểm tra và giữ nhịp đồng hồ tiếp tục chạy mượt mà cho đến khi các hình ảnh đã nạp xong vào cache trình duyệt (có fallback an toàn tối đa 3.0s), đảm bảo khi chuyển sang các cảnh ảnh tinted (#8375B3, #C54EAA, #89CC04) và `main-app`, toàn bộ hình ảnh xuất hiện ngay lập tức với tốc độ 60fps, loại bỏ hoàn toàn hiện tượng màn hình đen hoặc chớp giật do trễ mạng.
 ---------------------------------------------------------
+
+LẦN THAY ĐỔI: TĂNG CỠ CHỮ DÒNG CHÚ THÍCH "KHÁC" Ở GIAO DIỆN DỌC (FOCUS MODE)
+- Thời gian: 13/09/2026 09:36:20 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Căn cứ theo Focus Mode trên selector: `... > div:nth-of-type(6) > span:nth-of-type(2) > span:nth-of-type(1)`
+  + Thành phần: Dòng ghi chú chế độ danh mục "Khác" / "Others" (ví dụ: "(Chỉ có ở chế độ cá nhân, chuyển?)" hoặc "(Đang hiển thị)")
+  + Cập nhật thông số kích thước:
+    * Trước: `text-[0.48em] sm:text-[0.52em] font-light text-neutral-400 opacity-80` (trên màn hình dọc chỉ tương đương ~7.6px, quá nhỏ và mờ khó đọc).
+    * Sau: `text-[13px] sm:text-xs md:text-[0.52em] font-normal text-neutral-300/90 flex-wrap` (đảm bảo hiển thị tối thiểu 13px rõ nét trên điện thoại di động, độ tương phản cao, không bị vỡ dòng).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐÁNH SỐ THỨ TỰ CHO CÁC MỤC TRONG MỤC LỤC (TRỪ MỤC "KHÁC")
+- Thời gian: 13/09/2026 09:39:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Đánh số thứ tự "01", "02", "03", "04", "05" cho 5 mục đầu tiên trong Mục lục:
+    1. 01: Thông tin cơ bản / Basic Information
+    2. 02: Đội Thanh niên Tình nguyện - Trường THPT Chuyên Hùng Vương / TNTN Team - Hung Vuong for the gifted
+    3. 03: Câu lạc bộ Olympia - Trường THPT Chuyên Hùng Vương / Hung Vuong Olympia Club - Hung Vuong for the gifted
+    4. 04: #BLVD
+    5. 05: [Reimagined]
+    * Mục "Khác" / "Others": Giữ nguyên, không đánh số theo đúng yêu cầu.
+  + Định dạng font chữ & màu sắc:
+    * Font bình thường: `font-archivo font-normal not-italic` (chữ đứng 400, không in nghiêng ngay cả khi hover tên mục).
+    * Màu sắc: `#89CC04` (`text-[#89CC04]`).
+  + Bố cục hiển thị:
+    * Giao diện ngang (landscape): Số nằm cùng hàng ngang với tên mục (`landscape:flex-row landscape:items-baseline landscape:gap-3.5 lg:landscape:gap-4.5 landscape:text-[0.78em]`), canh thẳng chuẩn baseline với dòng chữ tiêu đề.
+    * Giao diện dọc (portrait): Số nằm ở phía trên tên mục (`portrait:flex-col portrait:items-start portrait:gap-0.5 text-[0.68em] sm:text-[0.72em]`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐỒNG BỘ CỠ SỐ GIAO DIỆN NGANG VÀ TỐI ƯU HIỂN THỊ TÁCH BẠCH GIAO DIỆN DỌC
+- Thời gian: 13/09/2026 09:42:40 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Giao diện ngang (landscape):
+    * Nâng kích thước số (01, 02, 03, 04, 05) lên ngang bằng 100% với cỡ chữ tên mục (`landscape:text-[1em]`).
+    * Số giữ nguyên font chuẩn `font-archivo font-normal not-italic text-[#89CC04]`, canh chuẩn baseline với dòng chữ tiêu đề, mang lại sự thuận mắt và cân bằng thị giác cao.
+  + Giao diện dọc (portrait):
+    * Giữ định dạng 2 chữ số (`##`: 01, 02, 03, 04, 05) nằm trên tên mục với kích cỡ nhỏ gọn, tinh tế (`text-[0.62em] sm:text-[0.68em]`) để không làm phình chiều cao danh sách.
+    * Bổ sung khoảng cách tách bạch (`portrait:mt-2.5 portrait:pt-1.5`) cho mục "Khác" / "Others" (mục không đánh số duy nhất), giúp phân định rõ ràng 5 mục dự án/hoạt động chính bên trên và mục danh mục mở rộng bên dưới.
+---------------------------------------------------------
