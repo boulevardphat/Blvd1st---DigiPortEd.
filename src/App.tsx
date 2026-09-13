@@ -11,7 +11,7 @@ import { motion } from 'motion/react';
 import { IntroClock } from './components/IntroClock';
 import { VespertineBackground } from './components/VespertineBackground';
 import { ModeSelector } from './components/ModeSelector';
-import { PortfolioMode, SceneState } from './types';
+import { AppLanguage, PortfolioMode, SceneState } from './types';
 
 export default function App() {
 
@@ -24,8 +24,35 @@ export default function App() {
     } catch (e) {}
     return 'individual';
   });
+  const [language, setLanguage] = useState<AppLanguage>(() => {
+    try {
+      const saved = localStorage.getItem('blvd_language');
+      if (saved === 'vi' || saved === 'en') return saved;
+    } catch (e) {}
+    return 'vi';
+  });
   const [isModeExiting, setIsModeExiting] = useState(false);
+  const [isBasicInfoOpen, setIsBasicInfoOpen] = useState(false);
+  const [phoneCopied, setPhoneCopied] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
   const bgAudioRef = React.useRef<HTMLAudioElement>(null);
+
+  const handlePhoneClick = () => {
+    try {
+      navigator.clipboard.writeText('0833939468');
+      setPhoneCopied(true);
+      setTimeout(() => setPhoneCopied(false), 2000);
+    } catch (err) {}
+  };
+
+  const handleEmailClick = () => {
+    try {
+      navigator.clipboard.writeText('thuanphat26092008@gmail.com');
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+      window.location.href = 'mailto:thuanphat26092008@gmail.com';
+    } catch (err) {}
+  };
 
   const handleSelectMode = (mode: PortfolioMode) => {
     setPortfolioMode(mode);
@@ -342,14 +369,14 @@ export default function App() {
 
       {/* Main App Screen (Background Image & Interactive Interface Layouts) */}
       {scene === 'main-app' && (
-        <div className="absolute inset-0 z-10 overflow-x-hidden overflow-y-auto no-scrollbar scroll-smooth">
+        <div className="absolute inset-0 z-10 overflow-x-hidden overflow-y-auto no-scrollbar scroll-smooth snap-y snap-mandatory overscroll-none">
           <div className="w-full flex flex-col overflow-x-hidden">
             {/* The 100vh Main Screen View */}
-            <div className="relative w-full h-[calc(var(--vh,1vh)*100)] shrink-0 flex items-center justify-center overflow-hidden ">
+            <div className="relative w-full h-[calc(var(--vh,1vh)*100)] shrink-0 flex items-center justify-center overflow-hidden snap-start snap-always">
               {/* Background Image */}
               <VespertineBackground shiftLeft={false} />
 
-              {/* Minimal Mode Indicator / Switcher in Main App */}
+              {/* Minimal Mode Indicator / Switcher in Main App (Top Left) */}
               <div 
                 id="main-app-mode-bar"
                 className="absolute landscape:top-[6.5%] landscape:left-[6.5%] portrait:top-6 portrait:left-6 z-30 pointer-events-auto flex items-center"
@@ -364,12 +391,38 @@ export default function App() {
                       localStorage.setItem('blvd_portfolio_mode', next);
                     } catch (e) {}
                   }}
-                  className="bg-transparent border-0 p-0 text-white/70 hover:text-white transition-colors cursor-pointer flex items-center select-none focus:outline-none"
+                  className="group bg-transparent border-0 p-0 text-white/70 hover:text-white transition-all cursor-pointer flex items-center select-none focus:outline-none"
                   title={`Current mode: ${portfolioMode === 'individual' ? 'individual' : 'employer / club'}. Click to switch.`}
                 >
-                  {/* Single unified mode name in lowercase for both mobile and desktop */}
-                  <span className="font-archivo text-xs tracking-wider lowercase">
-                    {portfolioMode === 'individual' ? 'individual' : 'employer / club'}
+                  <span className="font-archivo text-xs tracking-wider lowercase transition-all group-hover:italic">
+                    {language === 'vi'
+                      ? (portfolioMode === 'individual' ? 'cá nhân' : 'nhà tuyển dụng / clb')
+                      : (portfolioMode === 'individual' ? 'individual' : 'employer / club')
+                    }
+                  </span>
+                </button>
+              </div>
+
+              {/* Minimal Language Indicator / Switcher in Main App (Top Right - Symmetrical) */}
+              <div 
+                id="main-app-lang-bar"
+                className="absolute landscape:top-[6.5%] landscape:right-[6.5%] portrait:top-6 portrait:right-6 z-30 pointer-events-auto flex items-center"
+              >
+                <button
+                  type="button"
+                  id="lang-toggle-button"
+                  onClick={() => {
+                    const next = language === 'vi' ? 'en' : 'vi';
+                    setLanguage(next);
+                    try {
+                      localStorage.setItem('blvd_language', next);
+                    } catch (e) {}
+                  }}
+                  className="group bg-transparent border-0 p-0 text-white/70 hover:text-white transition-all cursor-pointer flex items-center select-none focus:outline-none"
+                  title={`Current language: ${language === 'vi' ? 'Tiếng Việt' : 'English'}. Click to switch.`}
+                >
+                  <span className="font-archivo text-xs tracking-wider lowercase transition-all group-hover:italic">
+                    {language === 'vi' ? 'tiếng việt' : 'english'}
                   </span>
                 </button>
               </div>
@@ -469,11 +522,407 @@ export default function App() {
               </div>
             </div>
 
-            {/* Blank Black Page (Scrollable content on both desktop and mobile) */}
+            {/* Page 2: Table of Contents */}
             <div 
               id="page-black-blank"
-              className="relative w-full h-[calc(var(--vh,1vh)*100)] bg-black shrink-0 z-20"
-            />
+              className="relative w-full h-[calc(var(--vh,1vh)*100)] max-h-[calc(var(--vh,1vh)*100)] bg-black shrink-0 z-20 flex items-center justify-between overflow-hidden snap-start snap-always select-none px-4 sm:px-8 md:px-12 lg:px-16"
+            >
+              {/* TABLE OF CONTENTS / MỤC LỤC Sublogo: Fixed aspect ratio vector so overlap & proportions are 100% mathematically locked */}
+              <div className="relative h-[82%] sm:h-[88%] md:h-[92%] w-auto aspect-[160/720] shrink-0 flex items-center justify-center select-none pointer-events-none">
+                <svg
+                  viewBox="0 0 160 720"
+                  className="h-full w-full overflow-visible"
+                  preserveAspectRatio="xMidYMid meet"
+                >
+                  <defs>
+                    <style>{`
+                      .toc-sublogo-text {
+                        font-family: Archivo, "Be Vietnam Pro", sans-serif;
+                        font-weight: 900;
+                        font-style: italic;
+                        text-transform: uppercase;
+                        letter-spacing: -0.04em;
+                      }
+                    `}</style>
+                  </defs>
+
+                  {/* Group rotated -90 deg so it reads vertically bottom-to-top */}
+                  <g transform="rotate(-90) translate(-720, 0)">
+                    {language === 'vi' ? (
+                      <>
+                        {/* Vietnamese mode: MỤC LỤC duplicated in 2 overlapping layers like English */}
+                        {/* Layer 1: MỤC LỤC (Background/lower layer) */}
+                        <text
+                          x="0"
+                          y="78"
+                          className="toc-sublogo-text"
+                          fontSize="115"
+                          fill="#262626"
+                          textLength="720"
+                          lengthAdjust="spacingAndGlyphs"
+                        >
+                          MỤC LỤC
+                        </text>
+
+                        {/* Layer 2: MỤC LỤC (Foreground/overlapping layer) */}
+                        <text
+                          x="0"
+                          y="142"
+                          className="toc-sublogo-text"
+                          fontSize="115"
+                          fill="#3c3c3c"
+                          textLength="720"
+                          lengthAdjust="spacingAndGlyphs"
+                        >
+                          MỤC LỤC
+                        </text>
+                      </>
+                    ) : (
+                      <>
+                        {/* English mode: TABLE OF CONTENTS */}
+                        {/* Layer 1: TABLE OF */}
+                        <text
+                          x="0"
+                          y="78"
+                          className="toc-sublogo-text"
+                          fontSize="108"
+                          fill="#262626"
+                          textLength="720"
+                          lengthAdjust="spacingAndGlyphs"
+                        >
+                          TABLE OF
+                        </text>
+
+                        {/* Layer 2: CONTENTS */}
+                        <text
+                          x="0"
+                          y="142"
+                          className="toc-sublogo-text"
+                          fontSize="108"
+                          fill="#3c3c3c"
+                          textLength="720"
+                          lengthAdjust="spacingAndGlyphs"
+                        >
+                          CONTENTS
+                        </text>
+                      </>
+                    )}
+                  </g>
+                </svg>
+              </div>
+
+              {/* Right Side: Project List - Centered and nicely spaced */}
+              <div className="flex-1 flex flex-col justify-center pl-6 sm:pl-10 md:pl-16 lg:pl-24 max-w-4xl">
+                <div className="flex flex-col justify-center space-y-3 sm:space-y-4 md:space-y-6 lg:space-y-8 text-[clamp(1rem,2.6vw,2.35rem)] text-white/95 font-archivo font-medium tracking-tight leading-snug select-none">
+                  {/* Top Item: Thông tin cơ bản / Basic Info */}
+                  <div className="w-fit">
+                    <span 
+                      onClick={() => setIsBasicInfoOpen(true)}
+                      className="hover-force-italic hover:text-white cursor-pointer"
+                    >
+                      {language === 'vi' ? 'Thông tin cơ bản' : 'Basic Information'}
+                    </span>
+                  </div>
+
+                  <div className="w-fit">
+                    <span className="hover-force-italic hover:text-white cursor-pointer">
+                      {language === 'vi' ? 'Đội Thanh niên Tình nguyện - Trường THPT Chuyên Hùng Vương' : 'TNTN Team - Hung Vuong for the gifted'}
+                    </span>
+                  </div>
+                  <div className="w-fit">
+                    <span className="hover-force-italic hover:text-white cursor-pointer">
+                      {language === 'vi' ? 'Câu lạc bộ Olympia - Trường THPT Chuyên Hùng Vương' : 'Hung Vuong Olympia Club - Hung Vuong for the gifted'}
+                    </span>
+                  </div>
+                  <div className="w-fit">
+                    <span className="hover-force-italic hover:text-white cursor-pointer">
+                      #BLVD
+                    </span>
+                  </div>
+                  <div className="w-fit">
+                    <span className="hover-force-italic hover:text-white cursor-pointer">
+                      [Reimagined]
+                    </span>
+                  </div>
+                  {/* Reactively changes according to portfolioMode */}
+                  <div 
+                    className="w-fit flex flex-col items-start"
+                    title={portfolioMode === 'individual' 
+                      ? (language === 'vi' ? 'Khả dụng ở chế độ Cá nhân' : 'Available in Individual Mode') 
+                      : (language === 'vi' ? 'Chỉ có ở chế độ Cá nhân. Bấm để chuyển mode.' : 'Only in Individual mode. Click to switch.')
+                    }
+                  >
+                    <span className={portfolioMode === 'individual' ? 'hover-force-italic text-white/95 hover:text-white cursor-pointer' : 'text-[#555555]'}>
+                      {language === 'vi' ? 'Khác' : 'Others'}
+                    </span>
+                    <span className="text-[0.48em] sm:text-[0.52em] font-light text-neutral-400 opacity-80 tracking-normal mt-1 flex items-center gap-1">
+                      {portfolioMode === 'individual' ? (
+                        <span>{language === 'vi' ? '(Đang hiển thị)' : '(Active)'}</span>
+                      ) : (
+                        <span>
+                          {language === 'vi' ? '(Chỉ có ở chế độ cá nhân, ' : '(Only in individual mode, '}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPortfolioMode('individual');
+                              try {
+                                localStorage.setItem('blvd_portfolio_mode', 'individual');
+                              } catch (err) {}
+                            }}
+                            className="text-neutral-300 hover:text-white no-underline hover-force-italic cursor-pointer transition-colors p-0 bg-transparent border-0 font-medium"
+                          >
+                            {language === 'vi' ? 'chuyển?' : 'switch?'}
+                          </button>
+                          {')'}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Window for "Thông tin cơ bản / Basic Information" */}
+      {isBasicInfoOpen && (
+        <div 
+          id="basic-info-modal-backdrop"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 md:p-8 animate-fade-in"
+          onClick={() => setIsBasicInfoOpen(false)}
+        >
+          {/* Outer Window Frame: Sharp Brutalist border, snug proportional fit without excess vertical space */}
+          <div 
+            id="basic-info-modal-window"
+            className="relative w-full max-w-2xl bg-[#0a0a0a] border border-neutral-800 shadow-2xl flex flex-col justify-between overflow-hidden rounded-none select-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button: Positioned directly in the corner without any fake tab bar / header row */}
+            <button
+              type="button"
+              id="close-basic-info-btn"
+              onClick={() => setIsBasicInfoOpen(false)}
+              className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 text-neutral-400 hover:text-white transition-colors cursor-pointer select-none bg-transparent border-0 p-1 flex items-center justify-center group z-30"
+              title={language === 'vi' ? 'Đóng' : 'Close'}
+            >
+              <span className="text-xl sm:text-2xl font-light transform transition-transform duration-300 ease-out group-hover:rotate-90 inline-block leading-none">
+                ✕
+              </span>
+            </button>
+
+            {/* Sunken Bold Italic Typography: Reduced opacity, subtly sunken into dark background */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none overflow-hidden z-0 opacity-50">
+              <div className="flex flex-col items-center justify-center font-archivo font-black italic tracking-tighter uppercase leading-[0.82] text-center w-full pb-6 sm:pb-8">
+                {language === 'vi' ? (
+                  <>
+                    <span className="text-[clamp(2.8rem,9.5vw,5.6rem)] text-[#161616] whitespace-nowrap block">
+                      THÔNG TIN
+                    </span>
+                    <span className="text-[clamp(2.8rem,9.5vw,5.6rem)] text-[#1a1a1a] whitespace-nowrap block">
+                      CƠ BẢN
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-[clamp(2.4rem,8.5vw,4.8rem)] text-[#161616] whitespace-nowrap block">
+                      BASIC
+                    </span>
+                    <span className="text-[clamp(2.4rem,8.5vw,4.8rem)] text-[#1a1a1a] whitespace-nowrap block">
+                      INFORMATION
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Upper Content: Larger square photo frame + Information Rows & Tools */}
+            <div className="relative z-10 flex items-center gap-3.5 sm:gap-5 md:gap-6 w-full p-3.5 sm:p-5 md:p-6 pb-3 sm:pb-4 my-auto">
+              {/* Square Image Frame scaled larger, closer to frame edges */}
+              <div 
+                id="info-avatar-frame"
+                className="shrink-0 w-[36%] sm:w-[38%] md:w-[40%] max-w-[230px] aspect-square border border-neutral-700 bg-neutral-900 rounded-none overflow-hidden shadow-2xl"
+              >
+                <img
+                  src="https://i.ibb.co/TD9mb1pB/avatar.jpg"
+                  alt="Avatar"
+                  className="w-full h-full object-cover rounded-none select-none block"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+
+              {/* Right Content: left-aligned information rows */}
+              <div className="flex-1 flex flex-col items-start justify-center text-left py-0.5 select-text min-w-0">
+                {/* Row 1: Name */}
+                <h3 className="font-archivo font-black text-base sm:text-2xl md:text-[1.65rem] text-white tracking-tight uppercase leading-tight mb-0.5 sm:mb-1 text-left truncate max-w-full">
+                  {language === 'vi' ? 'Nguyễn Thuận Phát' : 'Phat Nguyen Thuan'}
+                </h3>
+
+                {/* Row 2: Major */}
+                <p className="font-sans font-medium text-xs sm:text-sm md:text-base text-neutral-300 leading-snug mb-1 sm:mb-1.5 text-left">
+                  {language === 'vi' ? 'Ngành Báo chí/Nguyện vọng định hướng thiết kế' : 'Journalism/Design Track Preference'}
+                </p>
+
+                {/* Row 3: University / School (No underline, clickable with subtle hover feedback) */}
+                <a
+                  href="https://hcmussh.edu.vn/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-sans text-[11px] sm:text-xs md:text-sm text-neutral-400 hover:text-white no-underline transition-colors duration-200 cursor-pointer text-left leading-normal inline-block mb-2 sm:mb-3"
+                  title={language === 'vi' ? 'Trường ĐH KHXH&NV, ĐHQG-HCM' : 'VNUHCM-USSH'}
+                >
+                  {language === 'vi' ? 'Trường ĐH KHXH&NV, ĐHQG-HCM' : 'VNUHCM-USSH'}
+                </a>
+
+                {/* Row 4: Tools / Công cụ sử dụng */}
+                <div className="w-full flex flex-col items-start text-left pt-2 border-t border-neutral-800/90">
+                  <span className="font-archivo font-semibold text-[10px] sm:text-xs text-neutral-400 tracking-wider uppercase mb-1.5">
+                    {language === 'vi' ? 'Công cụ sử dụng:' : 'Tools:'}
+                  </span>
+                  {/* Tool Icons List: Canva, Affinity, Filmora, CapCut, Edits, ibisPaint */}
+                  <div className="flex items-center flex-wrap gap-1.5 sm:gap-2">
+                    {/* Canva */}
+                    <div 
+                      className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-900 flex items-center justify-center shrink-0 rounded-none border border-neutral-700 hover:scale-105 transition-transform overflow-hidden" 
+                      title="Canva"
+                    >
+                      <img 
+                        src="https://i.ibb.co/RTw2phXD/canva.jpg" 
+                        alt="Canva" 
+                        className="w-full h-full object-cover rounded-none select-none pointer-events-none"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+
+                    {/* Affinity */}
+                    <div 
+                      className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-900 flex items-center justify-center shrink-0 rounded-none border border-neutral-700 hover:scale-105 transition-transform overflow-hidden" 
+                      title="Affinity"
+                    >
+                      <img 
+                        src="https://i.ibb.co/pBXrq6cf/affinity.jpg" 
+                        alt="Affinity" 
+                        className="w-full h-full object-cover rounded-none select-none pointer-events-none"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+
+                    {/* Filmora */}
+                    <div 
+                      className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-900 flex items-center justify-center shrink-0 rounded-none border border-neutral-700 hover:scale-105 transition-transform overflow-hidden" 
+                      title="Filmora"
+                    >
+                      <img 
+                        src="https://i.ibb.co/v4h21FLG/filmora.png" 
+                        alt="Filmora" 
+                        className="w-full h-full object-cover rounded-none select-none pointer-events-none"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+
+                    {/* CapCut */}
+                    <div 
+                      className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-900 flex items-center justify-center shrink-0 rounded-none border border-neutral-700 hover:scale-105 transition-transform overflow-hidden" 
+                      title="CapCut"
+                    >
+                      <img 
+                        src="https://i.ibb.co/4RPxzLzK/capcut.png" 
+                        alt="CapCut" 
+                        className="w-full h-full object-cover rounded-none select-none pointer-events-none"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+
+                    {/* Edits */}
+                    <div 
+                      className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-900 flex items-center justify-center shrink-0 rounded-none border border-neutral-700 hover:scale-105 transition-transform overflow-hidden" 
+                      title="Edits"
+                    >
+                      <img 
+                        src="https://i.ibb.co/Pv9VfwzX/edits.webp" 
+                        alt="Edits" 
+                        className="w-full h-full object-cover rounded-none select-none pointer-events-none"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+
+                    {/* ibisPaint */}
+                    <div 
+                      className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-900 flex items-center justify-center shrink-0 rounded-none border border-neutral-700 hover:scale-105 transition-transform overflow-hidden" 
+                      title="ibisPaint"
+                    >
+                      <img 
+                        src="https://i.ibb.co/N66hJX5h/ibispaint.png" 
+                        alt="ibisPaint" 
+                        className="w-full h-full object-cover rounded-none select-none pointer-events-none"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Contact Buttons Bar (Spec-inspired from Boulevard1st, flush along bottom edge) */}
+            <div 
+              id="basic-info-contact-bar" 
+              className="relative z-20 w-full grid grid-cols-4 gap-0 border-t border-neutral-800 bg-black/60 select-none"
+            >
+              {/* Button 1: Facebook */}
+              <a
+                href="https://www.facebook.com/hellothisisBLVD17/"
+                target="_blank"
+                rel="noopener noreferrer"
+                id="info-btn-fb"
+                className="py-2.5 sm:py-3 min-h-[44px] flex items-center justify-center font-archivo font-semibold text-xs sm:text-sm text-white/90 lowercase border-r border-neutral-800 hover:bg-[#1877F2] hover:text-white active:bg-[#0c59be] active:text-white transition-colors cursor-pointer rounded-none no-underline text-center"
+                title="facebook"
+              >
+                facebook
+              </a>
+
+              {/* Button 2: Instagram */}
+              <a
+                href="https://www.instagram.com/endenogatai_dah"
+                target="_blank"
+                rel="noopener noreferrer"
+                id="info-btn-insta"
+                className="py-2.5 sm:py-3 min-h-[44px] flex items-center justify-center font-archivo font-semibold text-xs sm:text-sm text-white/90 lowercase border-r border-neutral-800 hover:bg-gradient-to-r hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] hover:text-white active:bg-gradient-to-r active:from-[#d87c1e] active:via-[#b81b34] active:to-[#910d68] active:text-white transition-all cursor-pointer rounded-none no-underline text-center"
+                title="instagram"
+              >
+                instagram
+              </a>
+
+              {/* Button 3: Phone / Zalo */}
+              <button
+                type="button"
+                id="info-btn-phone"
+                onClick={handlePhoneClick}
+                className={`py-2.5 sm:py-3 min-h-[44px] flex items-center justify-center font-archivo font-semibold text-xs sm:text-sm lowercase border-r border-neutral-800 transition-colors cursor-pointer rounded-none border-t-0 border-b-0 border-l-0 text-center ${
+                  phoneCopied 
+                    ? '!bg-[#10B981] !text-black font-bold' 
+                    : 'bg-transparent text-white/90 hover:bg-[#10B981] hover:text-black active:bg-[#047857] active:text-white'
+                }`}
+                title="0833939468"
+              >
+                {phoneCopied ? 'copied' : 'phone'}
+              </button>
+
+              {/* Button 4: Work Email */}
+              <button
+                type="button"
+                id="info-btn-email"
+                onClick={handleEmailClick}
+                className={`py-2.5 sm:py-3 min-h-[44px] flex items-center justify-center font-archivo font-semibold text-xs sm:text-sm lowercase transition-colors cursor-pointer rounded-none border-0 text-center ${
+                  emailCopied 
+                    ? '!bg-[#EA4335] !text-white font-bold' 
+                    : 'bg-transparent text-white/90 hover:bg-[#EA4335] hover:text-white active:bg-[#b31412] active:text-white'
+                }`}
+                title="thuanphat26092008@gmail.com"
+              >
+                {emailCopied ? 'copied' : 'email'}
+              </button>
+            </div>
           </div>
         </div>
       )}

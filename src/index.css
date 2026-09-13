@@ -42,14 +42,15 @@
   font-variation-settings: "wdth" 100;
 }
 
-.hover-italic-transition {
+.hover-force-italic {
   display: inline-block;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
-  transform-origin: center;
+  transform-origin: left center;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+  will-change: transform;
 }
 
-.hover-italic-transition:hover {
-  transform: skewX(-11deg);
+.hover-force-italic:hover {
+  transform: skewX(-14deg);
 }
 
 .text-stroke-white {

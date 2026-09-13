@@ -1,4 +1,5 @@
 export type PortfolioMode = 'individual' | 'employer-club';
+export type AppLanguage = 'vi' | 'en';
 
 export type SceneState = 
   | 'pre-intro' 

@@ -59,7 +59,7 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect, isExiting 
           </div>
 
           <div>
-            <h3 className="font-archivo font-black text-xl sm:text-2xl tracking-tight uppercase mb-1">
+            <h3 className="font-archivo font-black text-xl sm:text-2xl tracking-tight uppercase mb-1 transition-all group-hover:italic">
               Individual
             </h3>
             <p className="font-sans text-xs sm:text-sm text-neutral-600 group-hover:text-neutral-300 transition-colors tracking-wide">
@@ -86,7 +86,7 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect, isExiting 
           </div>
 
           <div>
-            <h3 className="font-archivo font-black text-xl sm:text-2xl tracking-tight uppercase mb-1">
+            <h3 className="font-archivo font-black text-xl sm:text-2xl tracking-tight uppercase mb-1 transition-all group-hover:italic">
               Employer / Club
             </h3>
             <p className="font-sans text-xs sm:text-sm text-neutral-600 group-hover:text-neutral-300 transition-colors tracking-wide">

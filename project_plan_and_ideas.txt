@@ -1,0 +1,33 @@
+================================================================================
+KẾ HOẠCH & Ý TƯỞNG TƯƠNG TÁC (INTERACTIVE PORTFOLIO PLAN)
+Ngày lập: 12/09/2026
+Mục tiêu: Ghi nhận toàn bộ quan điểm, ý tưởng và giải pháp kỹ thuật trước khi code.
+================================================================================
+
+1. PHÂN LUỒNG DỮ LIỆU (DATA ROUTING)
+- Quan điểm User: Dữ liệu chia vào 2 thư mục rõ ràng: `Individual` và `Employer`. Các ảnh nằm ngoài (ví dụ ở thư mục root) sẽ được show full cho cả 2 chế độ.
+- Giải pháp kỹ thuật: Xây dựng cấu trúc Data dạng mảng (Array of Objects) lưu đường dẫn và metadata (kích thước, tỷ lệ). Sử dụng hàm filter dựa trên state `portfolioMode` (hiện tại là individual hoặc employer-club) để quyết định render mảng nào.
+
+2. DỰ ÁN #BLVD (INSTAGRAM CAROUSEL)
+- Quan điểm User: Làm khung vuông 1:1, vuốt ngang trái/phải như trên Instagram. Riêng #BLVD 17 và 18 tương lai sẽ làm model 3D cuốn booklet.
+- Giải pháp kỹ thuật: 
+  + Container: Cố định tỷ lệ `aspect-square`.
+  + CSS: Sử dụng `overflow-x-auto no-scrollbar` và `scroll-snap-type: x mandatory` để tạo cảm giác "hít" (snap) mượt mà vào từng ảnh khi vuốt.
+  + UX: Có các chấm nhỏ (dots pagination) bên dưới.
+  + #BLVD 17 & 18: Tạm thời hiển thị dạng slide/tĩnh cho đến khi có file 3D model.
+
+3. THẺ HỌC SINH (3D FLIP CARD & SUBJECT SWITCHER)
+- Quan điểm User: Một chiếc thẻ 3D, bấm vào sẽ lật sang mặt sau. Bên dưới có thanh chuyển đổi giữa các môn học (Chuyên Toán, Lý, Hóa, v.v.).
+- Giải pháp kỹ thuật: 
+  + Thẻ 3D: Dùng CSS thuần `preserve-3d`, `backface-visibility: hidden` và `rotateY(180deg)` để lật thẻ êm ái, tối ưu hiệu suất tốt hơn dùng thư viện 3D nặng.
+  + Thanh chuyển môn: Dạng Dock/Pill ngang có thể cuộn. Khi User bấm chuyển môn, hệ thống sẽ swap ảnh nguồn (src) của thẻ mặt trước/mặt sau.
+
+4. THẺ ĐEO SỰ KIỆN (REACT BITS LANYARD COMPONENT)
+- Quan điểm User: Thích dùng component Lanyard (vật lý, đung đưa) nhưng lo ngại vì tỷ lệ ảnh không giống bản gốc.
+- Giải pháp kỹ thuật: Component gốc dùng `react-three-fiber`. Cần can thiệp vào mã nguồn của component này để chỉnh sửa tham số `BoxGeometry` (hoặc PlaneGeometry) thành tỷ lệ thực tế của ảnh (55:86), ví dụ args=[0.55, 0.86, 0.02]. Điều này giúp dán texture (ảnh thẻ) lên mesh 3D mà không bị méo, giãn.
+
+5. DÂY ĐEO SIÊU DÀI (PANORAMIC STRAP)
+- Quan điểm User: Dây đeo tỷ lệ quá dài (1559:26). Cần hiện một khúc, cho nó trượt chậm chậm tới cuối rồi quay lại. Khi nào User bấm vào mới kéo dãn ra (hoặc cho cuộn thủ công).
+- Giải pháp kỹ thuật: 
+  + Trạng thái Default (cửa sổ thu nhỏ): Bọc trong một khung có chiều ngang/dọc cố định. Dùng CSS animation `@keyframes` translateX/Y từ 0% đến 100% kèm thuộc tính `alternate` để nó chạy qua chạy lại.
+  + Trạng thái Expand (Bấm vào): Đóng băng animation, dùng Framer Motion mở rộng layout (layout transition) và chuyển sang `overflow-auto` để người dùng tự do cuộn tay khám phá chi tiết.

@@ -929,3 +929,293 @@ LẦN THAY ĐỔI: GIẢM VÙNG ĐỆM ĐEN THUẦN #000000 TỪ 3PX XUỐNG CÒ
     * Giữ nguyên toàn bộ dải chuyển sắc mềm mại phân bổ rộng rãi ở phía trên.
 - Tham số điều chỉnh: `#000000_calc(100%-1px),#000000_100%`.
 ---------------------------------------------------------
+
+LẦN THAY ĐỔI: THÊM TRANG TABLE OF CONTENTS (TRANG 2)
+- Thời gian: 13/09/2026 07:32:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Thay thế "Blank Black Page" (trang 2) bằng layout Table of Contents.
+  + Áp dụng flexbox chia 2 cột.
+  + Cột trái: Text "TABLE OF CONTENTS" siêu to (clamp(4rem,9vw,9rem)), màu xám đậm `#333333`, font Archivo Black, xoay dọc theo đúng tham chiếu từ ảnh mock (sử dụng `writing-mode: vertical-lr` + `transform: rotate(180deg)` để chữ đọc từ dưới lên và quay mặt sang trái).
+  + Cột phải: Danh sách các dự án (TNTN Team, Hung Vuong Olympia Club, #BLVD, [Reimagined]) với màu trắng. Mục "Others" có màu xám `#666666`. 
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TINH CHỈNH TABLE OF CONTENTS & KHÓA KHUNG VIEW 2 MÀN HÌNH
+- Thời gian: 13/09/2026 07:37:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Sửa thứ tự và kiểu chữ TOC:
+    * Cột 1 (ngoài cùng bên trái): "TABLE OF" (font Archivo Black Italic, màu #262626).
+    * Cột 2 (bên trong): "CONTENTS" (font Archivo Black Italic, màu #3E3E3E).
+    * Áp dụng margin âm (-ml-3 đến -ml-10) để dòng "CONTENTS" đè lên mép của dòng "TABLE OF", tạo hiệu ứng thị giác phân tầng (layered overlap) táo bạo.
+    * Chữ nghiêng (italic) hoàn toàn theo đúng mong muốn.
+  + Scale kích thước chữ:
+    * Điều chỉnh font size theo viewport height (vh) để chiều dài của từ tương ứng với tỉ lệ màn hình, vừa vặn không bị thừa thãi hay tràn khung.
+  + Khóa khung view tuyệt đối:
+    * Thay `min-h-[100vh]` bằng `h-[100vh] max-h-[100vh] overflow-hidden` trên trang 2.
+    * Thêm `snap-y snap-mandatory overscroll-none` ở container cha và `snap-start snap-always` ở cả 2 trang.
+    * Toàn bộ app chỉ gồm đúng 2 trang cố định 100vh x 2. Khi cuộn hết mục lục sẽ chạm đáy và khóa cứng tại đó, triệt tiêu hoàn toàn hiện tượng kéo trôi xuống mảng đen vô tận.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: SCALE KHỔNG LỒ TABLE OF CONTENTS DỌC THEO CHIỀU CAO/RỘNG VIEWPORT
+- Thời gian: 13/09/2026 07:39:50 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Scale kích thước chữ "TABLE OF CONTENTS" lên mức khổng lồ: `text-[clamp(4.5rem,14.5vh,13.5rem)]` với `leading-[0.72]`, trải dài gần như trọn vẹn từ trên xuống dưới màn hình (h-[96%]).
+  + Hai cột chữ đè lên nhau sâu hơn (-ml âm lớn tới 5.5rem), tạo hiệu ứng visual typography phân tầng cực mạnh.
+  + Đặt chữ ở lớp nền (absolute z-0 pointer-events-none) với gam màu `#222222` và `#363636`.
+  + Danh sách mục lục nằm ở lớp trên (z-10) với màu trắng sáng, đảm bảo dù chữ nền có to và trải rộng đến đâu thì các mục lục vẫn đọc rõ ràng 100%, không bị che khuất.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐÓNG GÓI TABLE OF CONTENTS THÀNH VECTOR SUBLOGO KHÓA CỐ ĐỊNH TỶ LỆ & ĐỘ ĐÈ
+- Thời gian: 13/09/2026 07:43:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Chuyển đổi toàn bộ cụm "TABLE OF CONTENTS" thành một Vector SVG Sublogo khép kín (viewBox="0 0 160 720"):
+    * Giữ nguyên tỷ lệ chuẩn `aspect-[160/720]`, tự động scale `contain/meet` theo chiều dọc màn hình (h-[82%] đến h-[92%]).
+    * Cố định độ đè của 2 dòng chữ ở mức chính xác tuyệt đối (~35% độ cao thân chữ y=78 và y=142): dù co kéo trình duyệt sang màn hình dài, vuông hay siêu rộng thì mức độ chồng lấn giữa 2 dòng vẫn bất biến, không bao giờ bị đè nát chữ hay tách rời nhau.
+    * Tự động căn chỉnh textLength="720" bằng nhau tuyệt đối giữa "TABLE OF" và "CONTENTS".
+  + Tách biệt không gian độc lập với danh sách các dự án bên phải (`flex-1` với padding hợp lý), chấm dứt hoàn toàn tình trạng chữ nuốt chữ hay chữ tràn vào mục lục.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐỒNG BỘ FONT ARCHIVO CHO CÁC MỤC & BIẾN ĐỔI REACTIVE MỤC OTHERS
+- Thời gian: 13/09/2026 07:46:15 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Chuyển font của toàn bộ danh sách mục lục sang `font-archivo font-medium tracking-tight`, tạo sự đồng nhất tuyệt đối về nhận diện hình học với cả Sublogo lẫn logo chính Boulevard1st.
+  + Biến đổi mục `Others` linh hoạt theo state `portfolioMode`:
+    * Khi ở `individual` mode: Mục `Others` sáng rõ cùng tone trắng (`text-white/95`), có hover effect và tag `(Active)`.
+    * Khi ở `employer / club` mode: Mục `Others` mờ chìm xuống (`opacity-50`, `#555555`), cursor chuyển sang `cursor-not-allowed` kèm nhãn `(Only in Individual mode)` để thể hiện rõ ràng tính độc quyền theo phân luồng dự án.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: THÊM NÚT CHUYỂN NGÔN NGỮ ĐỐI XỨNG & ĐỒNG BỘ HIỆU ỨNG HOVER NGHIÊNG (ITALIC)
+- Thời gian: 13/09/2026 07:49:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/types.ts, /src/App.tsx, /src/components/ModeSelector.tsx
+- Chi tiết thay đổi:
+  + Thêm nút chuyển đổi ngôn ngữ (Tiếng Việt / English) ở góc trên bên phải (đối xứng hoàn hảo với nút chuyển Mode ở góc trên bên trái):
+    * Tự động lưu thiết lập vào localStorage (`blvd_language`).
+    * Khi click, chuyển đổi giữa "tiếng việt" và "english".
+    * Đồng bộ hiển thị ngôn ngữ cho nút chuyển mode ("cá nhân" / "nhà tuyển dụng / clb") và mục "Khác" / "Others".
+  + Đồng bộ hiệu ứng Hover Nghiêng (`hover:italic`):
+    * Nút chuyển Mode (top-left) khi hover -> chữ nghiêng `italic`.
+    * Nút chuyển Ngôn ngữ (top-right) khi hover -> chữ nghiêng `italic`.
+    * Tất cả các mục trong Table of Contents (TNTN Team, Hung Vuong Olympia Club, #BLVD, [Reimagined], Others) khi hover -> chữ nghiêng `hover:italic` kết hợp nhích nhẹ sang phải (`hover:translate-x-1.5`).
+    * 2 thẻ chọn Mode ở màn hình khởi đầu (Individual, Employer / Club) khi hover -> tiêu đề chuyển nghiêng `group-hover:italic`.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: CẬP NHẬT TÊN TIẾNG VIỆT CHUẨN, SUBLOGO "MỤC LỤC" VÀ HIỆU ỨNG ÉP NGHIÊNG THUẦN TÚY (PURE SKEW)
+- Thời gian: 13/09/2026 07:53:15 (Giờ TPHCM)
+- File ảnh hưởng: /src/index.css, /src/App.tsx
+- Chi tiết thay đổi:
+  + Cập nhật nội dung Tiếng Việt chuẩn theo yêu cầu:
+    * "MỤC LỤC": Sublogo SVG tự động chuyển sang hiển thị 2 dòng "MỤC" và "LỤC" đè lên nhau chuẩn tỷ lệ vector khi bật Tiếng Việt, và "TABLE OF CONTENTS" khi bật English.
+    * Mục 1: "Đội Thanh niên Tình nguyện Chuyên Hùng Vương"
+    * Mục 2: "Câu lạc bộ Olympia - Trường THPT Chuyên Hùng Vương"
+  + Tinh chỉnh hiệu ứng Hover:
+    * Bỏ hoàn toàn chuyển động dịch chuyển/nhích ra (`translate-x`), chữ đứng yên tuyệt đối tại vị trí gốc.
+    * Áp dụng cơ chế ép nghiêng hình học thuần túy (`transform: skewX(-14deg)` với `transform-origin: left center`) qua class `.hover-force-italic`.
+    * Giải quyết dứt điểm lỗi đổi font/ký tự lạ khi hover: Chữ giữ nguyên 100% font glyph gốc Archivo, chỉ bị bẻ xiên hình học (oblique/skew), không bị browser thay thế bằng glyph font khác có dấu tiếng Việt.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: GỌN LẠI "MỤC LỤC" THÀNH 1 DÒNG, ĐỔI TÊN ĐỘI TÌNH NGUYỆN VÀ TẠO MODAL THÔNG TIN CƠ BẢN
+- Thời gian: 13/09/2026 07:57:40 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Bản tiếng Việt của Sublogo: Gộp "MỤC LỤC" thành 1 dòng duy nhất (chữ to, đanh thép, font Archivo Black Italic màu xám trầm #333333 trải dài 720px), nhìn cực kỳ gọn gàng và tinh tế thay vì cắt đôi thành 2 từ đè nhau. Bản tiếng Anh vẫn giữ nguyên 2 lớp "TABLE OF" và "CONTENTS".
+  + Đổi tên mục: "Đội Thanh niên Tình nguyện - Trường THPT Chuyên Hùng Vương".
+  + Thêm mục "Thông tin cơ bản" (Basic Information) ở vị trí đầu tiên của bảng mục lục.
+  + Tích hợp Modal Window (cửa sổ pop-up trống):
+    * Bấm vào "Thông tin cơ bản" sẽ bật lên một modal nền kính mờ (backdrop blur), có nút đóng ✕ và click ra ngoài backdrop để đóng.
+    * Khung bên trong đã được layout sẵn sàng để chuẩn bị đưa nội dung chi tiết vào.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: CẬP NHẬT TÊN TIẾNG ANH, NÚT SWITCH MODE TẠI CHỖ & VUÔNG HÓA CỬA SỔ MODAL
+- Thời gian: 13/09/2026 08:01:25 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  1. Thêm đuôi " - Hung Vuong for the gifted" cho 2 mục tiếng Anh:
+     * "TNTN Team - Hung Vuong for the gifted"
+     * "Hung Vuong Olympia Club - Hung Vuong for the gifted"
+  2. Nâng cấp mục "Khác / Others":
+     * Khi đang ở chế độ Nhà tuyển dụng / CLB: Hiển thị dòng gợi ý tương tác `(Only in individual mode, switch?)` ở bản Anh hoặc `(Chỉ có ở chế độ cá nhân, chuyển?)` ở bản Việt.
+     * Chữ `switch?` / `chuyển?` có gạch chân, hover chuyển nghiêng; khi bấm vào sẽ lập tức chuyển mode sang `individual` ngay tại chỗ mà không cần phải cuộn lại lên màn hình đầu.
+  3. Tinh chỉnh phong cách cửa sổ Thông tin cơ bản (Minimal Brutalist / Industrial):
+     * Bỏ hoàn toàn bo góc (`rounded-none`), viền góc vuông vức sắc sảo.
+     * Bỏ khung tròn và nền nút đóng ✕, đưa về dạng ký tự tối giản tinh tế, hover chuyển nghiêng `hover-force-italic` đồng bộ nhận diện.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: NHÂN ĐÔI CHỮ "MỤC LỤC" XẾP TẦNG ĐÈ LỚP ĐỒNG BỘ VỚI BẢN TIẾNG ANH
+- Thời gian: 13/09/2026 08:03:15 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Chữ "MỤC LỤC" ở bản tiếng Việt đã được nhân đôi thành 2 lớp xếp chồng tương tự như "TABLE OF" và "CONTENTS":
+    * Lớp 1 (Layer nền): "MỤC LỤC" với tone màu `#262626` đặt ở tọa độ y=78.
+    * Lớp 2 (Layer đè phía trước): "MỤC LỤC" với tone màu sáng hơn `#3c3c3c` đặt ở tọa độ y=142.
+  + Cả 2 lớp đều trải đều chiều dài 720px, tạo hiệu ứng thị giác phân tầng 3D đầy đặn, chắc chắn và tinh tế.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TỐI GIẢN HÓA CỬA SỔ THÔNG TIN (PURE BLUR) VÀ HIỆU ỨNG XOAY NÚT ĐÓNG
+- Thời gian: 13/09/2026 08:05:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Loại bỏ hoàn toàn: viền khung hộp (border), nền hộp, đường kẻ ngang phân tách (divider line) và khung viền đứt nét.
+  + Đằng sau là lớp mờ kính tối (backdrop-blur-xl với bg-black/75), chữ nổi bật trực tiếp lên không gian mờ ảo tuyệt đối tối giản.
+  + Nút đóng ✕ được đặt tinh tế ở góc trên bên phải (cùng tọa độ đối xứng với thanh điều hướng), tích hợp hiệu ứng xoay mượt mà 90 độ khi rê chuột vào (`group-hover:rotate-90 transition-transform duration-300`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: KHÔI PHỤC KHUNG NGOÀI CỬA SỔ, LƯỢC BỎ KHUNG TRONG VÀ ĐƯỜNG KẺ, NÚT ĐÓNG XOAY KHI HOVER
+- Thời gian: 13/09/2026 08:06:40 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Khôi phục khung cửa sổ ngoài: Khung viền sắc nét vuông vức (`border border-neutral-800`, `bg-[#0a0a0a]`, `rounded-none`, đổ bóng sâu shadow-2xl), nằm trên nền backdrop blur mờ ảo tối màu (`bg-black/80 backdrop-blur-md`).
+  + Lược bỏ triệt để các chi tiết thừa bên trong:
+    * Bỏ khung viền đứt nét (dashed box) bên trong.
+    * Bỏ đường kẻ ngang phân cách (border-b) giữa tiêu đề và nội dung.
+    * Không gian bên trong mở, thoáng đãng và sạch sẽ.
+  + Nút đóng ✕: Đặt ở góc trên bên phải khung cửa sổ ngoài, không có viền tròn, khi hover sẽ xoay mượt mà 90 độ (`group-hover:rotate-90 transition-transform duration-300`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: BỎ TÊN TAB, THIẾT KẾ "THÔNG TIN" VÀ "CƠ BẢN" IN HOA, ĐẬM, NGHIÊNG NẰM CHÌM TRONG KHUNG CỬA SỔ
+- Thời gian: 13/09/2026 08:15:55 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Bỏ hẳn phần "tên tab" (tiêu đề h3 Thông tin cơ bản) ở trên cùng.
+  + Đưa 2 dòng chữ "THÔNG TIN" và "CƠ BẢN" (hoặc "BASIC" và "INFORMATION" ở bản tiếng Anh) nằm chìm sâu vào bên trong khung cửa sổ:
+    * Kiểu dáng: In hoa (uppercase), font Archivo Black siêu đậm (font-weight: 900), ép nghiêng chuẩn hình học (`transform: skewX(-14deg)`).
+    * Hiệu ứng thị giác chìm: Tông màu trầm `#1c1c1c` và `#262626` tương phản nhẹ trên nền `#0a0a0a` tạo chiều sâu typography watermark cực ngầu và hiện đại.
+  + Nút đóng ✕ giữ nguyên ở góc trên bên phải, giữ hiệu ứng xoay 90 độ mượt mà khi hover.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: SCALE "THÔNG TIN" VÀ "INFORMATION" TRẢI DÀI HẾT CHIỀU NGANG CỬA SỔ, DÒNG CÒN LẠI CĂN GIỮA VỚI CÙNG FONT SIZE
+- Thời gian: 13/09/2026 08:19:10 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Chuyển đổi typography chìm trong modal sang định dạng Vector SVG responsive tự động thích ứng với mọi độ phân giải:
+    * Tiếng Việt:
+      - Dòng 1 ("THÔNG TIN"): Kéo dài chạm 2 mép mép ngang của cửa sổ (`textLength="1000"`, `fontSize="140"`).
+      - Dòng 2 ("CƠ BẢN"): Căn giữa chính xác (`textAnchor="middle"` tại tâm x=500), giữ NGUYÊN cùng cỡ chữ (`fontSize="140"`).
+    * Tiếng Anh:
+      - Dòng 2 ("INFORMATION"): Kéo dài chạm 2 mép mép ngang của cửa sổ (`textLength="1000"`, `fontSize="125"`).
+      - Dòng 1 ("BASIC"): Căn giữa chính xác (`textAnchor="middle"` tại tâm x=500), giữ NGUYÊN cùng cỡ chữ (`fontSize="125"`).
+  + Giữ nguyên chuẩn định dạng: In hoa (uppercase), font Archivo Black siêu đậm (900), in nghiêng (italic), chìm tinh tế trên nền cửa sổ đen `#0a0a0a`.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: SCALE TỰ NHIÊN VÀ CẮT XÉN CHỮ 2 MÉP (BLEEDING TYPOGRAPHY) TẠO CẢM GIÁC TÁO BẠO
+- Thời gian: 13/09/2026 08:21:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Loại bỏ việc dãn khoảng cách ký tự (letter-spacing stretch) gượng gạo.
+  + Giữ nguyên tỉ lệ hình học chữ tự nhiên, dày dặn, font-black 900 đậm đặc (`tracking-tighter`, `leading-[0.82]`).
+  + Phóng to cỡ chữ tỉ lệ (Scale Proportional) vượt nhẹ qua kích thước khung cửa sổ:
+    * Tiếng Việt: Cỡ chữ phóng to ~7.2rem, từ "THÔNG TIN" tràn nhẹ ra hai mép viền khiến chữ cái đầu và cuối (T...N) bị che nhẹ bởi viền khung (`overflow-hidden`), tạo cảm giác typography editorial phá cách, táo bạo. Từ "CƠ BẢN" căn giữa dùng chính xác cùng cỡ chữ.
+    * Tiếng Anh: Từ "INFORMATION" tràn nhẹ ra hai viền, bị che mép chữ cái đầu và cuối. Từ "BASIC" căn giữa dùng chính xác cùng cỡ chữ.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TÁCH DÒNG CHÚ THÍCH CỦA MỤC "KHÁC" / "OTHERS" KHÔNG ĐỂ ĐỨNG NGANG HÀNG NHAU
+- Thời gian: 13/09/2026 08:24:15 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Tách biệt chữ mục lục ("Khác" / "Others") và dòng chú thích ở cả 2 ngôn ngữ, không để chúng đứng ngang hàng nhau (`flex flex-col items-start` thay vì flex-row ngang).
+  + Chữ "Khác" / "Others" đứng độc lập trên dòng chính, thẳng hàng và đồng bộ với các mục project khác (#BLVD, [Reimagined]).
+  + Dòng chú thích `(Đang hiển thị)` / `(Chỉ có ở chế độ cá nhân, chuyển?)` được đưa xuống dòng ngay bên dưới (`mt-1`), thu nhỏ kích thước chữ thanh lịch (`text-[0.48em] sm:text-[0.52em]`), đóng vai trò như một phụ đề (caption) gọn gàng, không còn gây lệch hàng hay chen chúc bề ngang.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: THÊM KHUNG ẢNH VUÔNG BÊN TRÁI TAB INFO (AVATAR)
+- Thời gian: 13/09/2026 08:29:15 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Thêm khung ảnh vuông bên trái tab thông tin (avatar cá nhân):
+    * Nguồn ảnh: https://i.ibb.co/TD9mb1pB/avatar.jpg
+    * Thiết kế chuẩn Boulevard1st: Tỉ lệ vuông 1:1 (`aspect-square`), hoàn toàn KHÔNG BO GÓC (`rounded-none`), viền sắc nét `border border-neutral-700`, nền đen `bg-neutral-900`, `object-cover`.
+    * Kích thước responsive: 144px (mobile) -> 176px (tablet) -> 192px (desktop), đổ bóng sâu `shadow-2xl`.
+    * Bố cục: Nằm bên trái (`flex flex-col sm:flex-row items-center`), nhường không gian bên phải thoáng đãng để sẵn sàng hiển thị nội dung tiếp theo trên nền chữ chìm.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: THÊM KHUNG ẢNH VUÔNG BÊN TRÁI TAB THÔNG TIN CƠ BẢN
+- Thời gian: 13/09/2026 08:29:30 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Thêm 1 khung ảnh vuông sắc nét (`aspect-square`, kích thước responsive ~w-36 đến w-48) ở bên trái cửa sổ thông tin cơ bản.
+  + Tuân thủ nghiêm ngặt quy tắc Boulevard1st: góc vuông tuyệt đối (`rounded-none`), viền tinh tế `border border-neutral-700`, đổ bóng sâu shadow-2xl.
+  + Nhúng ảnh `https://i.ibb.co/TD9mb1pB/avatar.jpg` với thuộc tính `referrerPolicy="no-referrer"` và `object-cover`.
+  + Nằm nổi bật ở lớp foreground (z-10), tương phản ấn tượng với typography chìm (z-0) ở phía sau.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: KHÔI PHỤC KÍCH THƯỚC CỬA SỔ BAN ĐẦU, BỎ THANH TAB ẢO, SCALE ẢNH VUÔNG DỌC THEO CHIỀU RỘNG TAB
+- Thời gian: 13/09/2026 08:32:10 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Khôi phục kích cỡ cửa sổ ban đầu: đưa về `max-w-2xl`, loại bỏ chiều cao cứng, giữ tỉ lệ tự nhiên và cân đối.
+  + Loại bỏ hoàn toàn hàng "thanh tab" ảo phía trên:
+    * Xóa bỏ thẻ div hàng ngang chiếm chỗ.
+    * Đặt nút đóng `✕` trực tiếp bằng vị trí tuyệt đối (`absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-30`), không còn thanh tab thừa thãi.
+  + Tối ưu scale khung ảnh vuông theo chiều rộng tab:
+    * Thay thế các kích thước pixel cố định bằng tỉ lệ phần trăm co giãn mượt mà theo bề ngang tab (`w-[30%] sm:w-[33%] max-w-[200px] aspect-square`).
+    * Duy trì hình học vuông góc tuyệt đối (`rounded-none`), viền tinh tế `border border-neutral-700`, `object-cover`.
+    * Nằm cân đối bên trái, song hành cùng không gian bên phải và typography chìm phía sau.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: GIẢM THÊM OPACITY TEXT CHÌM, THÊM 3 DÒNG THÔNG TIN CĂN TRÁI VÀ BỎ GẠCH CHÂN NÚT CHUYỂN MODE
+- Thời gian: 13/09/2026 08:37:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Typography chìm phía sau: Giảm thêm opacity (màu sắc đưa về `#161616` / `#1a1a1a` kết hợp `opacity-60`), chìm sâu và thanh lịch vào nền đen `#0a0a0a`.
+  + Thêm 3 dòng thông tin căn lề trái (text-left):
+    1. Tên: "Nguyễn Thuận Phát" / "Phat Nguyen Thuan" (Font Archivo Black 900 đậm, in hoa, chữ trắng sắc sảo).
+    2. Ngành: "Ngành Báo chí" / "Journalism" (Chữ sáng vừa phải, màu neutral-300).
+    3. Trường: "Trường ĐH KHXH&NV, ĐHQG-HCM" / "VNUHCM-USSH" gắn link https://hcmussh.edu.vn/, KHÔNG GẠCH CHÂN (no-underline), khi rê chuột vào hiển thị con trỏ pointer và chuyển màu trắng tinh tế.
+  + Giao diện mục lục: Bỏ gạch chân (no-underline) ở nút "chuyển?" / "switch?" chuyển mode, giữ hiệu ứng nghiêng hover-force-italic và làm sáng chữ khi hover.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TÍCH HỢP 4 NÚT CONTACT CẠNH DƯỚI TAB INFO THEO ĐẶC TẢ BOULEVARD1ST (KHÔNG EASTEREGG)
+- Thời gian: 13/09/2026 08:45:50 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Dựa vào tài liệu đặc tả mục Contact của Boulevard1st, bổ sung thanh 4 nút nằm sát cạnh dưới (bottom edge) của cửa sổ thông tin (Info tab):
+    1. fb: Mở liên kết Facebook (https://www.facebook.com/hellothisisBLVD17/) trong tab mới. Hover chuyển sang xanh thương hiệu `#1877F2`, active `#0c59be`.
+    2. insta: Mở liên kết Instagram (https://www.instagram.com/endenogatai_dah) trong tab mới. Hover chuyển sang gradient Instagram (`#f09433` -> `#dc2743` -> `#bc1888`).
+    3. phone: Bấm để tự động sao chép số điện thoại `0833939468` vào Clipboard. Hiển thị nhãn phản hồi "copied" trong 2 giây (2000ms). Hover chuyển sang màu xanh lá `#10B981` chữ đen, active `#047857` chữ trắng.
+    4. email: Chỉ tích hợp duy nhất email công việc (`thuanphat26092008@gmail.com`). Bấm để tự động sao chép email vào Clipboard, kích hoạt ứng dụng email mặc định qua `mailto:thuanphat26092008@gmail.com` và hiển thị nhãn phản hồi "copied" trong 2 giây. Hover chuyển sang màu đỏ Gmail `#EA4335`, active `#b31412`.
+  + Loại bỏ hoàn toàn Easter Egg khi hover (không dùng các nhãn "HAVE", "YOU", "ARE", "MY SAVIOR" từ Boulevard1st), giữ nhãn tối giản cố định: `fb`, `insta`, `phone` (hoặc `copied`), `email` (hoặc `copied`).
+  + Tuân thủ nghiêm ngặt quy tắc kiến trúc Boulevard1st:
+    * Hoàn toàn không bo góc (`rounded-none`).
+    * Viền trên `border-t border-neutral-800` ngăn cách nội dung trên, viền dọc `border-r border-neutral-800` giữa các nút.
+    * Typography Archivo (`font-archivo font-semibold lowercase text-xs sm:text-sm`).
+    * Chiều cao tối thiểu touch target >= 44px (`min-h-[44px] py-2.5 sm:py-3`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: SỬA NỀN NÚT PHONE COPIED, SCALE ẢNH LỚN HƠN, GIẢM KHOẢNG TRỐNG VIỀN & THÊM DÒNG CÔNG CỤ SỬ DỤNG
+- Thời gian: 13/09/2026 08:54:40 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Sửa lỗi nút Phone bấm xong bị đen xì:
+    * Loại bỏ `bg-transparent` khỏi class nền tĩnh khi đang ở trạng thái `phoneCopied`.
+    * Áp dụng `!bg-[#10B981] !text-black font-bold` để đảm bảo nền xanh Zalo/Phone sáng rõ ràng, chữ đen tương phản tuyệt đối và không bị xung đột CSS làm chìm chữ.
+    * Tương tự bảo đảm cho nút Email với `!bg-[#EA4335] !text-white font-bold`.
+  + Scale ảnh lớn hơn & thu hẹp khoảng cách viền, loại bỏ khoảng trống thừa trên Mobile:
+    * Bỏ `min-h-[240px] sm:min-h-[260px]` để khung tab tự động ôm sát nội dung một cách tự nhiên.
+    * Giảm padding bao ngoài từ `p-6 sm:p-8 pb-5 sm:pb-6` xuống `p-3.5 sm:p-5 md:p-6 pb-3 sm:pb-4`.
+    * Tăng kích thước khung ảnh vuông từ `w-[30%] sm:w-[33%] max-w-[200px]` lên `w-[36%] sm:w-[38%] md:w-[40%] max-w-[230px]` aspect-square, đưa ảnh lại gần viền trên, dưới và trái hơn.
+  + Thêm dòng thông tin "Công cụ sử dụng / Tools":
+    * Nhãn `Công cụ sử dụng:` (vi) / `Tools:` (en) với font Archivo uppercase tinh tế.
+    * Tích hợp 6 icon vector sắc nét cho: Canva, Affinity, Filmora, CapCut, Edits, ibisPaint.
+    * Tuân thủ quy tắc Boulevard1st: Toàn bộ khung icon đều `rounded-none`, viền tinh giản, hỗ trợ hiệu ứng hover scale nhẹ và tooltip hiển thị tên từng công cụ.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: CẬP NHẬT 6 ICON CÔNG CỤ THEO URL HÌNH ẢNH DO NGƯỜI DÙNG CUNG CẤP
+- Thời gian: 13/09/2026 09:09:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Thay thế toàn bộ 6 icon vector SVG giả lập trước đó bằng ảnh logo chính thức từ link người dùng cung cấp:
+    1. Canva: https://i.ibb.co/RTw2phXD/canva.jpg
+    2. Affinity: https://i.ibb.co/pBXrq6cf/affinity.jpg
+    3. Filmora: https://i.ibb.co/v4h21FLG/filmora.png
+    4. CapCut: https://i.ibb.co/4RPxzLzK/capcut.png
+    5. Edits: https://i.ibb.co/Pv9VfwzX/edits.webp
+    6. ibisPaint: https://i.ibb.co/N66hJX5h/ibispaint.png
+  + Tuân thủ quy tắc Boulevard1st:
+    * Hoàn toàn không bo góc (`rounded-none`).
+    * Khung viền sắc nét `border border-neutral-700 bg-neutral-900`.
+    * Kích thước đồng bộ `w-6 h-6 sm:w-7 sm:h-7 aspect-square overflow-hidden`.
+    * Áp dụng thẻ `<img>` với `referrerPolicy="no-referrer"`, `object-cover` và tooltip `title` tương ứng từng công cụ.
+---------------------------------------------------------
