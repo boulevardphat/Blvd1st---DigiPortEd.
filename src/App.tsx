@@ -186,6 +186,16 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Preload custom intro fonts into browser cache immediately
+    if (typeof document !== 'undefined' && 'fonts' in document) {
+      Promise.all([
+        document.fonts.load('80px Turista'),
+        document.fonts.load('85px ArialCustom'),
+        document.fonts.load('85px Arial'),
+        document.fonts.load('80px Vespertine'),
+      ]).catch(() => {});
+    }
+
     // Disable right-click context menu globally
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
@@ -205,6 +215,25 @@ export default function App() {
     };
   }, []);
 
+  // When BLVD intro finishes at blvd-black, any key or click/touch returns to main-app
+  useEffect(() => {
+    if (scene !== 'blvd-black') return;
+
+    const handleAnyBack = () => {
+      setScene('main-app');
+    };
+
+    window.addEventListener('keydown', handleAnyBack);
+    window.addEventListener('click', handleAnyBack);
+    window.addEventListener('touchstart', handleAnyBack);
+
+    return () => {
+      window.removeEventListener('keydown', handleAnyBack);
+      window.removeEventListener('click', handleAnyBack);
+      window.removeEventListener('touchstart', handleAnyBack);
+    };
+  }, [scene]);
+
   // Handle automatic transitions between scenes (Custom sequence timing)
   useEffect(() => {
     if (scene === 'intro-play') {
@@ -215,52 +244,14 @@ export default function App() {
     }
     if (scene === 'intro-blvd') {
       const t = setTimeout(() => {
-        setScene('intro-clock-normal');
+        setScene('intro-clock-multiple');
       }, 500); // 0.5s for KC2 ("BLVD")
       return () => clearTimeout(t);
     }
-    if (scene === 'intro-clock-normal') {
-      const t = setTimeout(() => {
-        setScene('intro-clock-reverse-mirrored');
-      }, 600); // KC3
-      return () => clearTimeout(t);
-    }
-    if (scene === 'intro-clock-reverse-mirrored') {
-      const t = setTimeout(() => {
-        setScene('intro-clock-multiple');
-      }, 600); // KC4
-      return () => clearTimeout(t);
-    }
     if (scene === 'intro-clock-multiple') {
-      if (imagesLoaded) {
-        const t = setTimeout(() => {
-          setScene('intro-image-1');
-        }, 600); // KC6: Multiple clocks
-        return () => clearTimeout(t);
-      } else {
-        // Continue ticking clocks until critical visual assets finish caching, with max fallback
-        const t = setTimeout(() => {
-          setScene('intro-image-1');
-        }, 3000);
-        return () => clearTimeout(t);
-      }
-    }
-    if (scene === 'intro-image-1') {
-      const t = setTimeout(() => {
-        setScene('intro-image-2');
-      }, 500); // 0.5s for KC4 (tinted background #89CC04)
-      return () => clearTimeout(t);
-    }
-    if (scene === 'intro-image-2') {
-      const t = setTimeout(() => {
-        setScene('intro-image-3');
-      }, 500); // 0.5s for KC5 (tinted background #C54EAA)
-      return () => clearTimeout(t);
-    }
-    if (scene === 'intro-image-3') {
       const t = setTimeout(() => {
         setScene('main-app');
-      }, 500); // 0.5s for KC6 (tinted background #8375B3)
+      }, 600); // Multiple clocks
       return () => clearTimeout(t);
     }
 
@@ -273,20 +264,8 @@ export default function App() {
     }
     if (scene === 'blvd-text') {
       const t = setTimeout(() => {
-        setScene('blvd-clock-normal');
-      }, 500); // 0.5s for "BLVD"
-      return () => clearTimeout(t);
-    }
-    if (scene === 'blvd-clock-normal') {
-      const t = setTimeout(() => {
-        setScene('blvd-clock-reverse-mirrored');
-      }, 600); // 0.6s
-      return () => clearTimeout(t);
-    }
-    if (scene === 'blvd-clock-reverse-mirrored') {
-      const t = setTimeout(() => {
         setScene('blvd-title-1');
-      }, 600); // 0.6s
+      }, 500); // 0.5s for "BLVD"
       return () => clearTimeout(t);
     }
     if (scene === 'blvd-title-1') {
@@ -409,68 +388,8 @@ export default function App() {
         </div>
       )}
 
-      {/* KC3: High-frequency live ticking clock */}
-      {scene === 'intro-clock-normal' && <IntroClock mode="normal" />}
-      {/* KC4: Reverse and mirrored clock */}
-      {scene === 'intro-clock-reverse-mirrored' && <IntroClock mode="reverse-mirrored" />}
-      {/* KC6: Multiple clocks */}
+      {/* Multiple clocks */}
       {scene === 'intro-clock-multiple' && <IntroClock mode="multiple" />}
-
-      {/* KC4: Background Image with #8375B3 tint */}
-      {scene === 'intro-image-1' && (
-        <div 
-          id="scene-intro-image-1"
-          className="absolute inset-0 z-20 select-none pointer-events-none"
-        >
-          {/* Sibling image to ensure perfect mix-blend-mode rendering */}
-          <img
-            src="https://i.ibb.co/tP3rK5bg/ultrayoung.jpg"
-            alt="Intro Background Reference 1"
-            referrerPolicy="no-referrer"
-            loading="eager"
-            fetchPriority="high"
-            className="absolute inset-0 w-full h-full object-cover portrait:object-[49%_center]"
-          />
-          {/* #8375B3 Tint Overlays */}
-          <div className="absolute inset-0 bg-[#8375B3] mix-blend-color opacity-95 pointer-events-none" />
-          <div className="absolute inset-0 bg-[#8375B3]/35 mix-blend-multiply pointer-events-none" />
-        </div>
-      )}
-
-      {/* KC5: Background Image with #C54EAA tint */}
-      {scene === 'intro-image-2' && (
-        <div 
-          id="scene-intro-image-2"
-          className="absolute inset-0 z-15 select-none pointer-events-none"
-        >
-          {/* Sibling image to ensure perfect mix-blend-mode rendering */}
-          <img
-            src="https://i.ibb.co/Nd6BpwZ2/young.jpg"
-            alt="Intro Background Reference 2"
-            referrerPolicy="no-referrer"
-            loading="eager"
-            fetchPriority="high"
-            className="absolute inset-0 w-full h-full object-cover portrait:object-[49%_center]"
-          />
-          {/* #C54EAA Tint Overlays */}
-          <div className="absolute inset-0 bg-[#C54EAA] mix-blend-color opacity-95 pointer-events-none" />
-          <div className="absolute inset-0 bg-[#C54EAA]/35 mix-blend-multiply pointer-events-none" />
-        </div>
-      )}
-
-      {/* KC6: Background Image with #89CC04 tint */}
-      {scene === 'intro-image-3' && (
-        <div 
-          id="scene-intro-image-3"
-          className="absolute inset-0 z-10 select-none pointer-events-none"
-        >
-          {/* Sibling image to ensure perfect mix-blend-mode rendering */}
-          <VespertineBackground />
-          {/* #89CC04 Tint Overlays */}
-          <div className="absolute inset-0 bg-[#89CC04] mix-blend-color opacity-95 pointer-events-none" />
-          <div className="absolute inset-0 bg-[#89CC04]/35 mix-blend-multiply pointer-events-none" />
-        </div>
-      )}
 
       {/* --- SEPARATE #BLVD SEQUENCE --- */}
       {scene === 'blvd-play' && (
@@ -513,9 +432,6 @@ export default function App() {
           </svg>
         </div>
       )}
-
-      {scene === 'blvd-clock-normal' && <IntroClock mode="normal" />}
-      {scene === 'blvd-clock-reverse-mirrored' && <IntroClock mode="reverse-mirrored" />}
 
       {/* BLVD Title Scenes (Scene 1: #BLVD, Scene 2: #BLVD + CHANGE IN MIND stacked like reference) */}
       {(scene === 'blvd-title-1' || scene === 'blvd-title-2') && (
@@ -572,13 +488,21 @@ export default function App() {
         </div>
       )}
 
-      {/* BLVD Complete: Màn hình đen xì, không có gì cả */}
+      {/* BLVD Complete: Màn hình đen xì, bấm phím hoặc click bất kỳ để quay về */}
       {scene === 'blvd-black' && (
         <div 
           id="scene-blvd-black"
-          className="absolute inset-0 bg-black z-50 select-none"
+          onClick={() => setScene('main-app')}
+          className="absolute inset-0 bg-black z-50 select-none cursor-pointer"
         />
       )}
+
+      {/* Invisible off-screen preloader to trigger browser font rasterization immediately at start */}
+      <div className="absolute -left-[9999px] -top-[9999px] opacity-0 pointer-events-none select-none" aria-hidden="true">
+        <span className="font-turista">#BLVD15</span>
+        <span className="font-arial-custom">#blvd16</span>
+        <span className="font-vespertine">BLVD17</span>
+      </div>
 
       {/* Main App Screen (Background Image & Interactive Interface Layouts) */}
       {scene === 'main-app' && (

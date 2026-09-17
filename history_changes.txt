@@ -1376,3 +1376,28 @@ LẦN THAY ĐỔI: THIẾT KẾ VĂN BẢN VÀ FONT CHO 3 MÀN NỀN INTRO #BLVD
     * Áp dụng font Vespertine (`vespertine Regular.ttf`).
     * Nội dung hiển thị: chữ "BLVD17" màu đen tương phản rõ ràng, sắc nét.
 ---------------------------------------------------------
+
+LẦN THAY ĐỔI: TỐI ƯU PRELOAD FONT INTRO BLVD & THÊM TƯƠNG TÁC QUAY VỀ
+- Thời gian: 15/09/2026 07:00:20 (Giờ TPHCM)
+- File ảnh hưởng: /index.html, /src/App.tsx
+- Chi tiết thay đổi:
+  + Khắc phục triệt để lỗi "font không load kịp" trong các cảnh intro ngắn (500ms):
+    * Thêm 4 thẻ `<link rel="preload" as="font" ... crossorigin>` ngay trong `<head>` của `index.html` cho các file font: `Turista Gorda NF W01 Regular.ttf`, `ARIAL.TTF`, `ArialCE.ttf`, `vespertine Regular.ttf`.
+    * Tích hợp `document.fonts.load()` ngay khi ứng dụng mount để ép engine font của trình duyệt tải và nạp font vào bộ nhớ cache.
+    * Thêm phần tử ẩn off-screen render sẵn các đoạn text với các font tương ứng để trình duyệt giải mã rasterize glyphs sẵn từ trước.
+  + Thêm cơ chế bấm bất kỳ để quay lại (Back):
+    * Khi intro #BLVD chạy xong đến màn hình đen xì (`blvd-black`), người dùng chỉ cần nhấn bất kỳ phím nào trên bàn phím (`keydown`), click chuột bất kỳ đâu hoặc chạm màn hình cảm ứng (`touchstart`), giao diện sẽ lập tức quay trở lại màn hình chính (`main-app`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TINH CHỈNH KHUNG HÌNH INTRO CHÍNH VÀ INTRO PHỤ
+- Thời gian: 15/09/2026 22:37:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/types.ts, /src/App.tsx
+- Chi tiết thay đổi:
+  + Intro chính:
+    * Bỏ 2 cảnh đồng hồ điện tử: `intro-clock-normal` và `intro-clock-reverse-mirrored`.
+    * Bỏ 3 cảnh ảnh chuyển màu: `intro-image-1`, `intro-image-2`, `intro-image-3`.
+    * Trình tự phát mới: `pre-intro` -> `intro-play` ("phát", 500ms) -> `intro-blvd` ("BLVD", 500ms) -> `intro-clock-multiple` ("DIGITAL PORTFOLIO ED.", 600ms) -> `main-app`.
+  + Intro phụ (#BLVD):
+    * Bỏ 2 cảnh đồng hồ điện tử: `blvd-clock-normal` và `blvd-clock-reverse-mirrored`.
+    * Trình tự phát mới: `blvd-play` ("phát", 500ms) -> `blvd-text` ("BLVD", 500ms) -> `blvd-title-1` ("#BLVD", 600ms) -> `blvd-title-2` ("#BLVD" + "CHANGE IN MIND", 600ms) -> `blvd-color-1` ("#BLVD15", 500ms) -> `blvd-color-2` ("#blvd16" brat, 500ms) -> `blvd-color-3` ("BLVD17", 500ms) -> `blvd-black` (màn hình đen xì, bấm phím/click bất kỳ để quay lại).
+---------------------------------------------------------
