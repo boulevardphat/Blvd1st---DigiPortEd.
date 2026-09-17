@@ -1401,3 +1401,175 @@ LẦN THAY ĐỔI: TINH CHỈNH KHUNG HÌNH INTRO CHÍNH VÀ INTRO PHỤ
     * Bỏ 2 cảnh đồng hồ điện tử: `blvd-clock-normal` và `blvd-clock-reverse-mirrored`.
     * Trình tự phát mới: `blvd-play` ("phát", 500ms) -> `blvd-text` ("BLVD", 500ms) -> `blvd-title-1` ("#BLVD", 600ms) -> `blvd-title-2` ("#BLVD" + "CHANGE IN MIND", 600ms) -> `blvd-color-1` ("#BLVD15", 500ms) -> `blvd-color-2` ("#blvd16" brat, 500ms) -> `blvd-color-3` ("BLVD17", 500ms) -> `blvd-black` (màn hình đen xì, bấm phím/click bất kỳ để quay lại).
 ---------------------------------------------------------
+
+LẦN THAY ĐỔI: HIỆU ỨNG XUẤT HIỆN 25 DÒNG TỪ GIỮA RA 2 BÊN (KHÔNG FADE)
+- Thời gian: 17/09/2026 06:29:20 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/IntroClock.tsx
+- Chi tiết thay đổi:
+  + Cảnh 25 dòng chữ "DIGITAL PORTFOLIO ED." (mode: 'multiple'):
+    * Tính toán khoảng cách đối xứng từ tâm: `dist = Math.abs(i - 12)` (với dòng thứ 13, index 12 là tâm).
+    * Áp dụng cơ chế hiển thị giật bậc (stepped sequential snap) từ giữa bung dần ra hai phía (trên và dưới cùng lúc):
+      - Bắt đầu tức thì từ dòng tâm (index 12).
+      - Mỗi bước ~24ms, các cặp dòng đối xứng kế tiếp (11 & 13, 10 & 14, ..., 0 & 24) đồng loạt xuất hiện.
+    * TUYỆT ĐỐI KHÔNG DÙNG FADE:
+      - Sử dụng `visibility: visible / hidden` kết hợp `transition: none`, không can thiệp độ mờ `opacity` hay `filter: blur`.
+      - Các dòng ẩn vẫn giữ nguyên diện tích khung layout, giúp toàn bộ khối chữ không bị nhảy hay giật vị trí khi mở rộng.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TÍNH TOÁN ĐỘ RỘNG/CHIỀU CAO TAB ĐỂ XẾP SỐ DÒNG LINH HOẠT VÀ CHỐT TỐC ĐỘ XUẤT HIỆN
+- Thời gian: 17/09/2026 06:36:40 (Giờ TPHCM)
+- Files ảnh hưởng: /src/components/IntroClock.tsx, /src/App.tsx
+- Chi tiết thay đổi:
+  + Giữ nguyên 100% fontsize và kích thước hiển thị: font clamp(1.4rem, 4.2vw, 3.8rem), khoảng cách dòng, độ tràn mép ("tràn tràn") không đổi.
+  + Tính toán động số dòng hiển thị dựa trên kích thước thực tế của viewport (chiều rộng tab & chiều cao):
+    * Ở giao diện ngang (landscape / màn hình rộng): số dòng được tính toán vừa vặn để phủ kín màn hình và tràn nhẹ 2 mép (thay vì 25 dòng làm hàng chục dòng bị khuất ngoài viewport khiến hiệu ứng lướt quá nhanh).
+    * Ở giao diện dọc (portrait): số dòng tự động thích ứng để lấp đầy chiều cao.
+  + Không cố định thời lượng scene mà chốt tốc độ xuất hiện của các dòng:
+    * Cố định nhịp xuất hiện: 40ms/bước (mỗi bước bung 2 dòng đối xứng từ giữa ra 2 mép).
+    * Chạy cho đến khi toàn bộ các dòng bung hết ("chạy hết"), dừng lại 360ms để ngắm trọn vẹn bố cục, sau đó gọi onComplete() chuyển tiếp vào màn hình chính.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: THÊM CẢNH #BLVD18 VÀO INTRO PHỤ VÀ ĐỂ NỀN LÀ ẢNH BLVD 18 KHI CHẠY XONG
+- Thời gian: 17/09/2026 07:17:15 (Giờ TPHCM)
+- Files ảnh hưởng: /src/types.ts, /index.html, /src/App.tsx
+- Chi tiết thay đổi:
+  + Thêm scene 'blvd-color-4' vào SceneState trong /src/types.ts.
+  + Thêm link preload ảnh nền blvd 18 (https://i.ibb.co/ccfZG4Zk/n-n-blvd18.webp) trong index.html và App.tsx để tải tức thì không bị giật.
+  + Cảnh '#BLVD18' trong intro phụ:
+    * Text: "#BLVD18"
+    * Font: Archivo thường (font-normal, not italic)
+    * Màu chữ: Màu đen, opacity 60% (text-black/60)
+    * Nền sau: Ảnh https://i.ibb.co/ccfZG4Zk/n-n-blvd18.webp (object-cover, tràn toàn màn hình)
+    * Thời lượng xuất hiện: 500ms (nhất quán với các cảnh BLVD trước).
+  + Chạy xong intro phụ rồi để nền là ảnh blvd 18 luôn:
+    * Thay thế màn hình đen xì trước đây: sau khi chạy xong #BLVD18, màn hình giữ nguyên nền ảnh https://i.ibb.co/ccfZG4Zk/n-n-blvd18.webp (người dùng bấm phím bất kỳ hoặc click để quay về main-app).
+    * Khi quay về main-app: background của ứng dụng cũng được chuyển sang nền ảnh blvd 18 luôn.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: GIỮ NGUYÊN ẢNH NỀN VESPERTINE KHI QUAY VỀ GIAO DIỆN CHÍNH
+- Thời gian: 17/09/2026 07:19:50 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Nền ảnh blvd 18 (https://i.ibb.co/ccfZG4Zk/n-n-blvd18.webp) chỉ áp dụng cho cảnh #BLVD18 và màn hình chờ kết thúc intro phụ (blvd-black) để người dùng bấm phím/click quay về.
+  + Khi người dùng bấm phím hoặc click quay về giao diện chính (main-app): giữ nguyên 100% ảnh nền gốc VespertineBackground.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐIỀU CHỈNH VỊ TRÍ ẢNH BLVD18 Ở GIAO DIỆN NGANG VÀ TRIỆT TIÊU DELAY CHUYỂN CẢNH SANG #BLVD18
+- Thời gian: 17/09/2026 07:45:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/App.tsx
+- Chi tiết thay đổi:
+  + Điều chỉnh vị trí hình ở giao diện ngang ("nhích lên tí"):
+    * Thêm class `landscape:object-[50%_40%]` (dịch tiêu điểm dọc từ giữa 50% lên 40%).
+    * Thêm class `landscape:-translate-y-[2.5%] landscape:scale-[1.05]` để nhích vật lý hình ảnh lên trên 2.5% chiều cao màn hình một cách êm ái mà không để lại khe hở ở đáy màn hình.
+  + Triệt tiêu hiện tượng delay khi chuyển sang #BLVD18:
+    * Thay vì unmount rồi mount lại ảnh khi tới scene 'blvd-color-4' (gây trễ decode tấm ảnh WebP 21.7MP), thẻ chứa ảnh nền BLVD 18 giờ đây được render sẵn ở tầng z-40 ngay trong lúc đang chiếu scene 'blvd-color-3' (BLVD17, z-50 nền #E6E6E6).
+    * Khi 'blvd-color-3' kết thúc, lớp nền ảnh BLVD 18 chuyển lên z-50 và hiển thị chữ #BLVD18 tức thì mà không có bất kỳ độ trễ mount hay decode nào (0ms paint lag).
+    * Khi chuyển tiếp từ 'blvd-color-4' sang 'blvd-black', ảnh giữ nguyên vị trí, không unmount/remount, tạo cảm giác mượt mà tuyệt đối.
+    * Tích hợp cơ chế `img.decode()` cả ở giai đoạn tải trang đầu tiên và khi người dùng bấm click vào nút kích hoạt intro phụ `#BLVD`.
+    * Cập nhật thẻ preload ảnh `preload-blvd18` với `style={{ opacity: 0.001, transform: 'translateZ(0)' }}` để buộc engine trình duyệt giữ sẵn texture đã decode trong GPU VRAM.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TÍCH HỢP LỚP BLUR NHẸ VÀ HỆ THỐNG SAFEZONE LƯỚI Ô VUÔNG KÈM SỌC CHÉO CHO GIAO DIỆN #BLVD
+- Thời gian: 17/09/2026 07:58:00 (Giờ TPHCM)
+- File ảnh hưởng: /src/components/BlvdSafezoneGrid.tsx (tạo mới), /src/App.tsx
+- Chi tiết thay đổi:
+  + Mục 0: Thêm lớp blur CỰC NHẸ tầm 10% (`filter: blur(2.5px)` kết hợp `scale-[1.02]`) cho ảnh nền BLVD 18 khi chạy xong intro phụ (chỉ kích hoạt ở scene `blvd-black`), giúp tôn rõ nét các đường nét kỹ thuật của safezone và lưới ô vuông.
+  + Mục 1: Xác định vùng an toàn (Safezone) chính xác theo tỷ lệ màn hình thực tế:
+    * Giao diện ngang (Landscape, W/H > 1.25): Căn lề an toàn 6.5% đồng nhất (`marginX = W * 0.065`, `marginY = H * 0.065`).
+    * Giao diện dọc (Portrait, W/H < 0.85): Căn lề an toàn 6% ngang (`marginX = Math.max(20, W * 0.06)`), 5% dọc (`marginY = Math.max(24, H * 0.05)`).
+    * Giao diện thứ 3 gần vuông (Square / Split-screen, 0.85 <= W/H <= 1.25, ví dụ chia đôi màn hình trên máy tính hoặc tablet/foldable): Căn lề an toàn đối xứng `Math.max(24, min(W,H) * 0.06)`.
+  + Mục 2: Chia Safezone thành lưới gồm nhiều Ô VUÔNG (tỷ lệ chuẩn 1:1, cellSize tính toán thích ứng từ 34px đến 56px tùy độ phân giải):
+    * Lưới ô vuông luôn được căn giữa hoàn hảo trong Safezone / màn hình (`gridX = sx + (sw - gridW) / 2`, `gridY = sy + (sh - gridH) / 2`).
+    * Toàn bộ các khoảng dư trong Safezone (không chia hết cho kích thước ô vuông) gồm dải trái, dải phải, dải trên và dải dưới đều được tự động lấp đầy bằng các dải sọc chéo 45 độ đồng đều.
+  + Mục 3: Toàn bộ viền Safezone bao bọc, các đường kẻ lưới ô vuông và các sọc chéo đều sử dụng nét liền, màu đen thuần (#000000) và mảnh chuẩn kỹ thuật kiến trúc (`strokeWidth="1"`). Tuân thủ triệt để nguyên tắc Boulevard1st: không bo góc các component (các góc vuông 90 độ tuyệt đối).
+  + Người dùng vẫn có thể bấm phím bất kỳ hoặc click chuột/chạm bất cứ đâu trên màn hình để trở về giao diện chính bất cứ lúc nào (`pointer-events-none` trên SVG grid chuyển click mượt mà sang container).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TÍCH HỢP LOGO #BLVD (DESKTOP KHUNG HÌNH CHỮ NHẬT ĐỨNG STRETCH 2 CHIỀU, MOBILE VUỐT RESPONSIVE CO/DÃN VÀ HIỆN GRID)
+- Thời gian: 17/09/2026 08:15:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  + Mục 1 (Desktop - BlvdLandscapeGrid.tsx):
+    * Vị trí: Đặt chính xác tại góc trên bên trái của lưới (`logoX = gridX`, `logoY = gridY`).
+    * Tỷ lệ khung hình: Là 1 hình chữ nhật đứng với chiều ngang chiếm ~40% tổng số ô theo chiều dài safezone (`logoCols = Math.ceil(cols * 0.4)`), chiều dọc hơn chiều ngang từ 2 đến 3 ô (`logoRows = logoCols + 2`), đảm bảo không vượt quá số hàng thực tế của lưới.
+    * Kích thước khung: `logoW = logoCols * cellSize`, `logoH = logoRows * cellSize`. Khung viền nét liền đen 1px, không bo góc (chuẩn Boulevard1st).
+    * Hiệu ứng stretch: Chữ `#BLVD` áp dụng hiệu ứng stretch như intro bằng SVG `preserveAspectRatio="none"`, `textLength="400"`, `lengthAdjust="spacingAndGlyphs"` với font `Archivo` Black 900, stretch cả 2 chiều để lấp đầy 100% khung hình chữ nhật đứng, filled màu đen (#000000), không outline.
+    * Lưới xung quanh: Các đường kẻ dọc và kẻ ngang của lưới tự động né khung logo (không bị kẻ đè vào bên trong chữ), các ô bên ngoài vẫn giữ nguyên dạng ô vuông 1:1.
+  + Mục 2 (Mobile - BlvdPortraitGrid.tsx):
+    * Trạng thái ban đầu: Logo `#BLVD` stretch phủ kín toàn bộ Safezone (tính cả phần sọc chéo trên và dưới, từ `sy` đến `sy + sh`, chiều rộng `sw`).
+    * Tương tác vuốt (Touch/Pointer drag):
+      - Khi người dùng vuốt lên (`dy > 0`): Logo responsive co ngắn chiều cao lại (`logoHeight = Math.round(sh * (1 - progress))`), phần lưới ô vuông và sọc chéo bên dưới đáy logo được lộ ra thông qua `clipPath`.
+      - Khi vuốt xuống (`dy < 0`): Logo dài ra tương ứng với thao tác kéo của người dùng.
+      - Có đường viền ngăn cách sắc sảo 1px đen ở đáy logo khi đang co dãn.
+      - Kéo hết (vượt ngưỡng vuốt): Animation cubic ease-out tự động cuộn xuống/thu gọn hoàn toàn (`progress -> 1`, `logoHeight -> 0`), để lộ toàn bộ lưới Safezone bình thường.
+      - Khi đang ở lưới bình thường, vuốt từ trên xuống sẽ bung logo dài trở lại.
+      - Thao tác kéo/vuốt được cô lập (`e.stopPropagation()`), không bị kích hoạt nhầm sự kiện click thoát cảnh về giao diện chính.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TỐI ƯU STRETCH LOGO #BLVD KỊCH BIÊN CẢ 2 CHIỀU (XÓA BỎ KHOẢNG TRỐNG TRÊN VÀ DƯỚI)
+- Thời gian: 17/09/2026 08:26:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  + Nguyên nhân khoảng trống trên/dưới trước đó: Do viewBox SVG cũ (`viewBox="0 8 400 84"`, `y="86"`, `fontSize="106"`) bị dư khoảng đệm theo chiều dọc của font chữ, khiến chữ chỉ chiếm ~70% chiều cao của khung hình chữ nhật và để lại khoảng trống ở mép trên và mép dưới.
+  + Giải pháp kỹ thuật chuẩn xác:
+    * Chuyển hệ tọa độ viewBox về `viewBox="0 0 400 100"`.
+    * Căn giữa đối xứng trục Y tuyệt đối với `y="50%"` và `dominantBaseline="central"`, trục X với `x="50%"` và `textAnchor="middle"`.
+    * Tăng kích thước phông chữ lên `fontSize="148"` và `textLength="100%"` cùng `lengthAdjust="spacingAndGlyphs"`.
+    * Bật `overflow-hidden` trên thẻ `<svg>` để các đỉnh và đáy chữ áp sát tuyệt đối vào đường viền 1px trên và dưới của khung mà không bị lem pixel ra ngoài.
+  + Kết quả: Chữ `#BLVD` chạm kịch viền trên, kịch viền dưới, kịch viền trái và kịch viền phải (stretch 100% cả 2 chiều, zero gap), lấp đầy toàn bộ khung hình chữ nhật đứng đúng chuẩn thiết kế. Áp dụng đồng bộ cho cả Desktop (`BlvdLandscapeGrid.tsx`) và Mobile (`BlvdPortraitGrid.tsx`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: SỬA LỖI KHÔNG CUỘN ĐƯỢC TRÊN MOBILE & CHO PHÉP CUỘN LÊN HIỆN GRID TOÀN BỘ ĐỂ LÀM TIẾP
+- Thời gian: 17/09/2026 08:31:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/App.tsx
+  + /src/components/blvd-grid/index.tsx
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  + Nguyên nhân cốt lõi không cuộn được trên mobile:
+    1. Trong App.tsx, sự kiện toàn cục `window.addEventListener('touchstart', handleAnyBack)` và `click` trước đó tự động kích hoạt `setScene('main-app')` ngay khi ngón tay vừa chạm vào màn hình mobile, khiến người dùng bị văng khỏi cảnh `#blvd` ngay lập tức trước khi kịp thực hiện thao tác vuốt/cuộn.
+    2. Container `#blvd-safezone-grid-container` trong `index.tsx` bị đặt `pointer-events-none`, ngăn cản các tương tác chuột/touch truyền vào `BlvdPortraitGrid`.
+    3. `BlvdPortraitGrid.tsx` thiếu sự kiện `wheel` (cuộn chuột/trackpad scroll) và touch event riêng biệt, khiến thao tác cuộn trên máy tính giả lập mobile hoặc thiết bị di động không nhận diện được lệnh cuộn trang.
+  + Giải pháp triệt để:
+    1. Trong App.tsx: Khi `ENABLE_BLVD_SAFEZONE_GRID` bật, cô lập hoàn toàn sự kiện touch và click trong cảnh `blvd-black` (chỉ phím Escape mới thoát về main-app), ngăn triệt để việc bị văng ra giao diện chính.
+    2. Trong `index.tsx`: Chuyển container sang `pointer-events-auto` để tiếp nhận toàn bộ tương tác cử chỉ.
+    3. Trong `BlvdPortraitGrid.tsx`:
+       * Tích hợp đầy đủ: Pointer Events (`onPointerDown/Move/Up`), Native Touch Events (`onTouchStart/Move/End`), và Wheel Events (`onWheel`).
+       * Hỗ trợ cuộn chuột / trackpad: Cuộn xuống (`deltaY > 0`) đẩy trang lên thu gọn logo và mở lưới (`progress -> 1`).
+       * Tối ưu độ nhạy: Ngưỡng vuốt mở lưới giảm xuống còn >12% là tự động cuộn hết lên trên đỉnh và hiển thị trọn vẹn lưới Safezone 100% (ô vuông + sọc chéo) để người dùng tiếp tục làm việc.
+       * Hỗ trợ chạm/click nhanh: Chạm hoặc click nhẹ vào logo cũng tự động kích hoạt animation cuộn lên để mở lưới tức thì.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ÁP DỤNG Ý TƯỞNG 1 - KHÓA CỨNG KHOẢNG ĐỆM ĐÁY CHO LOGO #BLVD GIAO DIỆN NGANG (DESKTOP)
+- Thời gian: 17/09/2026 08:44:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+- Chi tiết thay đổi:
+  + Áp dụng chính xác quy tắc Ý tưởng 1:
+    1. Khóa cứng khoảng đệm đáy: Luôn chừa ít nhất 2 đến 3 hàng ô vuông ở dưới (`bottomPaddingRows = rows >= 9 ? 3 : 2`).
+    2. Quy định chiều cao tối đa của logo: `logoRows = Math.max(3, rows - bottomPaddingRows)`.
+    3. Bảo toàn tỷ lệ hình chữ nhật đứng (cao hơn rộng 2 ô): Chiều ngang logoCols được tính ngược lại: `logoCols = logoRows - 2`.
+  + Kết quả thị giác & công năng kiến trúc:
+    * Phía dưới logo #BLVD giờ đây luôn luôn có sẵn từ 2 đến 3 hàng ô vuông (1:1) thẳng thớm, nguyên vẹn, tạo thành một "bệ đỡ" kiến trúc vững chắc.
+    * Người dùng có không gian lưới chuẩn mực ở bên dưới để đặt text mô tả, slogan, metadata hoặc nút bấm tương tác mà không bị logo chạm kịch đáy lưới.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: CỐ ĐỊNH KHOẢNG ĐỆM ĐÁY 4 HÀNG Ô VUÔNG PHÍA DƯỚI LOGO #BLVD (DESKTOP)
+- Thời gian: 17/09/2026 08:59:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+- Chi tiết thay đổi:
+  + Nâng cấp khoảng đệm đáy: Chuyển từ mức động 2-3 hàng sang cố định luôn 4 hàng ô vuông thẳng thớm (`bottomPaddingRows = 4`).
+  + Công thức tính toán:
+    * Chiều cao logo: `logoRows = Math.max(3, rows - 4)`.
+    * Chiều ngang logo: `logoCols = logoRows - 2` (vẫn bảo toàn tỷ lệ hình chữ nhật đứng, cao hơn rộng đúng 2 ô vuông).
+  + Hiệu quả thị giác:
+    * Dưới chân logo #BLVD có một khoảng thở kiến trúc rộng rãi, cân xứng và thoáng đãng với chính xác 4 hàng ô vuông 1:1.
+    * Tạo không gian bệ đỡ hoàn hảo và thoải mái để bố trí khối nội dung tiếp theo (slogan, copy text, metadata...).
+---------------------------------------------------------
+
+

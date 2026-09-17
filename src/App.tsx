@@ -11,7 +11,11 @@ import { motion } from 'motion/react';
 import { IntroClock } from './components/IntroClock';
 import { VespertineBackground } from './components/VespertineBackground';
 import { ModeSelector } from './components/ModeSelector';
+import { BlvdSafezoneGrid } from './components/blvd-grid';
 import { AppLanguage, PortfolioMode, SceneState } from './types';
+
+// Cờ mô-đun hoá cho hệ thống lưới Safezone (#BLVD) - đổi thành false để tắt hoặc gỡ bỏ dễ dàng
+const ENABLE_BLVD_SAFEZONE_GRID = true;
 
 export default function App() {
 
@@ -67,6 +71,12 @@ export default function App() {
   };
 
   const handleBlvdClick = () => {
+    // Pre-decode blvd18 image in GPU memory so scene transition has zero delay
+    const img = new Image();
+    img.src = "https://i.ibb.co/ccfZG4Zk/n-n-blvd18.webp";
+    if (img.decode) {
+      img.decode().catch(() => {});
+    }
     setScene('blvd-play');
   };
 
@@ -76,7 +86,8 @@ export default function App() {
       "https://i.ibb.co/Nd6BpwZ2/young.jpg",
       "https://i.ibb.co/vy4ykmw/vespertine.png",
       "https://i.ibb.co/JFvk9wzr/vespertine-bg.png",
-      "https://i.ibb.co/jPHPJSG7/vespertine-sj.png"
+      "https://i.ibb.co/jPHPJSG7/vespertine-sj.png",
+      "https://i.ibb.co/ccfZG4Zk/n-n-blvd18.webp"
     ];
 
     let loadedCount = 0;
@@ -89,7 +100,13 @@ export default function App() {
 
     imageUrls.forEach(url => {
       const img = new Image();
-      img.onload = handleImageLoad;
+      img.onload = () => {
+        if (img.decode) {
+          img.decode().catch(() => {}).finally(handleImageLoad);
+        } else {
+          handleImageLoad();
+        }
+      };
       img.onerror = handleImageLoad;
       img.src = url;
     });
@@ -215,9 +232,22 @@ export default function App() {
     };
   }, []);
 
-  // When BLVD intro finishes at blvd-black, any key or click/touch returns to main-app
+  // When BLVD intro finishes at blvd-black, if grid is not enabled, any key or click returns to main-app
+  // If grid is enabled, only 'Escape' key returns to main-app so the user can interact freely with the grid and logo
   useEffect(() => {
     if (scene !== 'blvd-black') return;
+
+    if (ENABLE_BLVD_SAFEZONE_GRID) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setScene('main-app');
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
 
     const handleAnyBack = () => {
       setScene('main-app');
@@ -249,9 +279,10 @@ export default function App() {
       return () => clearTimeout(t);
     }
     if (scene === 'intro-clock-multiple') {
+      // Safety fallback timer: IntroClock now handles completing and transitioning dynamically via onComplete
       const t = setTimeout(() => {
         setScene('main-app');
-      }, 600); // Multiple clocks
+      }, 3500);
       return () => clearTimeout(t);
     }
 
@@ -289,13 +320,19 @@ export default function App() {
     if (scene === 'blvd-color-2') {
       const t = setTimeout(() => {
         setScene('blvd-color-3');
-      }, 500); // 0.5s for #89CC04
+      }, 500); // 0.5s for #8ace00 (#blvd16)
       return () => clearTimeout(t);
     }
     if (scene === 'blvd-color-3') {
       const t = setTimeout(() => {
+        setScene('blvd-color-4');
+      }, 500); // 0.5s for BLVD17
+      return () => clearTimeout(t);
+    }
+    if (scene === 'blvd-color-4') {
+      const t = setTimeout(() => {
         setScene('blvd-black');
-      }, 500); // 0.5s for #FF3BF1
+      }, 500); // 0.5s for #BLVD18 with blvd18 background image
       return () => clearTimeout(t);
     }
   }, [scene, imagesLoaded]);
@@ -343,6 +380,16 @@ export default function App() {
         fetchPriority="high"
         className="absolute inset-0 w-full h-full object-cover portrait:object-[49%_center] z-0 opacity-0 pointer-events-none"
       />
+      <img
+        id="preload-blvd18"
+        src="https://i.ibb.co/ccfZG4Zk/n-n-blvd18.webp"
+        alt="Boulevard 18 Background"
+        referrerPolicy="no-referrer"
+        loading="eager"
+        fetchPriority="high"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        style={{ opacity: 0.001, transform: 'translateZ(0)', pointerEvents: 'none' }}
+      />
       <VespertineBackground />
 
       {/* KC1: Start Screen ("phát") */}
@@ -388,8 +435,13 @@ export default function App() {
         </div>
       )}
 
-      {/* Multiple clocks */}
-      {scene === 'intro-clock-multiple' && <IntroClock mode="multiple" />}
+      {/* Multiple clocks - adaptive lines with fixed speed, runs to completion before entering main-app */}
+      {scene === 'intro-clock-multiple' && (
+        <IntroClock 
+          mode="multiple" 
+          onComplete={() => setScene('main-app')} 
+        />
+      )}
 
       {/* --- SEPARATE #BLVD SEQUENCE --- */}
       {scene === 'blvd-play' && (
@@ -488,13 +540,37 @@ export default function App() {
         </div>
       )}
 
-      {/* BLVD Complete: Màn hình đen xì, bấm phím hoặc click bất kỳ để quay về */}
-      {scene === 'blvd-black' && (
+      {/* 4. BLVD 18 background & scene: Pre-mounted at z-40 during blvd-color-3 so it is 100% warmed up and decoded with ZERO frame delay when transitioning to #BLVD18 */}
+      {(scene === 'blvd-color-3' || scene === 'blvd-color-4' || scene === 'blvd-black') && (
         <div 
-          id="scene-blvd-black"
-          onClick={() => setScene('main-app')}
-          className="absolute inset-0 bg-black z-50 select-none cursor-pointer"
-        />
+          id="scene-blvd-bg-layer"
+          onClick={scene === 'blvd-black' && !ENABLE_BLVD_SAFEZONE_GRID ? () => setScene('main-app') : undefined}
+          className={`absolute inset-0 select-none overflow-hidden ${
+            scene === 'blvd-color-3' ? 'z-40 pointer-events-none' : 'z-50'
+          } ${scene === 'blvd-black' && !ENABLE_BLVD_SAFEZONE_GRID ? 'cursor-pointer' : ''}`}
+        >
+          <img
+            src="https://i.ibb.co/ccfZG4Zk/n-n-blvd18.webp"
+            alt="nền blvd18"
+            referrerPolicy="no-referrer"
+            loading="eager"
+            fetchPriority="high"
+            className={`absolute inset-0 w-full h-full object-cover select-none pointer-events-none landscape:object-[50%_40%] landscape:-translate-y-[2.5%] landscape:scale-[1.05] transition-[filter] duration-500 ${
+              scene === 'blvd-black' ? 'scale-[1.02]' : ''
+            }`}
+            style={{
+              filter: scene === 'blvd-black' ? 'blur(2.5px)' : 'none',
+            }}
+          />
+          {scene === 'blvd-color-4' && (
+            <div className="relative z-10 w-full h-full flex items-center justify-center px-4">
+              <div className="font-archivo font-normal text-[clamp(3.5rem,11vw,8rem)] text-black/60 select-none leading-none tracking-normal">
+                #BLVD18
+              </div>
+            </div>
+          )}
+          {ENABLE_BLVD_SAFEZONE_GRID && scene === 'blvd-black' && <BlvdSafezoneGrid />}
+        </div>
       )}
 
       {/* Invisible off-screen preloader to trigger browser font rasterization immediately at start */}
@@ -502,6 +578,7 @@ export default function App() {
         <span className="font-turista">#BLVD15</span>
         <span className="font-arial-custom">#blvd16</span>
         <span className="font-vespertine">BLVD17</span>
+        <span className="font-archivo font-normal">#BLVD18</span>
       </div>
 
       {/* Main App Screen (Background Image & Interactive Interface Layouts) */}
