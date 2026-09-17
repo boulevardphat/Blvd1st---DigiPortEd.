@@ -1558,18 +1558,355 @@ LẦN THAY ĐỔI: ÁP DỤNG Ý TƯỞNG 1 - KHÓA CỨNG KHOẢNG ĐỆM ĐÁY
     * Người dùng có không gian lưới chuẩn mực ở bên dưới để đặt text mô tả, slogan, metadata hoặc nút bấm tương tác mà không bị logo chạm kịch đáy lưới.
 ---------------------------------------------------------
 
-LẦN THAY ĐỔI: CỐ ĐỊNH KHOẢNG ĐỆM ĐÁY 4 HÀNG Ô VUÔNG PHÍA DƯỚI LOGO #BLVD (DESKTOP)
-- Thời gian: 17/09/2026 08:59:00 (Giờ TPHCM)
+LẦN THAY ĐỔI: TÍCH HỢP NỘI DUNG GIỚI THIỆU 4 HÀNG DƯỚI LOGO #BLVD (DESKTOP) & CỬ CHỈ KÉO XUỐNG HIỆN BLUR GIỚI THIỆU + MỞ GRID (MOBILE)
+- Thời gian: 17/09/2026 09:37:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/blvdText.ts (Tạo mới)
+  + /src/components/blvd-grid/index.tsx
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+  + /src/App.tsx
+- Chi tiết thay đổi:
+  + Nội dung văn bản giới thiệu (Song ngữ Anh - Việt):
+    * Tiếng Việt: "#BLVD là một dự án thiết kế nhỏ, được Thuận Phát thực hiện đều đặn vào dịp sinh nhật hàng năm (26/09). Chỉ xuất hiện lặng lẽ trên Instagram, dự án là nơi gom nhặt những nguồn cảm hứng của Phát từ âm nhạc, nghệ thuật thị giác đến văn hóa đại chúng. Nhưng trên hết, đó là lăng kính cá nhân phản chiếu thế giới quan, cuộc sống và những thăng trầm Phát đã trải qua trong suốt một năm. Vượt lên trên một bài đăng khoe khéo "gu" thẩm mỹ hay kỹ năng thiết kế, #BLVD mang theo nhiều hơn một câu chuyện, và gửi gắm nhiều hơn một góc nhìn mới mà Phát đã tự mình gom góp được."
+    * Tiếng Anh: "#BLVD is an intimate design project created annually to mark Thuận Phát's birthday (September 26th). Quietly residing on Instagram, the project is a collection of Phát's inspirations - from music and visual arts to pop culture. Above all, it serves as a personal lens reflecting his worldview and the events that have shaped his life over the past year. Far from being just an aesthetic showcase or a display of design skills, #BLVD tells more than just one story, and conveys more than just one newfound perspective."
+    * Chuyển đổi ngôn ngữ: Đồng bộ liên tục với state `language` ('vi' / 'en') từ giao diện chính của ứng dụng truyền vào `BlvdSafezoneGrid`.
+  + Giao diện Ngang (Desktop - BlvdLandscapeGrid.tsx):
+    * Vị trí: Đặt chuẩn xác trong 4 hàng ô vuông kiến trúc ngay phía dưới logo #BLVD (`introX = logoX`, `introY = logoY + logoH`, `introW = logoW`, `introH = 4 * cellSize`).
+    * Tạo hình & Thẩm mỹ:
+      - Lớp nền màu tối kết hợp hiệu ứng `backdrop-blur-md` và giảm độ mờ (`bg-black/65`) giúp văn bản màu trắng nổi bật, dễ đọc trên nền ảnh.
+      - Phông chữ Archivo thường (`font-archivo font-normal`), cỡ chữ co dãn mượt mà (`clamp(11px, 0.85vw, 13.5px)`), khoảng cách dòng `leading-[1.6]`.
+      - Không chú thích, không gắn tag thừa, tuyệt đối không bo góc (`rounded-none`, chuẩn Boulevard1st).
+      - Các đường lưới ô vuông dọc và ngang né vùng logo và khối 4 hàng intro để tránh các đường kẻ cắt qua chữ, đường viền ngoài đồng bộ liền mạch 1px đen (#000000) với lưới Safezone.
+  + Giao diện Dọc (Mobile - BlvdPortraitGrid.tsx):
+    * Tương tác vuốt/kéo đa tầng (Multi-stage pull gesture):
+      1. Trạng thái ban đầu: Logo #BLVD stretch phủ kín toàn bộ Safezone.
+      2. Khi người dùng vuốt/kéo xuống (`dy > 0`): Lớp blur màu tối (`bg-black/70 backdrop-blur-md`) chứa lời giới thiệu xuất hiện và dãn dài trực tiếp bám sát theo cử chỉ vuốt ngón tay trong thời gian thực.
+      3. Khi kéo xong logo (Stage 1): Logo thu gọn lên đỉnh Safezone, khối blur hiển thị trọn vẹn nội dung giới thiệu (tiếng Việt hoặc tiếng Anh).
+      4. Khi người dùng kéo hẳn xuống tiếp (Stage 2): Toàn bộ hệ thống lưới ô vuông (1:1) và 2 vùng sọc chéo cạnh trên/dưới xuất hiện hoàn chỉnh như bình thường.
+      5. Thao tác vuốt ngược lên trên (`dy < 0`) hoặc cuộn ngược đưa giao diện mượt mà trở lại trạng thái giới thiệu hoặc logo ban đầu. Hỗ trợ chạm/click nhanh để chuyển đổi tuần tự giữa các trạng thái.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: CHUYỂN BLUR MÀU SÁNG, SỬA LỖI TEXT GIỚI THIỆU BỊ KHUẤT & NÂNG CẤP BLUR FULL MÀN HÌNH + VUỐT MOBILE MƯỢT MÀ
+- Thời gian: 17/09/2026 09:51:00 (Giờ TPHCM)
 - File ảnh hưởng:
   + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
 - Chi tiết thay đổi:
-  + Nâng cấp khoảng đệm đáy: Chuyển từ mức động 2-3 hàng sang cố định luôn 4 hàng ô vuông thẳng thớm (`bottomPaddingRows = 4`).
-  + Công thức tính toán:
-    * Chiều cao logo: `logoRows = Math.max(3, rows - 4)`.
-    * Chiều ngang logo: `logoCols = logoRows - 2` (vẫn bảo toàn tỷ lệ hình chữ nhật đứng, cao hơn rộng đúng 2 ô vuông).
-  + Hiệu quả thị giác:
-    * Dưới chân logo #BLVD có một khoảng thở kiến trúc rộng rãi, cân xứng và thoáng đãng với chính xác 4 hàng ô vuông 1:1.
-    * Tạo không gian bệ đỡ hoàn hảo và thoải mái để bố trí khối nội dung tiếp theo (slogan, copy text, metadata...).
+  1. Chuyển sang Blur Màu Sáng (Cả Desktop & Mobile):
+     * Thay toàn bộ các khối blur tối (`bg-black/75`) bằng lớp blur màu sáng (`bg-white/70 backdrop-blur-md` trên Desktop và `bg-white/75 backdrop-blur-2xl` trên Mobile).
+     * Màu chữ: Giữ nguyên kỹ thuật lấy nền dự án làm màu chữ (`background-clip: text`), tinh chỉnh độ tương phản `contrast(140%) brightness(75%)` để chữ nổi bật, sắc nét và tương phản tuyệt đẹp trên nền blur sáng.
+  2. Khắc phục triệt để lỗi Text Giới Thiệu Bị Khuất:
+     * Trên Desktop: Thay `justify-center` bằng `justify-start`, điều chỉnh padding (`p-3 sm:p-3.5`) và font size (`clamp(11.5px, 0.85vw, 13.5px)`), giúp dòng đầu tiên bắt đầu từ trên cùng của hộp, không bị cắt xén ở các cạnh, cuộn mượt mà với `overflow-y-auto`.
+     * Trên Mobile: Bố trí `justify-start` trong vùng đệm `pt-10 pb-6`, kích thước chữ `clamp(14px, 4vw, 17px)` với khoảng dãn dòng `leading-[1.68]`, đảm bảo toàn bộ đoạn văn bản hiển thị nguyên vẹn 100%.
+  3. Nâng cấp Trải nghiệm Vuốt Mobile & Blur Full Màn Hình:
+     * "Blur full màn hình, không chỉ Safezone": Lớp blur màu sáng mở rộng phủ trọn 100% diện tích màn hình thiết bị (`inset-0 w-full h-full`), không còn bị giới hạn trong khung Safezone 6% x 5%.
+     * Cử chỉ vuốt chuẩn xác, không còn xung đột sự kiện: Xử lý mượt mà chuyển đổi trạng thái:
+       - Từ Logo (`logo`): Vuốt xuống đẩy logo trượt đi hoàn toàn và mở lớp blur giới thiệu full màn hình.
+       - Từ Intro (`intro`): Vuốt xuống tiếp tục mở lưới ô vuông (1:1) Safezone; vuốt lên quay lại Logo.
+       - Từ Grid (`grid`): Chạm hoặc vuốt để quay lại.
+       - Hỗ trợ cả thao tác chạm/click nhanh để chuyển đổi tuần tự không độ trễ.
+     * Chuẩn Boulevard1st: Toàn bộ component giữ nguyên tắc không bo góc (`rounded-none`).
 ---------------------------------------------------------
 
 
+LẦN THAY ĐỔI: GIẢM OPACITY LỚP BLUR, LOGO RỘNG ~40% TỔNG SỐ Ô SAFEZONE & FIX TRIỆT ĐỂ TOUCH MOBILE
+- Thời gian: 17/09/2026 09:55:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Giảm Opacity Lớp Blur:
+     * Trên Desktop: Giảm từ bg-white/70 xuống bg-white/25 backdrop-blur-md, tạo lớp kính mờ thanh thoát, mỏng nhẹ, để lộ ánh sắc vàng/cam chuyển động của hình nền bên dưới.
+     * Trên Mobile: Giảm từ bg-white/75 xuống bg-white/30 backdrop-blur-xl, full màn hình mềm mại và sang trọng.
+     * Nâng cấp độ tương phản chữ (contrast(160%) brightness(60%) drop-shadow(0 1px 1px rgba(0,0,0,0.25))) để text màu nền dự án sắc nét, rõ ràng trên nền kính mờ giảm opacity.
+  2. Chiều Dài (Bề Rộng) Logo Chiếm ~40% Tổng Số Ô Safezone:
+     * Cập nhật công thức tính toán: logoCols = Math.max(3, Math.min(cols - 2, Math.round(cols * 0.4))).
+     * Thay vì bị bó hẹp trong 2 cột đơn lẻ gây khó đọc như trong ảnh người dùng gửi, khung logo và 4 hàng ô chứa text giới thiệu ở dưới mở rộng chiếm trọn ~40% tổng số cột Safezone (ví dụ: 4/10 cột hoặc 5/12 cột).
+     * Bề rộng văn bản tăng hơn gấp đôi, độ dài dòng từ 40-55 ký tự đạt chuẩn typography, đoạn văn bản dàn trang thoáng đãng, dễ đọc và đẹp mắt.
+  3. Khắc Phục Triệt Để Lỗi Touch Trên Mobile:
+     * Chuyển đổi sang hệ thống touch chuyên biệt và ổn định (Touch Events onTouchStart, onTouchMove, onTouchEnd kết hợp chuột cho preview).
+     * Ngưỡng vuốt chuẩn (swipeThreshold = 35px), phân biệt rạch ròi giữa cử chỉ vuốt (Swipe) và chạm (Tap).
+     * Vuốt xuống ở Logo -> mở Intro full màn hình mượt mà.
+     * Vuốt xuống ở Intro -> chuyển sang lưới ô vuông (1:1) Safezone; vuốt lên -> quay về Logo.
+     * Bổ sung thanh điều hướng tương tác rõ ràng (Tap/Click & Swipe) ở cả 3 chế độ: Logo, Intro full màn hình và Grid.
+     * Giữ vững nguyên tắc Boulevard1st: Toàn bộ component tuyệt đối không bo góc (rounded-none).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: LOẠI BỎ TOÀN BỘ CHỮ GỢI Ý/NÚT BẤM & TỐI ƯU CỬ CHỈ VUỐN LÊN LIÊN TỤC TRỰC TIẾP TRÊN MOBILE
+- Thời gian: 17/09/2026 10:00:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Loại bỏ 100% các nút bấm, tag, mũi tên hay câu chữ gợi ý ("chạm để...", "vuốt để...", "quay lại logo..."), giữ trọn vẹn bề mặt giao diện tinh gọn, nguyên bản, không micro-copy thừa.
+  2. Cơ chế Responsive Chuyển Động Theo Cử Chỉ Vuốt Thời Gian Thực (Real-time Gesture Tracking):
+     * Ngón tay kéo đến đâu, toàn bộ màn hình trượt bám sát theo ngón tay đến đó với độ trễ 0ms (`will-change: transform`).
+     * Khi thả tay, màn hình snap mượt mà theo quán tính và gia tốc cử chỉ (`cubic-bezier(0.2, 0.9, 0.3, 1)`).
+  3. Thứ tự và chiều vuốt chuẩn:
+     * Ở Logo: Vuốt lên (`swipe up`) -> Màn hình trượt lên mở lớp Intro blur màu sáng full màn hình.
+     * Ở Intro: Vuốt lên tiếp (`swipe up`) -> Màn hình trượt lên hiển thị Lưới ô vuông (1:1) Safezone.
+     * Vuốt ngược xuống (`swipe down`) ở bất kỳ đâu -> Màn hình trượt mượt mà quay trở lại các bước trước đó.
+  4. Lớp blur màu sáng giảm opacity (`bg-white/25 backdrop-blur-xl`), text bắt đầu từ trên cùng (`justify-start`), màu chữ lấy trực tiếp nền dự án (`background-clip: text`), hoàn toàn không bo góc (`rounded-none`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: KHÔI PHỤC HIỆU ỨNG LOGO CO DÃN & BLUR BIẾN THIÊN LIÊN TỤC THEO CỬ CHỈ VUỐT TRÊN MOBILE
+- Thời gian: 17/09/2026 10:02:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Loại bỏ hoàn toàn cấu trúc phân trang rời rạc và các nút bấm/text gợi ý thừa.
+  2. Logo co dãn biến thiên theo cử chỉ vuốt (Real-time gesture stretching):
+     * Khi vuốt lên (`dy < 0`), chiều cao logo co dãn liên tục từ `sh` xuống `0` tương ứng trực tiếp với độ dịch chuyển của ngón tay.
+     * Thuộc tính `preserveAspectRatio="none"` và `lengthAdjust="spacingAndGlyphs"` làm các nét chữ `#BLVD` biến dạng đàn hồi trực quan theo vị trí ngón tay.
+  3. Lớp blur màu sáng xuất hiện rồi biến mất mượt mà (Smooth continuous fade):
+     * Giai đoạn 1 (progress từ 0 -> 1): Lớp blur màu sáng giảm opacity (`bg-white/25 backdrop-blur-xl`) cùng văn bản giới thiệu tăng dần opacity từ 0 -> 1 mượt mà theo ngón tay.
+     * Giai đoạn 2 (progress từ 1 -> 2): Lớp blur và chữ mờ dần từ 1 -> 0 theo ngón tay, đồng thời lưới ô vuông (1:1) Safezone hiện dần từ 0 -> 1.
+     * Vuốt ngược xuống (`dy > 0`): Toàn bộ chuyển động đảo chiều mượt mà liên tục.
+  4. Thuật toán thả tay (Release momentum):
+     * Tự động snap mượt mà (cubic ease-out qua `requestAnimationFrame`) về các mốc 0 (Logo), 1 (Intro) hoặc 2 (Grid) dựa trên vận tốc vuốt hoặc khoảng cách kéo.
+  5. Giữ vững nguyên tắc Boulevard1st: Hoàn toàn không bo góc (`rounded-none`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐẶT TEXT GIỚI THIỆU NGAY DƯỚI LOGO (DI CHUYỂN LIÊN TỤC) & GRID TRƯỢT TỪ DƯỚI LÊN THEO CỬ CHỈ VUỐT
+- Thời gian: 17/09/2026 10:05:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Logo co dãn biến thiên theo ngón tay (Giai đoạn 1):
+     * Chiều cao logo `currentLogoH` co dãn liên tục từ `sh` xuống `compactLogoH` theo thời gian thực tương ứng với cử chỉ kéo của người dùng.
+  2. Khối Text Giới Thiệu Nằm NGAY DƯỚI LOGO:
+     * Vị trí `top = currentLogoH`: khối giới thiệu di chuyển gắn liền cùng chân logo, không nằm im một chỗ.
+     * Nền kính mờ màu sáng giảm opacity (`bg-white/25 backdrop-blur-xl`), viền 1px đen liền mạch (`border border-black border-t-0`).
+     * Nội dung bắt đầu từ đỉnh (`justify-start`), màu chữ lấy nền dự án (`background-clip: text`).
+  3. Lưới Grid Ô Vuông (1:1) Safezone TRƯỢT TỪ DƯỚI LÊN (Giai đoạn 2):
+     * Khi vuốt lên tiếp (`progress > 1`), cụm (Logo + Text) trượt lên trên, đồng thời toàn bộ hệ thống lưới ô vuông (1:1) Safezone trượt từ dưới lên (`gridTranslateY` từ `sh` lên `0`).
+     * Khi vuốt xuống, mọi chuyển động đảo ngược mượt mà liên tục.
+  4. Chuẩn Boulevard1st: Hoàn toàn không bo góc (`rounded-none`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TĂNG FONT-SIZE ~20% & GIẢM FONT-WEIGHT Ở CẢ 2 GIAO DIỆN
+- Thời gian: 17/09/2026 10:08:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Giao diện Desktop (Landscape):
+     * font-size: tăng khoảng 20% từ clamp(12px, 0.92vw, 14px) lên clamp(14.5px, 1.1vw, 17px).
+     * font-weight: giảm từ font-bold (700) xuống font-medium (500), tạo nét chữ thanh thoát, mềm mại và dễ đọc.
+     * line-height: điều chỉnh leading-[1.6] thoáng đãng.
+  2. Giao diện Mobile (Portrait):
+     * font-size: tăng khoảng 20% từ clamp(13px, 3.8vw, 16px) lên clamp(15.5px, 4.5vw, 19.5px).
+     * font-weight: giảm từ font-bold (700) xuống font-medium (500).
+     * line-height: điều chỉnh leading-[1.65] giúp các dòng văn bản không bị dính vào nhau khi hiển thị trên màn hình dọc.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: GIẢM OPACITY LƯỚI GRID XUỐNG MỨC MỜ NHẸ (OPACITY 0.2) Ở CẢ 2 GIAO DIỆN
+- Thời gian: 17/09/2026 10:11:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Giao diện Desktop (Landscape):
+     * Gom toàn bộ hệ thống lưới ô vuông (1:1), các đường kẻ dọc, đường kẻ ngang, khung bao ô vuông và các vùng sọc chéo vào một nhóm layer duy nhất có opacity="0.2".
+     * Nét vẽ trở nên mờ nhẹ, thanh mảnh, không còn bị đậm hay lấn át hình nền, nhưng vẫn vừa đủ để người dùng quan sát được hệ thống phân bổ ô Safezone.
+     * Viền ngoài Safezone được giảm nhẹ strokeOpacity="0.25" hài hòa.
+     * Khung logo #BLVD và khung text intro vẫn giữ nguyên stroke đen chuẩn nét rõ ràng.
+  2. Giao diện Mobile (Portrait):
+     * Tương tự trên Desktop, hệ thống lưới ô vuông (1:1) và các vùng sọc chéo được áp dụng opacity="0.2" kết hợp viền Safezone strokeOpacity="0.25".
+     * Khi trượt từ dưới lên theo cử chỉ vuốt, lưới xuất hiện một cách tinh tế, mờ ảo và cao cấp.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: GIAO DIỆN MOBILE - BLUR PHỦ FULL MÀN HÌNH, TEXT CHÍNH GIỮA & LOẠI BỎ HOÀN TOÀN CẢM GIÁC NAM CHÂM KHI CUỘN
+- Thời gian: 17/09/2026 10:14:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Lớp blur giới thiệu phủ kín FULL MÀN HÌNH:
+     * Kích thước w-full h-full (100vw x 100vh), lớp kính mờ mỏng nhẹ `bg-white/25 backdrop-blur-xl` bao trọn màn hình, không còn bị bó hẹp trong khung hộp hay Safezone.
+  2. Text giới thiệu nằm CHÍNH GIỮA MÀN HÌNH:
+     * Căn giữa tuyệt đối cả trục ngang và trục dọc (`flex items-center justify-center`). Khung văn bản cân đối ở trung tâm màn hình, nét chữ `font-medium` sắc nét, dễ đọc.
+  3. Loại bỏ hoàn toàn cảm giác "nam châm" khi cuộn:
+     * Chuyển sang cơ chế cuộn mượt tự nhiên (Natural Inertial Scrolling) với `overflow-y: auto`, `overscroll-none`, hoàn toàn KHÔNG sử dụng `scroll-snap` hay các điểm hút snap bắt buộc.
+     * Người dùng vuốt đến đâu màn hình trôi đến đó, dừng ở đâu thì giữ nguyên ở đó, hoàn toàn thoải mái và mượt mà.
+  4. Thứ tự 3 màn hình liền mạch khi cuộn:
+     * Màn 1: Logo #BLVD Safezone.
+     * Màn 2: Lớp Blur full màn hình với nội dung giới thiệu nằm chính giữa.
+     * Màn 3: Lưới ô vuông (1:1) Safezone và các dải sọc chéo với opacity 0.2 mờ nhẹ.
+  5. Giữ nguyên tắc Boulevard1st: Hoàn toàn không bo góc (`rounded-none`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: GIỮ NGUYÊN LOGO CO DÃN RESPONSIVE THEO CỬ CHỈ VUỐT + BLUR FULL MÀN HÌNH + TEXT CHÍNH GIỮA + KHÔNG NAM CHÂM
+- Thời gian: 17/09/2026 10:16:45 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. KHÔI PHỤC VÀ TỐI ƯU LOGO CO DÃN RESPONSIVE 1:1:
+     * Logo #BLVD trong Safezone co dãn chiều cao liên tục trực tiếp theo cử chỉ vuốt/cuộn của người dùng (`logoH = Math.round(sh * (1 - progress))`).
+     * Sử dụng thuộc tính `preserveAspectRatio="none"` và `lengthAdjust="spacingAndGlyphs"` để các nét chữ #BLVD co dãn đàn hồi linh hoạt, chuẩn xác theo từng pixel di chuyển của ngón tay.
+  2. Phần blur giới thiệu PHỦ KÍN 100% FULL MÀN HÌNH:
+     * Lớp kính mờ `bg-white/25 backdrop-blur-xl` trải rộng toàn bộ màn hình (inset-0, 100vw x 100vh).
+  3. Text giới thiệu nằm CHÍNH GIỮA MÀN HÌNH:
+     * Được căn giữa tuyệt đối ở cả 2 trục (ngang và dọc), chữ rõ nét với `font-medium` và background-clip text.
+  4. TUYỆT ĐỐI KHÔNG CÓ CẢM GIÁC NAM CHÂM KHI CUỘN:
+     * Không sử dụng bất kỳ hàm snap hay cưỡng chế chuyển cảnh nào. Người dùng cuộn/vuốt tự do theo quán tính tự nhiên, dừng ở bất kỳ vị trí nào thì màn hình và logo giữ nguyên trạng thái ở đúng vị trí đó.
+  5. Giữ nguyên tắc Boulevard1st: Hoàn toàn không bo góc (`rounded-none`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: GIAO DIỆN MOBILE - TEXT NẰM NGAY DƯỚI LOGO, DỪNG Ở TRUNG TÂM MÀN HÌNH, ĐI TIẾP LÊN GRID VÀ SMOOTH SCROLLING QUÁN TÍNH TỰ NHIÊN (KHÔNG NAM CHÂM)
+- Thời gian: 17/09/2026 10:20:10 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi chuẩn xác 100%:
+  1. Text nằm NGAY DƯỚI LOGO:
+     * Khối text nằm liền mạch ngay dưới chân logo (`finalTextTop = finalLogoTop + currentLogoH`), có cùng chiều ngang Safezone (`left: sx, width: sw`).
+     * Viền đen bao quanh khối text đồng bộ với khung logo (`border border-black border-t-0`), giữ nguyên tắc không bo góc (`rounded-none`).
+  2. Xuất hiện khi vuốt logo lên và DỪNG Ở TRUNG TÂM MÀN HÌNH:
+     * Khi vuốt lên từ vị trí ban đầu, logo co dãn chiều cao và nâng lên, kéo theo khối text trồi lên từ phía dưới.
+     * Khi vuốt đến giữa tiến trình, khối text DỪNG NGAY TẠI TRUNG TÂM MÀN HÌNH (`centerTextTop = H / 2 - textH / 2`), phía trên là logo co gọn, xung quanh là lớp blur màu sáng mỏng nhẹ phủ full màn hình (`bg-white/25 backdrop-blur-xl`).
+  3. Đi tiếp lên trên khi vuốt lên để xuống Lưới Grid:
+     * Khi người dùng tiếp tục vuốt lên từ vị trí trung tâm, cả cụm Logo và Text tiếp tục di chuyển lên trên và trôi ra khỏi đỉnh màn hình.
+     * Cùng lúc đó, hệ thống lưới ô vuông (1:1) Safezone trượt từ dưới lên chiếm trọn khung nhìn với độ mờ nhẹ 0.2 (`opacity: 0.2`).
+  4. Smooth Scrolling quán tính mượt mà (Inertial glide) & LOẠI BỎ HOÀN TOÀN CẢM GIÁC NAM CHÂM:
+     * Tích hợp bộ máy vật lý quán tính (Inertia Momentum Engine):
+       - Khi ngón tay kéo: phản hồi 1:1 trong thời gian thực.
+       - Khi thả tay hoặc vuốt mạnh: lướt êm ái theo trớn vận tốc ban đầu và hãm tốc tự nhiên bằng hàm ma sát (`friction = 0.93`).
+       - Tuyệt đối KHÔNG sử dụng snap hay magnetic locking: người dùng có thể buông tay ở bất kỳ điểm nào, màn hình sẽ dừng tự do tại vị trí đó mà không bị kéo giật hay bắt dính.
+       - Hỗ trợ đầy đủ touch gesture, mouse drag và mouse wheel.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TÁI CẤU TRÚC GIAO DIỆN MOBILE - ĐỒNG BỘ CHUẨN XÁC THEO ẢNH IMAGE.PNG, CỤM CARD DỪNG Ở TRUNG TÂM, SCROLL TỰ NHIÊN MƯỢT MÀ
+- Thời gian: 17/09/2026 10:27:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Loại bỏ triệt để toàn bộ hệ thống touch engine / requestAnimationFrame tự chế gây giật và xung đột (như một đống hổ lốn trước đó).
+  2. Thay bằng cơ chế Native Smooth Scrolling của trình duyệt (`overflow-y: auto`, `-webkit-overflow-scrolling: touch`):
+     * Cực kỳ mượt mà ở tần số 120Hz/60Hz, có độ lướt quán tính tự nhiên chuẩn hệ điều hành iOS/Android.
+     * TUYỆT ĐỐI KHÔNG CÓ CẢM GIÁC NAM CHÂM: Hoàn toàn không dùng `scroll-snap`, buông tay ở bất kỳ điểm nào (20%, 45%, 70%) thì màn hình dừng tự do ngay tại vị trí đó.
+  3. Đồng bộ chuẩn xác 100% theo layout trong ảnh `image.png`:
+     * Khởi đầu (scroll = 0): Logo #BLVD chiếm trọn 100% chiều cao Safezone (`sh`).
+     * Khi cuộn/vuốt lên: Logo co dãn chiều cao từ `sh` xuống `compactLogoH` (~27% Safezone).
+     * Khối Text giới thiệu nằm NGAY DƯỚI LOGO (cùng chiều rộng `sw`, viền 1px đen liền mạch `border-t-0`).
+     * Khi cuộn đến mốc giữa: Cụm Card (Logo trên + Text dưới) lấp đầy trọn vẹn Safezone ở TRUNG TÂM MÀN HÌNH y hệt như trong ảnh `image.png`, kết hợp lớp blur màu sáng mỏng nhẹ phủ full màn hình (`bg-white/25 backdrop-blur-xl`).
+     * Khi cuộn tiếp lên: Cả cụm Card (Logo + Text) trượt lên trên nhường chỗ cho Lưới ô vuông Safezone (1:1) trượt từ dưới lên với opacity 0.2 mờ nhẹ.
+  4. Giữ nguyên tắc Boulevard1st: Hoàn toàn không bo góc (`rounded-none`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: LOGO TIẾP TỤC CO ĐẾN MẤT HOÀN TOÀN TẠI TRUNG TÂM & TRIỆT TIÊU HIỆN TƯỢNG LÓ LƯỚI GRID Ở ĐÁY
+- Thời gian: 17/09/2026 10:32:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Logo co lại tiếp cho đến khi biến mất hoàn toàn (height = 0):
+     * Text ban đầu nằm ngay dưới chân logo. Khi vuốt lên, Logo co dãn từ `sh` xuống 0 và biến mất hoàn toàn (`currentLogoH = 0`).
+     * Khối Text khi đó mở rộng trọn vẹn và đứng một mình tại TRUNG TÂM MÀN HÌNH (chiếm trọn vẹn diện tích Safezone `sw x sh`), khép kín viền đen 1px đầy đủ.
+  2. Triệt tiêu hoàn toàn hiện tượng Grid bị ló ở đáy màn hình:
+     * Trong suốt quá trình hiển thị Logo và khối Text giới thiệu (kể cả khoảng dừng plateau ở giữa), layer Grid được ẩn hoàn toàn (`isGridVisible = false`, `translateY: H + 100`).
+     * Chỉ khi người dùng chủ động cuộn tiếp vượt qua khối Text giới thiệu, khối Text trượt lên trên thì Grid mới bắt đầu trượt từ đáy màn hình lên Safezone.
+  3. Duy trì Smooth Scrolling tự nhiên, không nam châm (không scroll-snap), không bo góc (`rounded-none`).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TÁCH LỚP BLUR KHỎI KHUNG TEXT - PHỦ 100% FULL MÀN HÌNH, XUẤT HIỆN & BIẾN MẤT TỪ TỪ THEO TIẾN TRÌNH VUỐT
+- Thời gian: 17/09/2026 10:35:40 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Loại bỏ hoàn toàn lớp blur và màu nền cục bộ bên trong khung Text giới thiệu (`blvd-portrait-intro-box` chuyển thành `bg-transparent`, chỉ giữ viền đen 1px mỏng không bo góc).
+  2. Lớp blur chuyển thành FULL MÀN HÌNH 100vw x 100vh (`blvd-portrait-fullscreen-blur`, `absolute inset-0 w-full h-full`):
+     * Xuất hiện từ từ khi vuốt lên (Giai đoạn 1: `blurRatio` từ 0 -> 1.0, độ mờ `backdropFilter` tăng dần từ `blur(0px)` -> `blur(24px)`, nền trắng mỏng tăng từ `rgba(255,255,255,0)` -> `rgba(255,255,255,0.25)`).
+     * Đạt độ mờ hoàn hảo tại khoảng dừng trung tâm màn hình khi người dùng đọc nội dung giới thiệu (`blurRatio = 1.0`).
+     * Biến mất từ từ khi vuốt tiếp lên để chuyển xuống Lưới Grid (Giai đoạn 3: `blurRatio` giảm dần từ 1.0 -> 0, trả lại hình ảnh nền và lưới sắc nét).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TEXTBOX DÀI BẰNG SAFEZONE, BỎ ĐƯỜNG VIỀN KHUNG TEXT & TĂNG FONT SIZE 15%
+- Thời gian: 17/09/2026 10:41:20 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Chiều dài (kích thước) textbox bằng đúng chiều dài Safezone (`height: sh, width: sw`):
+     * Textbox duy trì chiều cao chuẩn `sh`, trượt mượt mà lên chiếm trọn Safezone khi logo co về 0, typography bên trong không bị dồn nén hay vỡ dòng.
+  2. Bỏ hoàn toàn đường viền của textbox (`border-none`):
+     * Giao diện trở nên thoáng, thanh lịch và dễ đọc hơn, kết hợp hoàn hảo với lớp blur toàn màn hình.
+  3. Tăng font size lên 15%:
+     * Kích thước chữ chuyển từ `clamp(14.5px, 4.1vw, 18px)` lên `clamp(16.7px, 4.7vw, 20.7px)`, giãn dòng thoáng `leading-[1.68]`.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: THÊM 2 DÒNG TEXT ĐẦU & ĐUÔI THEO STYLE MỤC LỤC / TABLE OF CONTENTS NẰM NGANG
+- Thời gian: 17/09/2026 10:48:20 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Thêm 2 dòng text ở đầu và đuôi khu vực Text giới thiệu theo phong cách Table of Contents (Mục Lục) nằm ngang:
+     * Dòng đầu: Tiếng Việt hiển thị "GIỚI", Tiếng Anh hiển thị "WHAT IS".
+     * Dòng đuôi: Tiếng Việt hiển thị "THIỆU", Tiếng Anh hiển thị "#BLVD?".
+     * Typography: Font Archivo 900 italic, màu đen `#000000`, kéo dãn trải dài theo chiều ngang (`textLength="100%"`, `lengthAdjust="spacingAndGlyphs"`).
+  2. Căn chỉnh không gian ở giữa:
+     * Bố cục dọc `flex-col justify-between` chừa trọn vẹn không gian ở giữa cho đoạn văn bản giới thiệu (`introText`), với khoảng đệm thoáng đãng và thanh cuộn ẩn khi cần.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐỔI TEXT TIẾNG VIỆT THÀNH "ĐÂY LÀ" & "#BLVD", CÂN CHỈNH TỶ LỆ KÉO DÃN & ĐỘ DÀY BỐ CỤC ĐỂ ĐỠ TRỐNG
+- Thời gian: 17/09/2026 10:52:10 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Cập nhật nội dung 2 dòng text tiếng Việt:
+     * Dòng đầu: "ĐÂY LÀ"
+     * Dòng đuôi: "#BLVD"
+     * (Tiếng Anh duy trì: "WHAT IS" và "#BLVD?")
+  2. Khắc phục cảm giác bị dẹt/kì dị của text kéo dãn:
+     * Nâng chiều cao container từ `h-8` lên `h-11 sm:h-13`, viewBox `400 x 52`, fontSize `46` để chữ có độ dày, đậm và tỷ lệ hiển thị cân đối như một poster/tiêu đề thực thụ, tránh tình trạng bị ép dẹt như trước.
+  3. Lấp đầy không gian rỗng ("đỡ trống"):
+     * Đoạn text giới thiệu tăng nhẹ font size `clamp(16.2px, 4.5vw, 19.8px)` và độ giãn dòng `leading-[1.72]`, phân bổ đều đặn và tự nhiên giữa hai dòng tiêu đề, lấp đầy các khoảng vàng/cam trống trải trước đó.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: ĐỔI TEXT GIỚI THIỆU SANG MÀU ĐEN (CẢ 2 GIAO DIỆN); MOBILE ÁP DỤNG HIỆU ỨNG TRONG SUỐT CHO 2 ĐẦU, GIẢM OPACITY VÀ TĂNG CHIỀU CAO
+- Thời gian: 17/09/2026 10:55:50 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx (Desktop)
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx (Mobile)
+- Chi tiết thay đổi:
+  1. Đổi text giới thiệu sang màu đen thuần (`text-black`) ở cả 2 giao diện Desktop & Mobile:
+     * Loại bỏ hiệu ứng `background-clip: text` lấy nền cũ.
+     * Chữ văn bản chuyển sang màu đen (`#000000`), tương phản sắc nét, dễ đọc trên nền mờ.
+  2. Riêng ở Mobile - Áp dụng hiệu ứng "trong suốt" cho 2 dòng text đầu và đuôi:
+     * Chữ chuyển sang hiệu ứng rỗng ruột trong suốt (`fill="none"`, `stroke="#000000" strokeWidth="2"`).
+     * Giảm độ đục (`opacity="0.35"`) mờ nhẹ, tạo phong cách chữ chìm tinh tế, không lấn át đoạn văn bản ở giữa.
+  3. Tăng chiều cao 2 dòng text ở Mobile để không bị lùn:
+     * Nâng chiều cao container lên `h-16 sm:h-20`, viewBox `400 x 70`, fontSize `62` (y=55).
+     * Dáng chữ vươn cao, thanh thoát, bề thế và tỷ lệ chữ cân xứng, không còn bị đè dẹt.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: MÀU TEXT LẤY NỀN DỰ ÁN (BACKGROUND PATTERN FILL), GIẢM OPACITY XUỐNG 0.45 & TĂNG CHIỀU CAO LÊN H-24 (VIEWBOX 400X120)
+- Thời gian: 17/09/2026 10:59:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Màu text 2 đầu là nền dự án (không phải rỗng ruột hay viền nét):
+     * Sử dụng SVG `<pattern>` nhúng trực tiếp hình nền dự án (`n-n-blvd18.webp`) kết hợp dải gradient màu đất ấm làm nền lót.
+     * Thuộc tính `fill="url(#blvd-bg-pattern-top)"` và `fill="url(#blvd-bg-pattern-bottom)"` lấp đầy toàn bộ diện tích thân chữ bằng hình ảnh nền dự án.
+     * `stroke="none"` (hoàn toàn không có viền nét, không rỗng ruột).
+  2. Giảm Opacity:
+     * Đặt `opacity="0.45"` trên 2 dòng text, tạo độ mờ êm dịu, chìm nhẹ vào lớp kính mờ như watermark sang trọng.
+  3. Khắc phục triệt để tình trạng "vẫn lùn quá":
+     * Tăng chiều cao container lên `h-24 sm:h-28` (96px - 112px).
+     * Mở rộng khung đồ họa lên viewBox `400 x 120` với kích cỡ font `106px` (tỷ lệ gần 3.3:1 thay vì 8:1 như trước).
+     * Thân chữ đứng cao, thanh thoát, bề thế chuẩn poster typography, loại bỏ hoàn toàn cảm giác bị ép dẹt.
+  4. Text giới thiệu:
+     * Duy trì màu đen tuyền (`text-black`) sắc nét, tương phản hoàn hảo ở cả 2 giao diện.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: THÊM LỚP PHỦ TỐI CHO TEXT (DARK OVERLAY & UNDERLAY) & GIẢM OPACITY XUỐNG 0.25 ĐỂ CHỮ NỔI RÕ NÉT TRÊN NỀN VÀNG SÁNG
+- Thời gian: 17/09/2026 11:02:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Khắc phục lỗi chữ bị chìm/khó đọc trên nền vàng sáng:
+     * Chữ "ĐÂY LÀ" và "#BLVD" trước đó lấy màu nền vàng nên tiệp màu hoàn toàn vào nền vàng làm mất tương phản ("không đọc được").
+  2. Bổ sung lớp phủ tối cho text:
+     * Bên trong SVG pattern: Phủ thêm lớp lọc tối màu đen (`fill="#000000" opacity="0.65"`) kết hợp dải nền tối sâu (`#1a0a04` -> `#2c1006` -> `#0a0502`) lên trên ảnh nền dự án.
+     * Thêm lớp chữ lót đen (`fill="#000000" opacity="0.4"`) bên dưới lớp vân nền để định hình cạnh viền và cấu trúc nét chữ rõ ràng.
+     * Bổ sung hiệu ứng bóng đổ nhẹ (`drop-shadow(0 1px 2px rgba(0,0,0,0.3))`) giúp tách biệt mặt chữ khỏi nền.
+  3. Giảm thêm Opacity của text:
+     * Hạ opacity tổng thể của cả cụm text từ 0.45 xuống `0.25`.
+     * Nhờ có lớp phủ tối và bóng lót, chữ hiển thị sắc nét, tương phản tối trên nền vàng sáng, dễ đọc và tinh tế như một watermark chuẩn mực, không làm rối mắt hay cạnh tranh với văn bản ở giữa.
+---------------------------------------------------------

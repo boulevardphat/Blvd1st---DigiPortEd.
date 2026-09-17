@@ -569,7 +569,7 @@ export default function App() {
               </div>
             </div>
           )}
-          {ENABLE_BLVD_SAFEZONE_GRID && scene === 'blvd-black' && <BlvdSafezoneGrid />}
+          {ENABLE_BLVD_SAFEZONE_GRID && scene === 'blvd-black' && <BlvdSafezoneGrid language={language} />}
         </div>
       )}
 

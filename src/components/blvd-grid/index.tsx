@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BlvdLandscapeGrid } from './BlvdLandscapeGrid';
 import { BlvdPortraitGrid } from './BlvdPortraitGrid';
+import { AppLanguage } from '../../types';
+
+interface BlvdSafezoneGridProps {
+  language?: AppLanguage;
+}
 
 /**
  * BlvdSafezoneGrid - Hệ thống Lưới Safezone Mô đun hóa:
@@ -10,7 +15,7 @@ import { BlvdPortraitGrid } from './BlvdPortraitGrid';
  * - Tách biệt 100% code giao diện ngang & dọc, dễ tinh chỉnh độc lập.
  * - Mô-đun hóa độc lập, cực kỳ dễ tháo bỏ (chỉ cần bật/tắt hoặc xoá component mà không ảnh hưởng code khác).
  */
-export const BlvdSafezoneGrid: React.FC = () => {
+export const BlvdSafezoneGrid: React.FC<BlvdSafezoneGridProps> = ({ language = 'vi' }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -60,9 +65,9 @@ export const BlvdSafezoneGrid: React.FC = () => {
       className="absolute inset-0 pointer-events-auto z-20 select-none overflow-hidden"
     >
       {isLandscape ? (
-        <BlvdLandscapeGrid width={W} height={H} />
+        <BlvdLandscapeGrid width={W} height={H} language={language} />
       ) : (
-        <BlvdPortraitGrid width={W} height={H} />
+        <BlvdPortraitGrid width={W} height={H} language={language} />
       )}
     </div>
   );
