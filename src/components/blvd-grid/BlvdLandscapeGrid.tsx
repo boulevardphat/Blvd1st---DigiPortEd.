@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AppLanguage } from '../../types';
 import { BLVD_INTRO_TEXT } from './blvdText';
+import { BlvdTemplateExporter } from './BlvdTemplateExporter';
 
 interface BlvdGridProps {
   width: number;
@@ -18,8 +19,23 @@ interface BlvdGridProps {
  *   + Màu chữ lấy chính nền làm màu (background-clip: text từ ảnh nền và gradient của dự án).
  *   + Lớp blur màu tối giảm opacity để chữ tương phản và đọc rõ.
  *   + Không bo góc (chuẩn Boulevard1st: rounded-none).
+ * - Quản lý tab kiểu Google Chrome ở góc trên bên trái của khu vực bên phải:
+ *   + Rộng 1 ô (tabH = cellSize), dài khoảng 4 ô (tabBodyW = 4 * cellSize) vừa vặn cho sub-logo (#BLVD18, #BLVD17, #BLVD16).
+ *   + Ô thứ 5 vát chéo nửa ô (tabSlantW = 0.5 * cellSize) tạo hiệu ứng tab mượt mà, không thô.
+ *   + Hoàn toàn 0px border-radius (rounded-none), nét vẽ 1px đen chuẩn kiến trúc lưới.
  */
 export const BlvdLandscapeGrid: React.FC<BlvdGridProps> = ({ width: W, height: H, language = 'vi' }) => {
+  // Trạng thái tab đang hoạt động (mặc định là #BLVD18)
+  const [activeTab, setActiveTab] = useState<'BLVD18' | 'BLVD17' | 'BLVD16'>('BLVD18');
+  // Tùy chọn hiển thị 3 nút Tab hay ẩn để thiết kế theo kiểu vuốt từ trên xuống
+  const [showTabs, setShowTabs] = useState(true);
+
+  const TABS = [
+    { id: 'BLVD18', label: '#BLVD18' },
+    { id: 'BLVD17', label: '#BLVD17' },
+    { id: 'BLVD16', label: '#BLVD16' },
+  ] as const;
+
   // 1. Xác định Safezone cho màn hình ngang (6.5% mỗi cạnh)
   const marginX = Math.round(W * 0.065);
   const marginY = Math.round(H * 0.065);
@@ -46,9 +62,9 @@ export const BlvdLandscapeGrid: React.FC<BlvdGridProps> = ({ width: W, height: H
   const gridY = sy + topH;
 
   // 3. Logo #BLVD & 4 Hàng Ô Chứa Nội Dung Giới Thiệu ở Desktop:
-  // Chiều dài (chiều ngang) logo chiếm khoảng 40% tổng số ô theo chiều dài của Safezone
+  // Chiều dài (chiều ngang) logo chiếm khoảng 40% tổng số ô theo chiều dài của Safezone.
   const introRows = 4;
-  const logoCols = Math.max(3, Math.min(cols - 2, Math.round(cols * 0.4)));
+  const logoCols = Math.max(3, Math.min(cols - 3, Math.round(cols * 0.4)));
   const logoRows = Math.max(2, rows - introRows);
 
   const logoW = logoCols * cellSize;
@@ -62,11 +78,33 @@ export const BlvdLandscapeGrid: React.FC<BlvdGridProps> = ({ width: W, height: H
   const introW = logoW;
   const introH = Math.min(introRows * cellSize, (gridY + gridH) - introY);
 
-  // Danh sách toạ độ các đường kẻ dọc (né khung logo và 4 hàng intro ở góc trái)
+  // 4. Hệ thống Tab Quản lý (#BLVD18, #BLVD17, #BLVD16) Phương Án 1:
+  // - Bắt đầu ngay mép phải logo #BLVD (logoX + logoW), kết thúc chạm sát mép phải Safezone (gridX + gridW).
+  // - Toàn bộ chiều ngang khu vực bên phải: rightAreaW = (cols - logoCols) * cellSize.
+  // - Chiều cao: Đúng 1 hàng ô vuông (tabH = cellSize).
+  // - Chiều dài mỗi nút: Chia đều chính xác cho 3 (tabW = rightAreaW / 3).
+  //   Nếu không phải số tự nhiên (ví dụ 3.5, 4.33 ô...) cũng giữ nguyên giá trị thực, KHÔNG làm tròn ép số nguyên.
+  const rightCols = cols - logoCols;
+  const tabStartX = logoX + logoW;
+  const tabY = gridY;
+  const tabH = cellSize;
+  const totalTabsW = rightCols * cellSize;
+  const tabW = totalTabsW / 3;
+
+  // Ranh giới phân chia giữa 3 tab theo trục X:
+  // Tab 0 kết thúc tại x = tabStartX + tabW
+  // Tab 1 kết thúc tại x = tabStartX + 2 * tabW
+  const tabDividerX1 = tabStartX + tabW;
+  const tabDividerX2 = tabStartX + 2 * tabW;
+
+  // Danh sách toạ độ các đường kẻ dọc của lưới:
+  // Nếu showTabs = true: Ở hàng 0 (từ yStart = gridY đến gridY + cellSize), các đường kẻ dọc ở khu vực bên phải (c >= logoCols)
+  // sẽ bắt đầu từ hàng 1 (yStart = gridY + cellSize) để ruột nút phẳng hoàn toàn.
+  // Nếu showTabs = false: Lưới ô vuông phủ kín bình thường từ hàng 0.
   const verticalLines: { x: number; y1: number; y2: number }[] = [];
   for (let c = 1; c < cols; c++) {
     const xVal = gridX + c * cellSize;
-    const yStart = c < logoCols ? introY + introH : gridY;
+    let yStart = c < logoCols ? introY + introH : (showTabs ? gridY + cellSize : gridY);
     if (yStart < gridY + gridH) {
       verticalLines.push({ x: xVal, y1: yStart, y2: gridY + gridH });
     }
@@ -225,6 +263,48 @@ export const BlvdLandscapeGrid: React.FC<BlvdGridProps> = ({ width: W, height: H
           strokeWidth="1"
         />
 
+        {/* Khung viền kỹ thuật SVG cho 3 Tab hình chữ nhật phẳng (Flat Architecture) */}
+        {showTabs && (
+          <g id="blvd-landscape-flat-tabs-svg">
+            {/* Đường biên dưới của toàn bộ hàng tab */}
+            <line
+              x1={tabStartX}
+              y1={tabY + tabH}
+              x2={tabStartX + totalTabsW}
+              y2={tabY + tabH}
+              stroke="#000000"
+              strokeWidth="1"
+            />
+            {/* Vạch phân chia giữa Tab 1 và Tab 2 */}
+            <line
+              x1={tabDividerX1}
+              y1={tabY}
+              x2={tabDividerX1}
+              y2={tabY + tabH}
+              stroke="#000000"
+              strokeWidth="1"
+            />
+            {/* Vạch phân chia giữa Tab 2 và Tab 3 */}
+            <line
+              x1={tabDividerX2}
+              y1={tabY}
+              x2={tabDividerX2}
+              y2={tabY + tabH}
+              stroke="#000000"
+              strokeWidth="1"
+            />
+            {/* Vạch mép phải của Tab 3 (tiếp giáp mép phải lưới) */}
+            <line
+              x1={tabStartX + totalTabsW}
+              y1={tabY}
+              x2={tabStartX + totalTabsW}
+              y2={tabY + tabH}
+              stroke="#000000"
+              strokeWidth="1"
+            />
+          </g>
+        )}
+
         {/* Viền ngoài cùng của Safezone */}
         <rect
           x={sx}
@@ -238,12 +318,7 @@ export const BlvdLandscapeGrid: React.FC<BlvdGridProps> = ({ width: W, height: H
         />
       </svg>
 
-      {/* Lớp hiển thị nội dung giới thiệu trong 4 hàng ô dưới logo #BLVD:
-          - Nền blur màu sáng giảm opacity (bg-white/25 backdrop-blur-md) theo yêu cầu.
-          - Chiều ngang mở rộng ~40% tổng số ô Safezone, giúp text đọc thoải mái, rõ ràng.
-          - justify-start với padding gọn gàng để text bắt đầu từ trên cùng, KHÔNG bị khuất chữ.
-          - Font size & weight cân đối (font-bold), màu chữ lấy nền làm màu (background-clip: text).
-          - Chuẩn Boulevard1st: Không bo góc (rounded-none). */}
+      {/* Lớp hiển thị nội dung giới thiệu trong 4 hàng ô dưới logo #BLVD */}
       <div
         id="blvd-landscape-intro-box"
         style={{
@@ -259,6 +334,84 @@ export const BlvdLandscapeGrid: React.FC<BlvdGridProps> = ({ width: W, height: H
           {introText}
         </p>
       </div>
+
+      {/* Lớp tương tác 3 Tab hình chữ nhật phẳng (#BLVD18, #BLVD17, #BLVD16):
+          - Phương án 1: Trải đều toàn bộ chiều ngang của khu vực bên phải (từ mép logo #BLVD đến mép phải Safezone).
+          - Tổng chiều dài 3 nút = Chiều rộng khu vực bên phải (totalTabsW).
+          - Chia đều chính xác cho 3 (tabW = totalTabsW / 3). Kể cả là số thập phân (3.5, 5.33...) cũng giữ nguyên giá trị thực, không ép nguyên.
+          - Thiết kế Flat tối giản, chuẩn Boulevard1st: rounded-none, 0px border-radius, không depth rườm rà.
+          - Active tab: Nền đen chữ trắng phẳng tương phản cao (bg-black text-white).
+          - Inactive tab: Nền phẳng sáng (bg-white/30 hover:bg-white/50 text-black). */}
+      {showTabs && (
+        <div
+          id="blvd-landscape-flat-tabs-overlay"
+          style={{
+            position: 'absolute',
+            left: `${tabStartX}px`,
+            top: `${tabY}px`,
+            width: `${totalTabsW}px`,
+            height: `${tabH}px`,
+          }}
+          className="z-20 pointer-events-auto flex items-stretch select-none"
+        >
+          {TABS.map((tab, idx) => {
+            const isActive = activeTab === tab.id;
+
+            return (
+              <button
+                key={`tab-btn-${tab.id}`}
+                type="button"
+                id={`tab-btn-${tab.id.toLowerCase()}`}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 h-full flex items-center justify-center transition-colors duration-100 cursor-pointer rounded-none outline-none border-b border-r border-black ${
+                  idx === 0 ? 'border-l' : ''
+                } ${
+                  isActive
+                    ? 'bg-black text-white font-extrabold'
+                    : 'bg-white/30 hover:bg-white/50 text-black font-bold'
+                }`}
+              >
+                <span className="font-archivo text-[clamp(13px,1.05vw,16px)] tracking-[0.08em] uppercase whitespace-nowrap select-none">
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Mô-đun xuất Template Canva - Độc lập, dễ dàng bỏ sau này */}
+      <BlvdTemplateExporter
+        showTabs={showTabs}
+        onToggleShowTabs={(val) => setShowTabs(val)}
+        gridInfo={{
+          isMobile: false,
+          canvasWidth: W,
+          canvasHeight: H,
+          cellSize,
+          cols,
+          rows,
+          marginX,
+          marginY,
+          gridX,
+          gridY,
+          gridW,
+          gridH,
+          logoCols,
+          logoRows,
+          introRows,
+          logoW,
+          logoH,
+          introH,
+          tabStartX,
+          tabY,
+          tabH,
+          totalTabsW,
+          tabW,
+          activeTabName: activeTab,
+          showTabs,
+        }}
+      />
     </div>
   );
 };

@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { AppLanguage } from '../../types';
 import { BLVD_INTRO_TEXT } from './blvdText';
+import { BlvdTemplateExporter } from './BlvdTemplateExporter';
 
 interface BlvdGridProps {
   width: number;
@@ -32,6 +33,14 @@ export const BlvdPortraitGrid: React.FC<BlvdGridProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollY, setScrollY] = useState(0);
+  const [activeTab, setActiveTab] = useState<'BLVD18' | 'BLVD17' | 'BLVD16'>('BLVD18');
+  const [showTabs, setShowTabs] = useState(false); // Mặc định ở mobile: đang cân nhắc vuốt dọc hoặc tab
+
+  const TABS = [
+    { id: 'BLVD18', label: '#BLVD18' },
+    { id: 'BLVD17', label: '#BLVD17' },
+    { id: 'BLVD16', label: '#BLVD16' },
+  ] as const;
 
   // 1. Safezone cho màn hình dọc (6% ngang, 5% dọc)
   const marginX = Math.round(Math.max(20, W * 0.06));
@@ -97,6 +106,16 @@ export const BlvdPortraitGrid: React.FC<BlvdGridProps> = ({
   const handleMouseUp = () => {
     isMouseDownRef.current = false;
   };
+
+  useEffect(() => {
+    const onWindowMouseUp = () => {
+      isMouseDownRef.current = false;
+    };
+    window.addEventListener('mouseup', onWindowMouseUp);
+    return () => {
+      window.removeEventListener('mouseup', onWindowMouseUp);
+    };
+  }, []);
 
   // 4. Tính toán phân đoạn chuyển động:
   // normalizedProgress từ 0 -> 2.4
@@ -310,6 +329,43 @@ export const BlvdPortraitGrid: React.FC<BlvdGridProps> = ({
               strokeWidth="1"
             />
           </svg>
+
+          {/* Lớp 3 Tab trên Mobile khi người dùng bật tùy chọn hiển thị Tab */}
+          {showTabs && (
+            <div
+              id="blvd-portrait-flat-tabs-overlay"
+              style={{
+                position: 'absolute',
+                left: `${sx}px`,
+                top: `${sy + gridY}px`,
+                width: `${sw}px`,
+                height: `${cellSize}px`,
+              }}
+              className="z-30 pointer-events-auto flex items-stretch select-none"
+            >
+              {TABS.map((tab, idx) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={`p-tab-btn-${tab.id}`}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-1 h-full flex items-center justify-center transition-colors duration-100 cursor-pointer rounded-none outline-none border-b border-r border-black ${
+                      idx === 0 ? 'border-l' : ''
+                    } ${
+                      isActive
+                        ? 'bg-black text-white font-extrabold'
+                        : 'bg-white/30 hover:bg-white/50 text-black font-bold'
+                    }`}
+                  >
+                    <span className="font-archivo text-[12px] tracking-[0.05em] uppercase whitespace-nowrap select-none">
+                      {tab.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -544,6 +600,33 @@ export const BlvdPortraitGrid: React.FC<BlvdGridProps> = ({
           className="pointer-events-none"
         />
       </div>
+
+      {/* Mô-đun xuất Template Canva cho Mobile - Độc lập, dễ dàng bỏ sau này */}
+      <BlvdTemplateExporter
+        showTabs={showTabs}
+        onToggleShowTabs={(val) => setShowTabs(val)}
+        gridInfo={{
+          isMobile: true,
+          canvasWidth: W,
+          canvasHeight: H,
+          cellSize,
+          cols,
+          rows,
+          marginX,
+          marginY,
+          gridX: sx,
+          gridY: sy + gridY,
+          gridW,
+          gridH,
+          tabStartX: sx,
+          tabY: sy + gridY,
+          tabH: cellSize,
+          totalTabsW: sw,
+          tabW: sw / 3,
+          activeTabName: activeTab,
+          showTabs,
+        }}
+      />
     </div>
   );
 };

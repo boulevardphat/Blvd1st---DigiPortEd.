@@ -1910,3 +1910,160 @@ LẦN THAY ĐỔI: THÊM LỚP PHỦ TỐI CHO TEXT (DARK OVERLAY & UNDERLAY) & 
      * Hạ opacity tổng thể của cả cụm text từ 0.45 xuống `0.25`.
      * Nhờ có lớp phủ tối và bóng lót, chữ hiển thị sắc nét, tương phản tối trên nền vàng sáng, dễ đọc và tinh tế như một watermark chuẩn mực, không làm rối mắt hay cạnh tranh với văn bản ở giữa.
 ---------------------------------------------------------
+
+LẦN THAY ĐỔI: RÀ SOÁT, TỐI ƯU HIỆU NĂNG MÃ NGUỒN, ĐỒNG BỘ METADATA & DỌN DẸP SỰ KIỆN TOÀN DIỆN
+- Thời gian: 18/09/2026 22:05:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /index.html
+  + /metadata.json
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+  + /src/components/blvd-grid/index.tsx
+  + /src/components/blvd-grid/blvdText.ts
+- Chi tiết rà soát & tối ưu:
+  1. Đồng bộ Metadata & SEO Entrypoint:
+     * Cập nhật `<title>`, `<meta property="og:title">`, `<meta name="description">`, `<meta property="og:description">` trong `index.html` đồng nhất với `metadata.json` ("Remix Boulevard1st (DigiPort ed.)").
+  2. Tối ưu Bộ lắng nghe sự kiện & Xử lý Kéo thả trên Desktop/Mobile:
+     * Bổ sung cleanup event `mouseup` toàn cục trên `window` trong `BlvdPortraitGrid.tsx`, loại bỏ nguy cơ bị kẹt trạng thái chuột (`isMouseDownRef`) khi kéo chuột vượt khỏi khung xem iframe.
+     * Xác nhận toàn bộ tương tác touch & native inertial smooth scrolling (không dùng scroll-snap) đạt 60fps/120fps chuẩn sạch, không memory leak.
+  3. Kiểm tra Tính toàn vẹn Quy tắc Boulevard1st:
+     * Toàn bộ component (`BlvdLandscapeGrid`, `BlvdPortraitGrid`, `BlvdSafezoneGrid`) đảm bảo 100% `rounded-none`, không bo góc bất kỳ chi tiết nào.
+     * Văn bản song ngữ (Tiếng Việt và Tiếng Anh) hoạt động đồng bộ với switcher ngôn ngữ ở màn hình chính.
+     * Grid ô vuông (1:1) Safezone, hệ thống sọc chéo, blur toàn màn hình và bố cục typography 2 đầu ("ĐÂY LÀ" / "#BLVD") hiển thị sắc nét, tương phản tối ưu trên mọi kích thước thiết bị.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: LƯU TRỮ VÀ HỆ THỐNG HÓA KHO MULTIMEDIA ASSETS (97 TÀI NGUYÊN WEB)
+- Thời gian: 18/09/2026 22:08:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/data/multimediaArchive.ts (Tạo mới)
+- Chi tiết lưu trữ:
+  1. Mục đích: Lưu trữ an toàn và phân loại toàn bộ 97 liên kết tài nguyên từ kho multimedia chính thức của Boulevard1st (GitHub Boulevardphat/Kho-multimedia-c-a-Blvd). Chưa hiển thị lên giao diện UI ("đừng show liền sau này mới dùng tới").
+  2. Cấu trúc dữ liệu có kiểu định nghĩa chặt chẽ (ArchiveAsset, ProjectGroup) phân loại theo 2 nhóm chế độ Portfolio chuẩn:
+     * Employer / Club (73 tài nguyên):
+       - [#BLVD] #BLVD16 (10 ảnh)
+       - [#BLVD] #BLVD17 (8 ảnh)
+       - [#BLVD] #BLVD18 (6 ảnh ghép lưới)
+       - [HVOC] BONDING (1 poster)
+       - [HVOC] Bưu điện HVOC (3 ảnh: Chính, Quảng bá, Ảnh bìa)
+       - [HVOC] HVOC Club Day (2 template photobooth: Biển, Núi)
+       - [HVOC] HVOC DDO 7 (8 tài nguyên: Dây đeo, Khung avatar, Poster, Template, Thẻ đeo)
+       - [HVOC] HVOC TAR 8 (1 thẻ đeo)
+       - [HVOC] Máu đông (1 poster)
+       - [REINMAGINED] Thẻ Học sinh CHV (22 thẻ: 11 lớp chuyên mặt trước, 11 lớp chuyên mặt sau)
+       - [Đội TNTN] Spotiflyer (20 tài nguyên: Bản đồ khu vực, Bản đồ thế giới, Dãy BD công viên 1 & 2, Nhà đa năng 1 & 2, Luật chơi)
+     * Individual (24 tài nguyên):
+       - Bảo vệ môi trường (1 poster)
+       - Kỉ yếu (3 tài nguyên: Mặt trước/sau thẻ quà, Thư mời)
+       - Museum of Fine Arts (6 đồ hoạ)
+       - Thuan Phat, Boulevard et ville de Da Lat: #BLVD16 (8 đồ hoạ), #BLVD17 (5 đồ hoạ)
+       - [A2K28] 20_10_2025 (1 poster)
+  3. Cung cấp sẵn các helper function: `getAssetsByMode`, `getAssetsByProject`, `getProjectGroups` để sẵn sàng truy xuất tức thì khi người dùng yêu cầu dựng Gallery / Showcase / Chi tiết dự án trong tương lai.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: THÊM HỆ THỐNG TAB QUẢN LÝ KIỂU GOOGLE CHROME VÀO GÓC TRÊN BÊN TRÁI KHU VỰC BÊN PHẢI (DESKTOP LANDSCAPE)
+- Thời gian: 18/09/2026 23:07:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+- Chi tiết thay đổi:
+  1. Vị trí và kích thước hình học Tab Bar (kiểu Google Chrome):
+     * Tọa độ bắt đầu: Ngay tại mép phải của logo #BLVD (x = logoX + logoW), hàng trên cùng của lưới Safezone (y = gridY).
+     * Chiều rộng (chiều cao) mỗi tab: Rộng đúng 1 hàng ô vuông (tabH = cellSize).
+     * Chiều dài thân tab: Dài khoảng 4 ô (tabBodyW = 4 * cellSize), tỷ lệ hoàn hảo vừa đủ để hiển thị trang nhã các sub-logo (#BLVD18, #BLVD17, #BLVD16).
+     * Hiệu ứng vát chéo ở ô thứ 5: Cắt chéo đúng nửa ô (tabSlantW = 0.5 * cellSize) tạo góc vát mượt mà, kỹ thuật, loại bỏ cảm giác thô cứng của hình chữ nhật cụt.
+  2. Bố cục và cấu trúc các Tab (#BLVD18, #BLVD17, #BLVD16):
+     * Tab 1 (#BLVD18 - Mặc định Active): Cạnh trái thẳng đứng tiếp giáp mép logo #BLVD, cạnh trên 4 ô, cạnh phải vát chéo 0.5 ô vào ô thứ 5, cạnh đáy 4.5 ô.
+     * Tab 2 (#BLVD17) & Tab 3 (#BLVD16): Cạnh trái ăn khớp chuẩn xác với đường vát chéo của tab trước (11.111111%), cạnh trên 4 ô, cạnh phải vát chéo tiếp 0.5 ô.
+     * Tích hợp đồng thời 2 lớp:
+       - Lớp SVG Polygon: Viền kỹ thuật 1px đen nét liền (stroke="#000000" strokeWidth="1"), chính xác đến từng subpixel.
+       - Lớp HTML Overlay Button: clip-path đa giác khớp 100% với SVG, hiệu ứng kính mờ (backdrop-blur-md), phản hồi hover và click chuyển đổi tab mượt mà.
+  3. Xử lý đường kẻ lưới an toàn:
+     * Ẩn các đoạn kẻ dọc nội bộ ở hàng 0 bên trong thân tab (yStart = gridY + cellSize) để không cắt ngang chữ sub-logo.
+     * Giữ nguyên các đường biên ô 4, 5... để góc vát chéo nửa ô thứ 5 hiển thị rõ nét so với khung lưới tổng thể.
+  4. Tuân thủ bộ quy tắc:
+     * 100% rounded-none, không bo góc bất kỳ chi tiết nào (chuẩn Boulevard1st).
+     * Typography Archivo in hoa, đậm nét (font-archivo font-extrabold uppercase tracking-[0.06em]).
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: CHUYỂN TAB SANG 3 NÚT HÌNH CHỮ NHẬT PHẲNG (FLAT), TỔNG CHIỀU DÀI BẰNG KHU VỰC BÊN TRÁI
+- Thời gian: 18/09/2026 23:16:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+- Chi tiết thay đổi:
+  1. Loại bỏ hoàn toàn hiệu ứng vát chéo/depth:
+     * Bỏ polygon cắt chéo nửa ô thứ 5 kiểu Chrome tab, bỏ clip-path phức tạp và hiệu ứng depth không phù hợp với thẩm mỹ Flat của dự án.
+     * Cả 3 nút đều là hình chữ nhật phẳng 100%, nét vẽ 1px đen liền viền theo từng ô lưới (Swiss/Editorial architecture).
+  2. Kích thước và căn chỉnh lưới hình học:
+     * Tổng chiều dài 3 nút = Chiều dài khu vực bên trái (totalTabsW = logoW = logoCols * cellSize).
+     * Chiều cao mỗi nút = Đúng 1 hàng ô vuông (tabH = cellSize).
+     * Chiều rộng mỗi nút = Chia đều 1/3 chiều dài khu vực bên trái (tabW = logoW / 3 = colsPerTab * cellSize).
+     * Đảm bảo logoCols là bội số của 3 để từng nút khớp chính xác từng ô vuông lưới nguyên vẹn.
+  3. Xử lý đường kẻ dọc nội bộ:
+     * Tự động ẩn các đường kẻ dọc ở hàng 0 trong phạm vi ruột của từng tab (tabInnerCols) để text sub-logo không bị gạch ngang.
+     * Giữ nguyên các đường kẻ dọc tại ranh giới giữa Tab 1 - Tab 2 - Tab 3 và mép phải Tab 3 để tạo vách ngăn 1px chuẩn xác.
+  4. Trạng thái và thẩm mỹ phẳng (Flat Aesthetic):
+     * Active tab (#BLVD18 mặc định): Nền đen đặc chữ trắng tương phản cao (bg-black text-white font-extrabold), phẳng 100%, đồng điệu với logo #BLVD.
+     * Inactive tab (#BLVD17, #BLVD16): Nền sáng phẳng (bg-white/30 hover:bg-white/50 text-black font-bold).
+     * Tuân thủ quy tắc Boulevard1st: rounded-none 100%, 0px border-radius, không glow, không gradient chữ.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TRẢI ĐỀU 3 NÚT TAB TOÀN BỘ CHIỀU NGANG KHU VỰC BÊN PHẢI (PHƯƠNG ÁN 1, GIỮ NGUYÊN TỶ LỆ THỰC KHÔNG ÉP SỐ TỰ NHIÊN)
+- Thời gian: 18/09/2026 23:20:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+- Chi tiết thay đổi:
+  1. Kích thước và phân bổ chiều dài 3 nút tab theo Phương án 1:
+     * Tổng chiều dài của 3 nút = Toàn bộ chiều ngang khu vực bên phải (từ mép phải logo #BLVD đến mép phải Safezone): `totalTabsW = (cols - logoCols) * cellSize`.
+     * Chiều dài mỗi nút = Chia đều chính xác cho 3 (`tabW = totalTabsW / 3`).
+     * Tuyệt đối không ép tròn số ô (dù là 3.5, 4.33, 5.67 ô... thì giữ nguyên độ dài thực tế để chia đều 100% không để lại khoảng trống dư thừa hay lọt thỏm).
+     * Chiều cao mỗi nút: Rộng đúng 1 hàng ô vuông (`tabH = cellSize`).
+  2. Bố cục và đường nét lưới kỹ thuật:
+     * Lớp SVG vẽ chính xác các đường phân chia 1px giữa Tab 1 - Tab 2 (`tabDividerX1`), giữa Tab 2 - Tab 3 (`tabDividerX2`), và đường biên dưới toàn bộ hàng tab.
+     * Ở hàng 0 trong phạm vi khu vực bên phải, các đường kẻ dọc nội bộ của lưới được bắt đầu từ hàng 1 (`yStart = gridY + cellSize`) để mặt phẳng của 3 tab liền mạch, sạch sẽ, không bị nét lưới cắt vụn chữ.
+  3. Lớp nút bấm phẳng và trực quan (Flat Architecture):
+     * Dùng `flex-1 h-full` trong container overlay giúp 3 nút trải đều 100% không gian khu vực bên phải.
+     * Nút đang chọn (Active): Nền đen phẳng, chữ trắng in hoa tương phản cao (`bg-black text-white font-extrabold`).
+     * Nút chưa chọn (Inactive): Nền phẳng sáng nhẹ (`bg-white/30 hover:bg-white/50 text-black font-bold`).
+     * Tuân thủ chuẩn Boulevard1st: 100% `rounded-none`, 0px border-radius, hoàn toàn không bo góc.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: TÍCH HỢP MÔ-ĐUN POPUP XUẤT TEMPLATE CANVA (BLVDTEMPLATEEXPORTER)
+- Thời gian: 18/09/2026 23:25:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdTemplateExporter.tsx (Tạo mới hoàn toàn độc lập)
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+- Chi tiết thay đổi:
+  1. Mô-đun hóa độc lập (Modular Pattern):
+     * Toàn bộ logic xuất template, tính toán kích thước khung và giao diện popup được gói gọn trong file `/src/components/blvd-grid/BlvdTemplateExporter.tsx`.
+     * Khi không còn nhu cầu sử dụng, chỉ cần xóa file hoặc bỏ 1 dòng gọi component trong `BlvdLandscapeGrid.tsx` mà không làm ảnh hưởng đến bất kỳ thành phần nào khác của dự án.
+  2. Nút kích hoạt và giao diện Popup:
+     * Đặt một nút pop-up nhỏ gọn ở góc dưới bên phải màn hình (`#btn-open-canva-template-exporter`), phong cách Flat, `rounded-none`, không che khuất nội dung chính.
+     * Khi bấm, mở cửa sổ Modal chi tiết hiển thị:
+       - Kích thước canvas thực tế của màn hình (ví dụ 1920x1080 px).
+       - Kích thước lưới Safezone 6.5% và kích thước ô vuông.
+       - Tọa độ X, Y và diện tích pixel chính xác của "Vùng thiết kế nội dung tab" bên phải.
+  3. Tính năng xuất file phục vụ thiết kế trên Canva:
+     * "Tải PNG Canva": Xuất file ảnh PNG độ phân giải 1:1, hỗ trợ nền trong suốt (Transparent) hoặc nền sáng/tối để kéo thả thẳng vào Canva làm khung tham chiếu.
+     * "Tải SVG Vector": Xuất file SVG vector chuẩn xác từng nét kẻ lưới, không bị vỡ hạt.
+     * "Sao chép số đo": Sao chép nhanh toàn bộ bảng thông số pixel chuẩn để người dùng nhập thẳng vào Canva khi tạo Custom Size.
+  4. Tuân thủ triệt để quy chuẩn Boulevard1st: 100% `rounded-none`, 0px border-radius, font Archivo, bảng màu tối giản đen/trắng kỹ thuật.
+---------------------------------------------------------
+
+LẦN THAY ĐỔI: HỖ TRỢ XUẤT TEMPLATE CANVA CHO MOBILE & TÙY CHỌN HIỆN/ẨN NÚT TAB
+- Thời gian: 18/09/2026 23:44:00 (Giờ TPHCM)
+- File ảnh hưởng:
+  + /src/components/blvd-grid/BlvdTemplateExporter.tsx
+  + /src/components/blvd-grid/BlvdLandscapeGrid.tsx
+  + /src/components/blvd-grid/BlvdPortraitGrid.tsx
+- Chi tiết thay đổi:
+  1. Hỗ trợ đầy đủ cho Mobile (Portrait):
+     * Tích hợp `BlvdTemplateExporter` vào giao diện dọc `BlvdPortraitGrid`.
+     * Tự động nhận diện kích thước khung hình Canvas mobile, lề Safezone dọc (6% ngang, 5% dọc) và kích thước ô vuông tương ứng.
+     * Cho phép xuất cả PNG trong suốt và SVG Vector cho màn hình điện thoại (dạng 9:16 hoặc độ phân giải thực tế của máy).
+  2. Tùy chọn chuyển đổi: Hiện nút Tab (#BLVD18, 17, 16) hoặc Vuốt cuộn từ trên xuống:
+     * Thêm mục chuyển đổi tương tác trực tiếp ngay trong popup ("Hình thức điều hướng"):
+       + Chế độ "Dùng 3 Nút Tab": Giữ hàng đầu tiên làm tab navigation, tính toán diện tích thiết kế bên dưới hàng tab.
+       + Chế độ "Vuốt từ trên xuống": Ẩn toàn bộ 3 nút tab, giải phóng trọn vẹn 100% chiều cao vùng lưới Safezone để người dùng thoải mái dàn layout theo dạng cuộn dọc.
+     * Cả trên màn hình thực tế lẫn trong ảnh template tải về đều cập nhật tức thời theo tùy chọn này để người dùng dễ dàng so sánh và đưa ra quyết định thiết kế.
+  3. Mô-đun hóa độc lập (Modular Pattern):
+     * Toàn bộ tính năng được điều khiển qua prop `showTabs` và `onToggleShowTabs`, hoàn toàn độc lập và dễ dàng tháo gỡ sau khi hoàn thành thiết kế.
+---------------------------------------------------------
