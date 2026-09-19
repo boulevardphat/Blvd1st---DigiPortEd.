@@ -2067,3 +2067,310 @@ LẦN THAY ĐỔI: HỖ TRỢ XUẤT TEMPLATE CANVA CHO MOBILE & TÙY CHỌN HI�
   3. Mô-đun hóa độc lập (Modular Pattern):
      * Toàn bộ tính năng được điều khiển qua prop `showTabs` và `onToggleShowTabs`, hoàn toàn độc lập và dễ dàng tháo gỡ sau khi hoàn thành thiết kế.
 ---------------------------------------------------------
+
+
+# NHẬT KÝ THAY ĐỔI & LỊCH SỬ PHIÊN BẢN (CHANGELOG & ROLLBACK LOG)
+
+Dự án: Remix Boulevard1st (DigiPort ed.)
+
+---
+
+## [Lần 1] - Khởi tạo trạng thái Đen xì theo yêu cầu (#blvd black canvas)
+- **Thời điểm:** Turn 1 (Sau Checkpoint 1).
+- **Yêu cầu người dùng:** "mình thấy giao diện #blvd quá xấu, bỏ hết đi, đưa về 1 giao diện đen xì, ta làm lại".
+- **Chi tiết thay đổi:**
+  1. `src/App.tsx`:
+     - Gỡ bỏ component `<BlvdSafezoneGrid />` khỏi cảnh `blvd-black`.
+     - Thay thế cảnh `blvd-black` bằng một giao diện đen xì thuần túy (`bg-black`, `id="scene-blvd-pure-black"`, không chứa ảnh nền, không chứa grid, không chứa exporter).
+     - Điều chỉnh sự kiện thoát cảnh `blvd-black`: Giữ phím `Escape` để quay về `main-app` (không tự kích hoạt click thoát khi tương tác) để sẵn sàng bắt đầu xây dựng lại giao diện mới.
+     - Dọn dẹp import `BlvdSafezoneGrid` và cờ `ENABLE_BLVD_SAFEZONE_GRID`.
+  2. File `/src/components/blvd-grid/`: Giữ nguyên độc lập làm tài liệu đối chiếu / tái cấu trúc khi người dùng bắt đầu làm mới.
+
+---
+
+## [Lần 2] - Thêm chữ #BLVD kéo dãn toàn màn hình, filled, không stroke, giảm opacity
+- **Thời điểm:** Turn 2 (Sau Checkpoint 2).
+- **Yêu cầu người dùng:** "đầu tiên, giống cái scene #BLVD kéo dãn to trong intro ấy, lấy cái đó, nhưng thêm dấu thăng, filled, không stroke, giảm opacity".
+- **Chi tiết thay đổi:**
+  1. `src/App.tsx`:
+     - Trong cảnh `scene === 'blvd-black'`, sử dụng SVG toàn màn hình (`w-full h-full`, `preserveAspectRatio="none"` tương tự scene intro kéo dãn).
+     - Text render `#BLVD` (font-archivo font-black).
+     - Định dạng: `fill="rgba(255, 255, 255, 0.25)"`, `stroke="none"` (filled, không viền stroke, giảm opacity 25%).
+
+---
+
+## [Lần 3] - Chuyển #BLVD sang stroke mỏng viền nét giống BLVD gốc
+- **Thời điểm:** Turn 3 (Sau Checkpoint 2).
+- **Yêu cầu người dùng:** "filled hơi thô =))) chắc cho như BLVD gốc, stroke mỏng tí".
+- **Chi tiết thay đổi:**
+  1. `src/App.tsx`:
+     - Trong cảnh `scene === 'blvd-black'`, cập nhật text `#BLVD`:
+     - `fill`: Chuyển từ `rgba(255, 255, 255, 0.25)` sang `"none"`.
+     - `stroke`: Thêm nét viền `rgba(255, 255, 255, 0.85)` giống BLVD gốc nhưng tinh chỉnh nét mỏng thanh thoát (`strokeWidth="1.2"` thay vì 3.2).
+
+---
+
+## [Lần 4] - Thiết lập cấu trúc 4 Zone cuộn từ trên xuống dưới theo thứ tự giảm dần, sublogo đổi tại chỗ góc trên bên phải, và 3D Booklet Z-Fold 6 tờ trong Zone 18
+- **Thời điểm:** Turn 4 (Sau Checkpoint 2).
+- **Yêu cầu người dùng:** "rồi từ chữ blvd đó cho kéo xuống nha 3 scene cuối của intro phụ ấy, tách ra thành 3 'sublogo', mỗi phần sẽ có zone riêng theo thừ tự giảm dần và đi từ trên xuống dưới, trong môĩ zone ấy, sublogo nằm góc trên bên phải, khi sang zone mới thì sublogo thay đổi theo thao tác và đổi tại chỗ đó. trong zone 18, hãy tạo 1 booklet 3d (dạng Gấp Z-fold), 6 tờ, mỗi tờ tỉ lệ 4:5, lấy ảnh từ link luôn nha. cuỗi cùng mình đang có 4 zone, đừng cho nút hay badge hay note thừa thãi, đúng những gì mình nói thôi".
+- **Chi tiết thay đổi:**
+  1. Tạo component `src/components/ZFoldBooklet.tsx`:
+     - Booklet 3D dạng gấp Z-fold (accordion) gồm đúng 6 tờ lấy từ link chính thức của #BLVD18 (row-1-column-1.webp đến row-1-column-6.webp).
+     - Mỗi tờ có tỉ lệ chuẩn `aspect-ratio: 4 / 5`.
+     - Tạo góc gập 3D luân phiên (+28deg / -28deg) theo trục Y, hỗ trợ click tương tác mở rộng hoặc xếp gọn mượt mà.
+  2. Cập nhật `src/App.tsx`:
+     - Tạo 4 Zone cuộn snap-y từ trên xuống dưới theo thứ tự giảm dần:
+       + Zone 1: `#BLVD` (kéo dãn toàn màn hình).
+       + Zone 2: `Zone 18` (chứa 3D Z-fold Booklet 6 tờ tỉ lệ 4:5).
+       + Zone 3: `Zone 17` (khung nền đen sạch sẽ).
+       + Zone 4: `Zone 16` (khung nền đen sạch sẽ).
+     - Tạo vị trí cố định góc trên bên phải (`fixed top-6 right-6 md:top-8 md:right-8`): Sublogo tự động thay đổi tại chỗ (`#BLVD18` -> `BLVD17` -> `#blvd16`) theo zone người dùng đang cuộn tới.
+     - Giữ nguyên tắc khắt khe: Không thêm bất kỳ nút bấm, badge, footnote hay icon thừa thãi nào.
+
+---
+
+## [Lần 5] - Booklet 6 tấm dính liền nhau (thu/mở hoàn toàn khi bấm), zoom & xoay 360 độ, chuyển sublogo sang góc trên bên trái, thêm 2 text 3d model và Carousel ở cạnh dưới (ẩn khi sang zone 16)
+- **Thời điểm:** Turn 5 (Sau Checkpoint 2).
+- **Yêu cầu người dùng:** 
+  1. booklet cả 6 tấm dính liền nhau, bấm vô là thu hoàn toàn, bấm nữa là mở ra hoàn toàn, cho người dùng zoom ra zoom vào và xoay 360 độ
+  2. sublogo nằm góc trên trên trái
+  3. ở cạnh dưới màn hình, cho 2 text là 3d model và Carousel, không cần khung hay fill, sang 16 thì bỏ cái thanh này đi
+- **Chi tiết thay đổi:**
+  1. `src/components/ZFoldBooklet.tsx`:
+     - Tái cấu trúc hình học 3D để cả 6 tấm dính liền mép nhau 100% không kẽ hở (mép phải của tấm trước trùng khít với mép trái của tấm sau).
+     - Phân biệt click và kéo xoay: Click vào sẽ chuyển đổi trạng thái gập thu hoàn toàn (`isOpen = false`, xếp khít 6 lớp như tập sách đóng) hoặc mở ra hoàn toàn (`isOpen = true`, mở rộng toàn bộ dải z-fold liền mạch).
+     - Hỗ trợ xoay 360 độ tự do bằng chuột/cảm ứng (kéo ngang xoay quanh trục Y, kéo dọc xoay quanh trục X).
+     - Hỗ trợ zoom phóng to/thu nhỏ bằng con lăn chuột (wheel event) hoặc pinch-to-zoom hai ngón tay trên màn hình cảm ứng.
+     - Tạo mặt sau của các trang sách (`backface-visibility`) để khi xoay 360 độ vẫn nhìn thấy chi tiết mặt sau 3D chân thực.
+     - Hỗ trợ chế độ Carousel ngang khi người dùng chọn tab "Carousel".
+  2. `src/App.tsx`:
+     - Chuyển vị trí sublogo từ góc trên bên phải sang góc trên bên trái (`fixed top-6 left-6 md:top-8 md:left-8 justify-start`).
+     - Thêm thanh điều hướng tối giản ở cạnh dưới màn hình (`fixed bottom-6 md:bottom-8 inset-x-0`) với 2 text thuần typography "3d model" và "Carousel" (không khung viền, không nền fill).
+     - Khi cuộn sang Zone 16 (`activeBlvdZone === 'zone-16'`), thanh text này tự động ẩn hoàn toàn theo đúng yêu cầu.
+
+---
+
+## [Lần 6] - Tối ưu toàn diện thao tác Booklet (non-passive wheel zoom, xoay 360 không trễ, thu phẳng khép kín), mặt sau y chang mặt trước, thanh chuyển đổi dùng font archivo thường đầu và chỉ xuất hiện ở zone 18 & 17
+- **Thời điểm:** Turn 6 (Sau Checkpoint 2).
+- **Yêu cầu người dùng:** 
+  1. hệ thông thao tác với booklet bị quần què
+  2. thanh chuyển đổi, font archivo thường đầu, với lại sao xuất hiện ngay từ zone #BLVD rồi
+  3. Mặt sau blvd 18 booklet, cho i chang mặt trước
+- **Chi tiết thay đổi:**
+  1. `src/components/ZFoldBooklet.tsx`:
+     - Khắc phục lỗi wheel zoom can thiệp scroll trang: Đăng ký event `wheel` trực tiếp lên container với `{ passive: false }` và `e.preventDefault()`, loại bỏ triệt để tình trạng lăn chuột zoom mà bị nhảy snap sang zone khác.
+     - Tối ưu thao tác kéo xoay: Trong lúc drag, tắt bỏ transition (`transition-none`) để phản hồi xoay 360 độ tức thì theo thời gian thực (60fps mượt mà không trễ).
+     - Tối ưu cơ chế Thu hoàn toàn: Khi bấm thu lại (`isOpen = false`), toàn bộ 6 trang gấp phẳng xếp chồng thành một cuốn booklet đóng kín hướng về phía người dùng (`angle = 0`, `X = 0`, `Z = -i * 2.5`), không còn bị dựng nghiêng méo mó.
+     - Mặt sau Booklet: Dùng chính xác cùng URL hình ảnh mặt trước (`p.url`) xoay `rotateY(180deg)` để mặt trước và mặt sau giống hệt nhau khi xoay 360 độ.
+  2. `src/App.tsx`:
+     - Thanh chuyển đổi ở cạnh dưới: Chuyển sang `font-archivo font-normal normal-case text-sm md:text-base tracking-normal` (chữ thường / viết hoa đầu chữ, không viết hoa toàn bộ uppercase).
+     - Điều kiện hiển thị: Thay đổi thành `(activeBlvdZone === 'zone-18' || activeBlvdZone === 'zone-17')`. Thanh hoàn toàn KHÔNG xuất hiện ở Zone 1 (#BLVD) và tự động ẩn khi xuống Zone 4 (#blvd16).
+
+---
+
+## [Lần 7] - Thêm Booklet Zone 17 (tỉ lệ 1:1, 4 tờ: 4 file số chẵn mặt trước, 4 file số lẻ mặt sau) & Bỏ hoàn toàn khoảng cách (gap) giữa các ảnh ở cả 3D và Carousel
+- **Thời điểm:** Turn 7 (Sau Checkpoint 2).
+- **Yêu cầu người dùng:** 
+  1. rồi 17 tương tư luôn, nhưng tỉ lệ 1:1 và 4 tờ tổng cộng, trong file có tên ảnh ấy, 4 file số chẵn mặt trước, 4 file số lẻ mặt sau
+  2. bỏ hết gap giữa các ảnh ở cả 3d và Carousel
+- **Chi tiết thay đổi:**
+  1. `src/components/ZFoldBooklet.tsx`:
+     - Định nghĩa `BLVD17_PAGES` gồm 4 tờ tổng cộng tỉ lệ 1:1:
+       + Tờ 1: Mặt trước là 2.webp, mặt sau là 1.webp
+       + Tờ 2: Mặt trước là 4.webp, mặt sau là 3.webp
+       + Tờ 3: Mặt trước là 6.webp, mặt sau là 5.webp
+       + Tờ 4: Mặt trước là 8.webp, mặt sau là 7.webp
+     - Bỏ toàn bộ gap giữa các ảnh:
+       + Ở chế độ Carousel: Thiết lập `gap-0`, loại bỏ border 2 bên, toàn bộ các bức ảnh ghép sát mép nhau 100% không kẽ hở.
+       + Ở chế độ 3D Model: Loại bỏ border trái/phải trên các panel (chỉ giữ `border-y` tinh tế), mở rộng kích thước subpixel +0.4px để các mép nối khít tuyệt đối, loại bỏ các vạch nẹp ngăn cách.
+  2. `src/App.tsx`:
+     - Import `BLVD17_PAGES` và render `ZFoldBooklet` trong `blvd-zone-17` với `aspectRatio="1/1"` và `pages={BLVD17_PAGES}`.
+     - Cả Zone 18 và Zone 17 đồng bộ tương tác với nút chuyển đổi `3d model` và `Carousel`.
+
+---
+
+## [Lần 8] - Cập nhật BLVD17 (mặt trước 8 6 4 2, carousel hiện cả 2 mặt trên dưới), thêm Zone 16 (1:1 chỉ Carousel 10 ảnh), và tối ưu hóa hệ thống cử chỉ & thuật toán load ảnh/model 3D
+- **Thời điểm:** Turn 8 (Sau Checkpoint 2).
+- **Yêu cầu người dùng:** 
+  1. riêng 17 nè: mặt trước ngược lại 8 6 4 2, ở carousel thì hiện cả 2 mặt, mặt trên trên mặt dưới dưới mặt trên, do 2 mặt có 2 câu chuyện riêng
+  2. tiện thì đưa nốt 16 vô đi, 1:1, chỉ carousel thôi
+  3. cuối cùng tối ưu lại mã nguồn, đặc biệt là hệ thống cử chỉ trên cả 2 giao diện và thuật toán load ảnh, thuật toán liên quan đến model 3d
+- **Chi tiết thay đổi:**
+  1. `src/components/ZFoldBooklet.tsx`:
+     - Cập nhật `BLVD17_PAGES`: Mặt trước theo thứ tự ngược lại `[8, 6, 4, 2]`. Khi xoay 360 độ ra mặt sau hiển thị câu chuyện `[1, 3, 5, 7]`.
+     - Chế độ Carousel cho Zone 17 (`showDualCarousel={true}`): Hiển thị 2 hàng liền kề:
+       + Hàng trên (mặt trước): 4 ảnh `[8, 6, 4, 2]`, tỉ lệ 1:1, `gap-0`.
+       + Hàng dưới (mặt sau): 4 ảnh `[1, 3, 5, 7]`, tỉ lệ 1:1, `gap-0`, nằm ngay dưới hàng trên.
+     - Tạo component `Zone16Carousel`: Hiển thị trọn bộ 10 ảnh của `[#BLVD] #BLVD16` (`1.webp` đến `10.webp`), tỉ lệ 1:1, dạng dải cuộn ngang không khoảng cách (`gap-0`).
+     - Tối ưu hóa hệ thống cử chỉ (Gestures):
+       + Carousel: Thêm hook `useDragScroll` hỗ trợ kéo cuộn bằng chuột (drag-to-scroll) trên desktop và vuốt mượt mà trên mobile với `touch-pan-x`.
+       + Model 3D: Thiết lập `touch-action: none`, `setPointerCapture` và `requestAnimationFrame` giúp bắt chuyển động xoay 360 độ không độ trễ, phân biệt chuẩn xác giữa nhấp chuột (click toggle thu/mở) và kéo xoay (drag rotate).
+       + Con lăn chuột (Wheel zoom): Xử lý `{ passive: false }` với `e.preventDefault()`, khóa triệt để lỗi vô tình scroll snap trang khi đang zoom model.
+     - Tối ưu hóa thuật toán load ảnh & render model 3D:
+       + Thuật toán `preloadBookletImages`: Tự động tải trước và giải mã (`decoding="async"`) toàn bộ ảnh vào bộ nhớ đệm GPU, tránh hiện tượng giật hình hoặc nháy trắng khi xoay ra mặt sau.
+       + Bổ sung `will-change: transform` và `transformStyle: preserve-3d` tăng tốc phần cứng GPU.
+       + Sử dụng `useMemo` tính toán tọa độ z-fold chuẩn xác, loại bỏ hoàn toàn tính toán thừa khi render.
+  2. `src/App.tsx`:
+     - Tích hợp `Zone16Carousel` vào `blvd-zone-16`.
+     - Kích hoạt `showDualCarousel={true}` cho Zone 17.
+
+---
+
+## [Lần 9] - Hiệu chỉnh thứ tự mặt sau BLVD18 (đọc từ trái sang phải), hiệu chỉnh BLVD17 (mặt trước 2 4 6 8, mặt sau 7 5 3 1), và khắc phục trọn vẹn 10 ảnh Zone 16 cuộn ngang mượt mà
+- **Thời điểm:** Turn 9 (Sau Checkpoint 2).
+- **Yêu cầu người dùng:** 
+  1. 18 là mặt sau cùng là đọc từ trái sang phải, bạn làm vậy bị ngược
+  2. 17 mình lộn, 2 4 6 8 nhưng 7 5 3 1
+  3. 16 là tỉ lệ 1:1 mỗi tấm, từ trái sang phải là 1 đến 10, mình thấy bạn hiện thiếu, nhiều quá cho cuộn cũng được
+- **Chi tiết thay đổi:**
+  1. `src/components/ZFoldBooklet.tsx`:
+     - **Hiệu chỉnh BLVD18 mặt sau:** Khi mô hình 3D quay 180 độ quanh trục Y, tờ số 5 (bên phải ban đầu) trở thành mép trái của người xem. Đã đảo map mặt sau của các tờ theo thứ tự `[Col 6, Col 5, Col 4, Col 3, Col 2, Col 1]` để khi người dùng nhìn vào mặt sau, từ trái sang phải sẽ đọc chuẩn xác: `Col 1 -> Col 2 -> Col 3 -> Col 4 -> Col 5 -> Col 6`.
+     - **Hiệu chỉnh BLVD17:**
+       + Mặt trước (từ trái sang phải): `[2, 4, 6, 8]`.
+       + Mặt sau khi xoay 180 độ (từ trái sang phải): `[7, 5, 3, 1]`.
+       + Cập nhật thứ tự map các tờ 3D: Tờ 0 (front: 2, back: 1), Tờ 1 (front: 4, back: 3), Tờ 2 (front: 6, back: 5), Tờ 3 (front: 8, back: 7). Khi nhìn từ mặt trước đọc là 2, 4, 6, 8; khi xoay 180 độ nhìn từ trái sang phải đọc là 7, 5, 3, 1.
+       + Ở chế độ Carousel 2 hàng của Zone 17:
+         * Hàng trên (mặt trước): `[2.webp, 4.webp, 6.webp, 8.webp]`, tỉ lệ 1:1, không khoảng cách (`gap-0`).
+         * Hàng dưới (mặt sau): `[7.webp, 5.webp, 3.webp, 1.webp]`, tỉ lệ 1:1, không khoảng cách (`gap-0`).
+     - **Khắc phục trọn vẹn Zone 16 Carousel (10 ảnh từ 1 đến 10):**
+       + Loại bỏ class flexbox `md:justify-center` vốn khiến dải ảnh tràn rộng (~1800px) bị căn giữa và đẩy các tấm 1, 2, 3... sang tọa độ âm ngoài màn hình không thể cuộn tới.
+       + Đặt container thành `justify-start overflow-x-auto` với dải flex `w-max shrink-0 gap-0`, đảm bảo tấm số 1 nằm chuẩn xác ở mép trái ban đầu và người dùng có thể cuộn trơn tru qua đủ cả 10 tấm (`1.webp` đến `10.webp`).
+       + Nâng cấp `useDragScroll`: Thêm lắng nghe con lăn chuột dọc (`wheel`) tự động chuyển thành cuộn ngang thông minh mượt mà, kết hợp kéo rê chuột (drag) và vuốt cảm ứng đa nền tảng.
+
+---
+
+## [Lần 10] - Cập nhật thanh dưới cho Zone 16 (chỉ Carousel, không click) & đảo thứ tự hàng dưới Carousel Zone 17 thành 1 3 5 7
+- **Thời điểm:** Turn 10.
+- **Yêu cầu người dùng:**
+  1. 16 cho thanh ở dưới như 17 18 đi nhưng chỉ caro thôi, không bấm ra gì hết
+  2. 17 vẫn ngược =))) 4 ảnh ở dưới ở phần carousel là đảo phải sang trái và ngược lại (mình quy ước trước rồi nên mình còn biết nói sao)
+- **Chi tiết thay đổi:**
+  1. `src/App.tsx`:
+     - Bổ sung `activeBlvdZone === 'zone-16'` vào điều kiện hiển thị thanh chế độ ở cạnh dưới (`#blvd-bottom-mode-text`).
+     - Với Zone 16, hiển thị đúng duy nhất chữ "Carousel" (`font-archivo font-medium normal-case text-sm md:text-base tracking-normal text-white cursor-default select-none pointer-events-none`) ở vị trí cố định chính giữa, không nhận thao tác click và không có nút 3D.
+  2. `src/components/ZFoldBooklet.tsx`:
+     - Ở chế độ Carousel của Zone 17 (`showDualCarousel = true`): Đảo ngược thứ tự 4 ảnh hàng dưới (mặt sau) từ `[7, 5, 3, 1]` thành `[1, 3, 5, 7]` (`1.webp`, `3.webp`, `5.webp`, `7.webp`).
+     - Đồng bộ hóa với mô hình 3D của Zone 17 (`BLVD17_PAGES`): Tờ 0 (front 2, back 7), Tờ 1 (front 4, back 5), Tờ 2 (front 6, back 3), Tờ 3 (front 8, back 1) để khi xoay 180° nhìn từ trái sang phải cũng đọc tuần tự chuẩn xác là `[1, 3, 5, 7]`.
+
+---
+
+## [Lần 11] - Tái cấu trúc chuyển động gập mở Origami bản lề liền mạch & chuẩn hóa cử chỉ Touch/Touchpad mượt mà không rung lắc
+- **Thời điểm:** Turn 11.
+- **Yêu cầu người dùng:**
+  1. Chuyển động thu lại mở ra của model còn thô kệch quá, các ảnh đè lên nhau các thứ.
+  2. Thao tác zoom của touchpad bị chập chờn, của touch thì gây giật model.
+- **Chi tiết thay đổi:**
+  1. `src/components/ZFoldBooklet.tsx`:
+     - **Tái cấu trúc hình học gập Origami theo chuỗi bản lề nối tiếp (Hinged Chain Architecture):**
+       + Thay thế hoàn toàn cách tính toạ độ độc lập trước đây (vốn khiến các panel trượt xuyên cắt qua nhau và đè chồng trong lúc chuyển đổi).
+       + Xây dựng component đệ quy `ZFoldPanel`: Mỗi trang sách được lồng trực tiếp vào mép phải (`left: 100%`) của trang trước với `transform-origin: left center` và `transform-style: preserve-3d`.
+       + Nếp gấp mở ra/thu lại thực hiện xoay góc quanh chính bản lề nối giữa 2 trang: Khi mở, các nếp gấp xoay $\pm 48^\circ$ tạo hình z-fold dích dắc đều đặn; khi gập lại, các trang gấp góc $\pm 178.5^\circ$ xếp gọn gàng thành tập sách đóng khít như tờ rơi gấp thật.
+       + Bổ sung bù độ dày giấy `translateZ(-1.2px)` khi đóng để triệt tiêu hoàn toàn hiện tượng z-fighting (nhấp nháy chiều sâu).
+       + Căn giữa động mô hình trong suốt quá trình mở ra/gập lại với cùng hàm easing `cubic-bezier(0.2, 0.9, 0.3, 1)` thời lượng 850ms, giúp chuyển động mượt mà, chân thực và không có bất kỳ kẽ hở hay va chạm nào.
+     - **Khắc phục lỗi chập chờn khi zoom Touchpad:**
+       + Bắt sự kiện `wheel` với `e.ctrlKey === true` (cử chỉ pinch-zoom trên Trackpad macOS / Precision Touchpad của Windows) và áp dụng công thức hàm mũ liên tục `Math.exp(-e.deltaY * 0.012)`.
+       + Ngắt bỏ CSS transition (`isInteracting ? 'transition-none' : 'transition-transform duration-250 ease-out'`) trong lúc zoom, loại bỏ triệt để độ trễ và xung đột làm gián đoạn chuyển động.
+     - **Khắc phục lỗi giật lắc model khi phóng to thu nhỏ bằng Touch (Màn hình cảm ứng):**
+       + Tích hợp hệ thống quản lý con trỏ thống nhất `activePointersRef` (Map chứa các pointerId đang kích hoạt).
+       + Phân tách rạch ròi hành vi: Khi phát hiện 2 ngón tay chạm màn hình (`activePointersRef.current.size === 2`), hệ thống **CHỈ THỰC HIỆN PINCH ZOOM** và **KHÓA HOÀN TOÀN TÍNH NĂNG XOAY MODEL**. Nhờ đó, thao tác phóng to/thu nhỏ bằng 2 ngón tay không còn bị tính nhầm tọa độ thành lệnh xoay, loại bỏ 100% tình trạng giật cục, rung lắc.
+       + Loại bỏ các hàm lắng nghe `onTouch*` trùng lặp, dùng thuần Pointer Events kết hợp `touchAction: 'none'` trên container 3D.
+---
+
+## [Lần 13] - Cập nhật logo #BLVD17, hoàn thiện màn hình load 12345678910 stretched style BLVD, tinh chỉnh nếp gấp Origami và cử chỉ Pan 2 ngón tay
+- **Thời điểm:** Turn 13.
+- **Yêu cầu người dùng:**
+  1. Thay logo #BLVD 17: `https://raw.githubusercontent.com/boulevardphat/Kho-multimedia-c-a-Blvd/main/blvdarchive/Boulevard1st/Employer/%5B%23BLVD%5D%20%23BLVD17/logo%20%23blvd17.webp`.
+     - Logo #BLVD17 ở intro phụ của mục #BLVD thì invert màu logo để tăng độ tương phản.
+  2. Ở dạng carousel của cả 3 dạng, có thể zoom ra zoom vô; khi zoom/double-click thì tự động scale để hiện tấm ảnh đầu tiên to và dễ quan sát.
+  3. Trình tự load: Khi ở giao diện chọn mode, bắt đầu load các ảnh ở giao diện chính và tiếp đến là thông tin cơ bản; khi ở giao diện #BLVD: khi bấm vô thì có tiến trình load với màn hình load là dãy số "12345678910", style giống chữ "BLVD" viết to và kéo dãn.
+  4. Zone 18 của giao diện #blvd: fix lỗi hiệu ứng gập, lệch trọng tâm sau mỗi lần đóng mở; bổ sung cử chỉ di 2 ngón tay để di chuyển (Pan) dễ xem chi tiết.
+- **Chi tiết thay đổi:**
+  1. `src/App.tsx`:
+     - Tích hợp màn hình loading `blvd-loading` với SVG text kéo dãn toàn màn hình `viewBox="0 0 1000 100"` hiển thị dãy số `12345678910` (font Archivo Black, chữ outline nét trắng kéo dãn tràn khung) chuyển cảnh mượt sang chuỗi #BLVD.
+     - Thay thế text `BLVD17` bằng hình ảnh logo chính thức `logo #blvd17.webp`, áp dụng filter `invert brightness-110` ở cả fixed sublogo và scene intro phụ.
+     - Preload tài nguyên ảnh và dữ liệu ngay từ giao diện chọn chế độ.
+  2. `src/components/ZFoldBooklet.tsx`:
+     - Tinh chỉnh công thức gập `relativeAngle` và xếp lớp `zOffset` theo bậc cấp số nhân của từng index (`index * 1.5px`), loại bỏ triệt để xung đột bề mặt (z-fighting) và mép lộ nền khi đóng gập.
+     - Căn giữa trọng tâm đối xứng 100% khi đóng (`offsetX = 0`) và khi mở (`-(totalOpenWidth - panelWidth) / 2`).
+     - Hoàn thiện cử chỉ di 2 ngón tay (Two-finger pan) kết hợp zoom mượt mà không xoay model khi thao tác 2 ngón; hỗ trợ kéo chuột phải trên desktop và nhấp đúp để reset.
+     - Hoàn thiện `ZoomableCarouselContainer` cho cả 3 mode (Zone 16, 17, 18) với tính năng double-click/pinch-to-zoom phóng to tấm đầu tiên và cuộn về mép trái mượt mà.
+
+
+     # NHẬT KÝ THAY ĐỔI & PHỤC HỒI (ROLLBACK LOG)
+Dự án: Boulevard1st Portfolio & BLVD Archive
+
+---
+## LẦN 2
+- Thời điểm: Turn hiện tại (Tối ưu thao tác Carousel Trackpad Zoom, Chế độ xem "Instagram", Mặc định Zoom 230% Carousel 16, Font Archivo & Nút Back về mục lục)
+- Nội dung thay đổi chi tiết:
+  1. Tối ưu thao tác Carousel & Zoom Trackpad / Touchpad:
+     - `src/components/ZFoldBooklet.tsx`: Trong `ZoomableCarouselContainer`, tích hợp bắt sự kiện `wheel` với `e.ctrlKey || e.metaKey` (cử chỉ pinch-to-zoom trên trackpad máy Mac và precision touchpad của Windows laptop). Khi phát hiện cử chỉ pinch-zoom bằng trackpad, hệ thống phóng to / thu nhỏ mượt mà với công thức `zoom * Math.exp(-e.deltaY * 0.012)`, giới hạn an toàn từ 0.6x đến 3.5x.
+     - Khi lăn chuột thông thường (không giữ ctrl), chuyển đổi deltaY thành cuộn ngang `container.scrollLeft += e.deltaY`.
+     - Hỗ trợ sự kiện Safari iOS / macOS `gesturestart` và `gesturechange` cho cử chỉ 2 ngón mở rộng/thu hẹp.
+     - Toàn bộ các nút điều khiển zoom (+, -, %, reset) chuyển sang `font-archivo`, phong cách brutalist không bo góc `rounded-none`.
+  2. Tích hợp chế độ xem "Instagram" bên cạnh Carousel:
+     - Tạo component `InstagramViewer` trong `src/components/ZFoldBooklet.tsx`: Chỉ hiển thị 1 khung tỉ lệ tương ứng với ảnh (`1:1` cho Zone 16 & Zone 17, `4/5` cho Zone 18).
+     - Hỗ trợ chuyển ảnh theo thứ tự bằng:
+       * Vuốt cảm ứng (Touch swipe) trái/phải trên điện thoại / màn hình cảm ứng.
+       * Vuốt trackpad / touchpad (lắng nghe sự kiện `wheel` có ngưỡng `deltaX` hoặc `deltaY` lớn hơn 28px kết hợp debounce chống lướt quá đà).
+       * Phím mũi tên sang trái / sang phải trên bàn phím.
+       * 2 nút bấm điều hướng trái `‹` và phải `›` (sử dụng `font-archivo`, brutalist không bo góc `rounded-none`).
+       * Hiển thị số thứ tự trang hiện tại (`currentIndex + 1 / total`) và dải thanh tiến trình tối giản ở cạnh đáy.
+     - Cập nhật `ZFoldBooklet` và `Zone16Carousel` hỗ trợ `mode: 'instagram'`.
+  3. Mặc định Zoom 230% cho Carousel 16:
+     - Cập nhật `Zone16Carousel` trong `src/components/ZFoldBooklet.tsx` với `initialZoom={2.3}` (230%), kết hợp CSS variable `--carousel-scale: 2.3` ngay khi khởi tạo để hiển thị to rõ nét theo đúng yêu cầu.
+  4. Nút zoom chuyển sang Font Archivo:
+     - Đổi toàn bộ font-family của thanh điều khiển zoom trong `ZoomableCarouselContainer` thành `font-archivo` (nút `−`, nhãn `%`, nút `+`, nút `reset`).
+  5. Nút chữ "back" font Archivo thường quay về mục lục:
+     - Thêm nút chữ `back` (`font-archivo font-normal normal-case text-xs md:text-sm`) đặt ngay dưới sublogo cố định góc trên bên trái (`#blvd-sublogo-fixed-tl`) trong cảnh `blvd-black` của `src/App.tsx`.
+     - Nhấp vào nút sẽ kích hoạt `setScene('main-app')`, đưa người dùng quay trở lại ngay màn hình chính / Table of Contents (Mục lục dự án).
+     - Cập nhật thanh điều hướng chế độ hiển thị ở cạnh dưới màn hình (`#blvd-bottom-mode-text`):
+       * Zone 18 & Zone 17: hiển thị "3d model", "Carousel" và "Instagram".
+       * Zone 16: hiển thị "Carousel" và "Instagram" cạnh nhau.
+
+---
+## LẦN 4
+- Thời điểm: Turn trước (Di chuyển nút Reset Zoom sang bên phải & sửa lỗi không bấm được, Khóa chuyển động trượt dọc 1 lần = 1 zone chống lướt quá đà ở cả 2 giao diện desktop & mobile)
+- Nội dung thay đổi chi tiết:
+  1. Di chuyển nút "reset zoom" sang bên phải và sửa triệt để tính năng:
+     - `src/App.tsx`: Chuyển vị trí nút `#blvd-reset-zoom-desktop` từ bên trái (`left-6 md:left-8`) sang bên phải màn hình (`right-6 md:right-8`), đặt `z-[60]` và `pointer-events-auto` để đảm bảo nút luôn nổi lên trên cùng và nhận sự kiện click nhạy bén.
+     - Sửa vùng chứa thanh chọn mode `#blvd-bottom-mode-text` từ `pointer-events-auto` toàn dải sang `pointer-events-none` (chỉ các nút con mang `pointer-events-auto`), ngăn chặn khung trong suốt mở rộng chiếm toàn bộ chiều ngang cạnh đáy che khuất và chặn click vào nút reset zoom.
+     - `src/components/ZFoldBooklet.tsx`: Bổ sung event listener `blvd-reset-zoom` cho chế độ `3d` booklet model để khi người dùng đang xoay/zoom booklet 3D và ấn nút reset zoom thì model được đưa ngay về trạng thái chuẩn (`zoom = 1`, `rotX = 10`, `rotY = -15`, `pan = (0, 0)`). Đồng thời hỗ trợ reset zoom cho cả Carousel 18, 17 và 16.
+  2. Kiểm soát thao tác cuộn / vuốt: 1 lần vuốt/cuộn = chuyển sang đúng 1 zone, chống trượt lố trên cả desktop & mobile:
+     - `src/App.tsx`: Loại bỏ cơ chế `snap-y snap-mandatory` mặc định của trình duyệt (vốn bị quán tính momentum của trackpad và màn hình cảm ứng điện thoại đẩy trượt qua nhiều zone liên tiếp).
+     - Thay thế bằng kiến trúc Slider điều khiển trạng thái chủ động `#blvd-zones-slider` với `activeZoneIndex` (0: #BLVD, 1: Zone 18, 2: Zone 17, 3: Zone 16) và biến đổi tọa độ GPU `translate3d(0, -${activeZoneIndex * 100}%, 0)` mượt mà (`duration-650`, cubic-bezier `[0.2, 0.9, 0.3, 1]`).
+     - Tích hợp bộ điều hướng chuyển zone `goToZone` có cờ khóa `isZoneTransitioningRef` (thời gian trễ an toàn 650ms):
+       * Sự kiện cuộn chuột / trackpad (`wheel`): Khi phát hiện cuộn dọc vượt ngưỡng kích hoạt 18px, tự động chuyển tiến hoặc lùi đúng 1 zone và chặn ngay lập tức toàn bộ chuỗi sự kiện lăn chuột quán tính kế tiếp trong 650ms, triệt tiêu 100% hiện tượng trượt lố nhiều zone.
+       * Sự kiện vuốt cảm ứng trên di động (`touchstart`, `touchend`): Tính toán độ dài vector chuyển động dọc `diffY` so với ngang `diffX`. Khi người dùng quẹt ngón tay (flick hoặc swipe dọc có chủ đích), hệ thống chuyển chính xác 1 zone rồi khóa chuyển động tiếp nối, ngăn chặn quán tính cảm ứng đẩy văng qua các zone tiếp theo.
+       * Sự kiện bàn phím (`keydown`): Phím mũi tên lên/xuống và PageUp/PageDown chuyển tuần tự từng zone một tương ứng.
+       * Đồng bộ tự động `activeBlvdZone` và cập nhật tức thời sublogo góc trên bên trái cùng các chế độ xem tương ứng.
+
+---
+## LẦN 5
+- Thời điểm: Turn hiện tại (Dọn dẹp mã nguồn, tối ưu hóa toàn diện và loại bỏ hoàn toàn hệ thống grid cũ)
+- Nội dung thay đổi chi tiết:
+  1. Loại bỏ triệt để hệ thống Grid cũ (Safezone Grid & Canva Template Exporter):
+     - Xóa bỏ hoàn toàn tệp `src/components/BlvdSafezoneGrid.tsx`.
+     - Xóa bỏ toàn bộ thư mục `src/components/blvd-grid/` cùng các tệp trực thuộc:
+       * `src/components/blvd-grid/BlvdLandscapeGrid.tsx`
+       * `src/components/blvd-grid/BlvdPortraitGrid.tsx`
+       * `src/components/blvd-grid/BlvdTemplateExporter.tsx`
+       * `src/components/blvd-grid/blvdText.ts`
+       * `src/components/blvd-grid/index.tsx`
+     - Giải phóng hơn 1,000 dòng mã nguồn thừa không còn sử dụng sau khi chuyển đổi sang không gian triển lãm 4 Zone Z-Fold Booklet & Carousels.
+  2. Rà soát & tối ưu hóa mã nguồn:
+     - Kiểm tra toàn bộ các import và phụ thuộc chéo trong `src/App.tsx`, `src/components/ZFoldBooklet.tsx`, `src/components/VespertineBackground.tsx`, `src/components/ModeSelector.tsx`, `src/components/IntroClock.tsx`.
+     - Đảm bảo 100% không còn code rác, không còn biến/type mồ côi.
+     - Kiểm tra nghiêm ngặt quy tắc thiết kế Boulevard1st: không bo góc (`rounded-none` 100%, 0px border-radius), không vi phạm layout trên cả giao diện ngang và dọc.
+     - Linter (`tsc --noEmit`) và Build (`vite build`) đạt 100% thành công, không phát sinh bất kỳ lỗi hay cảnh báo nào.
+
+
+
+
+
+
+
+
+
+
+

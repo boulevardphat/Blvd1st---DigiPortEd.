@@ -1,6 +1,0 @@
-import { AppLanguage } from '../../types';
-
-export const BLVD_INTRO_TEXT: Record<AppLanguage, string> = {
-  vi: '#BLVD là một dự án thiết kế nhỏ, được Thuận Phát thực hiện đều đặn vào dịp sinh nhật hàng năm (26/09). Chỉ xuất hiện lặng lẽ trên Instagram, dự án là nơi gom nhặt những nguồn cảm hứng của Phát từ âm nhạc, nghệ thuật thị giác đến văn hóa đại chúng. Nhưng trên hết, đó là lăng kính cá nhân phản chiếu thế giới quan, cuộc sống và những thăng trầm Phát đã trải qua trong suốt một năm. Vượt lên trên một bài đăng khoe khéo "gu" thẩm mỹ hay kỹ năng thiết kế, #BLVD mang theo nhiều hơn một câu chuyện, và gửi gắm nhiều hơn một góc nhìn mới mà Phát đã tự mình gom góp được.',
-  en: "#BLVD is an intimate design project created annually to mark Thuận Phát's birthday (September 26th). Quietly residing on Instagram, the project is a collection of Phát's inspirations - from music and visual arts to pop culture. Above all, it serves as a personal lens reflecting his worldview and the events that have shaped his life over the past year. Far from being just an aesthetic showcase or a display of design skills, #BLVD tells more than just one story, and conveys more than just one newfound perspective."
-};

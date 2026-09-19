@@ -161,33 +161,430 @@ function useDragScroll() {
 }
 
 // ============================================================================
+// COMPONENT CONTAINER CAROUSEL HỖ TRỢ ZOOM RA/VÔ & TỰ ĐỘNG MỞ RỘNG KHUNG (KHÔNG BỊ VƯỚNG KHUNG CŨ)
+// ============================================================================
+interface ZoomableCarouselContainerProps {
+  id: string;
+  className?: string;
+  children: React.ReactNode;
+  initialZoom?: number;
+}
+
+const ZoomableCarouselContainer: React.FC<ZoomableCarouselContainerProps> = ({
+  id,
+  className = "",
+  children,
+  initialZoom = 1,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [zoom, setZoom] = useState(initialZoom);
+  const activePointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const initialPinchDistRef = useRef<number>(0);
+  const initialPinchZoomRef = useRef<number>(initialZoom);
+  const gestureStartZoomRef = useRef<number>(initialZoom);
+
+  // Kéo chuột trái để cuộn ngang dải ảnh (Drag to scroll), Lăn chuột & Zoom qua Trackpad / Con lăn
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+
+    const onMouseDown = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      isDown = true;
+      startX = e.pageX - el.offsetLeft;
+      scrollLeft = el.scrollLeft;
+      el.style.cursor = 'grabbing';
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    };
+
+    const onMouseUp = () => {
+      isDown = false;
+      if (el) el.style.cursor = 'grab';
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - el.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      el.scrollLeft = scrollLeft - walk;
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      // 1. Pinch zoom trên Trackpad (Chromium, Firefox, Safari gửi wheel với ctrlKey hoặc metaKey)
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        const factor = Math.exp(-e.deltaY * 0.008);
+        setZoom((prev) => {
+          const next = Math.min(3.5, Math.max(0.6, prev * factor));
+          return Number(next.toFixed(2));
+        });
+        return;
+      }
+
+      // 2. Lăn chuột thông thường: cuộn ngang dải ảnh tự nhiên
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        const canScrollLeft = el.scrollLeft > 0 && e.deltaY < 0;
+        const canScrollRight = el.scrollLeft < (el.scrollWidth - el.clientWidth - 1) && e.deltaY > 0;
+        if (canScrollLeft || canScrollRight) {
+          e.preventDefault();
+          el.scrollLeft += e.deltaY * 1.2;
+        }
+      }
+    };
+
+    // 3. WebKit native gesture listeners (Safari Trackpad Pinch)
+    const onGestureStart = (e: any) => {
+      e.preventDefault();
+      gestureStartZoomRef.current = zoom;
+    };
+
+    const onGestureChange = (e: any) => {
+      e.preventDefault();
+      const next = Math.min(3.5, Math.max(0.6, gestureStartZoomRef.current * (e.scale || 1)));
+      setZoom(Number(next.toFixed(2)));
+    };
+
+    el.addEventListener('mousedown', onMouseDown);
+    el.addEventListener('wheel', onWheel, { passive: false });
+    // @ts-ignore
+    el.addEventListener('gesturestart', onGestureStart, { passive: false });
+    // @ts-ignore
+    el.addEventListener('gesturechange', onGestureChange, { passive: false });
+
+    return () => {
+      el.removeEventListener('mousedown', onMouseDown);
+      el.removeEventListener('wheel', onWheel);
+      // @ts-ignore
+      el.removeEventListener('gesturestart', onGestureStart);
+      // @ts-ignore
+      el.removeEventListener('gesturechange', onGestureChange);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [zoom]);
+
+  // Lắng nghe sự kiện reset zoom từ desktop control
+  useEffect(() => {
+    const handleReset = () => {
+      setZoom(initialZoom);
+      if (containerRef.current) {
+        containerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+      }
+    };
+    window.addEventListener('blvd-reset-zoom', handleReset);
+    return () => window.removeEventListener('blvd-reset-zoom', handleReset);
+  }, [initialZoom]);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    activePointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (activePointersRef.current.size === 2) {
+      const pts = Array.from(activePointersRef.current.values()) as { x: number; y: number }[];
+      initialPinchDistRef.current = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      initialPinchZoomRef.current = zoom;
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!activePointersRef.current.has(e.pointerId)) return;
+    activePointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (activePointersRef.current.size === 2) {
+      e.preventDefault();
+      const pts = Array.from(activePointersRef.current.values()) as { x: number; y: number }[];
+      const currentDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      if (initialPinchDistRef.current > 0) {
+        const factor = currentDist / initialPinchDistRef.current;
+        const targetZoom = Math.min(3.5, Math.max(0.6, initialPinchZoomRef.current * factor));
+        setZoom(Number(targetZoom.toFixed(2)));
+      }
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    activePointersRef.current.delete(e.pointerId);
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Toggle giữa initialZoom và phóng to gấp rưỡi
+    setZoom((prev) => {
+      const next = Math.abs(prev - initialZoom) < 0.1 ? Number((initialZoom * 1.45).toFixed(2)) : initialZoom;
+      if (containerRef.current) {
+        containerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+      }
+      return next;
+    });
+  };
+
+  return (
+    <div 
+      className="relative w-full flex flex-col items-center justify-center select-none"
+      style={{ '--carousel-scale': zoom } as React.CSSProperties}
+    >
+      <div
+        ref={containerRef}
+        id={id}
+        className={`${className} overflow-x-auto no-scrollbar py-8 select-none cursor-grab active:cursor-grabbing touch-pan-x`}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onDoubleClick={handleDoubleClick}
+      >
+        {/* Không dùng transform: scale bọc ngoài để DOM layout tự động mở rộng tự nhiên, không bị kẹt hay khuất khung */}
+        <div className="w-max shrink-0 flex flex-col items-start justify-center transition-all duration-200 ease-out">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// COMPONENT INSTAGRAM VIEWER (1 KHUNG TỈ LỆ CHUẨN, VUỐT TOUCH / TOUCHPAD HOẶC BẤM 2 NÚT TRÁI PHẢI)
+// ============================================================================
+export interface InstagramViewerProps {
+  id?: string;
+  images: string[];
+  aspectRatio?: '4/5' | '1/1';
+}
+
+export const InstagramViewer: React.FC<InstagramViewerProps> = ({
+  id = 'instagram-viewer',
+  images,
+  aspectRatio = '1/1',
+}) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isThrottledRef = useRef(false);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    preloadBookletImages(images);
+  }, [images]);
+
+  // Điều hướng tới slide trước
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+
+  // Điều hướng tới slide kế tiếp
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev < images.length - 1 ? prev + 1 : prev));
+  };
+
+  // Thao tác với bàn phím (Mũi tên trái/phải)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') handlePrev();
+      else if (e.key === 'ArrowRight') handleNext();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [images.length]);
+
+  // Thao tác vuốt Touchpad / Trackpad bằng 2 ngón (vuốt ngang deltaX hoặc dọc deltaY)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) return;
+
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (Math.abs(delta) > 18 && !isThrottledRef.current) {
+        if (delta > 0) {
+          handleNext();
+        } else {
+          handlePrev();
+        }
+        isThrottledRef.current = true;
+        setTimeout(() => {
+          isThrottledRef.current = false;
+        }, 320);
+        e.preventDefault();
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [images.length]);
+
+  // Thao tác vuốt màn hình cảm ứng (Touch swipe)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      touchStartXRef.current = e.touches[0].clientX;
+      touchStartYRef.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchStartXRef.current - touchEndX;
+    const diffY = (touchStartYRef.current || 0) - touchEndY;
+
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 35) {
+      if (diffX > 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+    }
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  };
+
+  const isSquare = aspectRatio === '1/1';
+
+  return (
+    <div
+      ref={containerRef}
+      id={id}
+      className="relative w-full flex flex-col items-center justify-center select-none py-4 px-2"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Khung ảnh chính duy nhất chuẩn tỉ lệ, không bo góc (sharp border brutalist) */}
+      <div
+        className="relative overflow-hidden bg-[#111] border border-white/20 shadow-2xl flex items-center justify-center transition-all duration-300 rounded-none group"
+        style={{
+          width: isSquare ? 'min(85vw, 440px)' : 'min(82vw, 380px)',
+          aspectRatio: isSquare ? '1 / 1' : '4 / 5',
+          maxHeight: 'calc(var(--vh, 1vh) * 66)',
+        }}
+      >
+        {/* Dải ảnh trượt mượt mà theo currentIndex */}
+        <div
+          className="flex h-full w-full transition-transform duration-300 ease-out will-change-transform"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {images.map((src, idx) => (
+            <div
+              key={idx}
+              className="w-full h-full shrink-0 relative bg-black flex items-center justify-center overflow-hidden"
+            >
+              <img
+                src={src}
+                alt={`Slide ${idx + 1}`}
+                referrerPolicy="no-referrer"
+                loading={Math.abs(idx - currentIndex) <= 1 ? 'eager' : 'lazy'}
+                decoding="async"
+                className="w-full h-full object-cover select-none pointer-events-none"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Nút bấm trái (<) font archivo, bình thường ẩn, hover vào khung ảnh mới hiện */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handlePrev();
+          }}
+          disabled={currentIndex === 0}
+          className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-9 md:h-9 bg-black/75 border border-white/30 text-white flex items-center justify-center font-archivo text-base md:text-lg transition-all duration-200 rounded-none cursor-pointer opacity-0 group-hover:opacity-80 hover:!opacity-100 ${
+            currentIndex === 0
+              ? 'pointer-events-none !opacity-0'
+              : 'hover:bg-white hover:text-black active:scale-95'
+          }`}
+          title="Trang trước"
+          aria-label="Previous image"
+        >
+          ‹
+        </button>
+
+        {/* Nút bấm phải (>) font archivo, bình thường ẩn, hover vào khung ảnh mới hiện */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleNext();
+          }}
+          disabled={currentIndex === images.length - 1}
+          className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-9 md:h-9 bg-black/75 border border-white/30 text-white flex items-center justify-center font-archivo text-base md:text-lg transition-all duration-200 rounded-none cursor-pointer opacity-0 group-hover:opacity-80 hover:!opacity-100 ${
+            currentIndex === images.length - 1
+              ? 'pointer-events-none !opacity-0'
+              : 'hover:bg-white hover:text-black active:scale-95'
+          }`}
+          title="Trang kế"
+          aria-label="Next image"
+        >
+          ›
+        </button>
+      </div>
+
+      {/* Các thanh định vị vị trí ảnh nằm dưới khung ảnh */}
+      <div className="mt-4 flex items-center justify-center gap-1.5 pointer-events-none select-none">
+        {images.map((_, idx) => (
+          <div
+            key={idx}
+            className={`h-[2px] transition-all duration-200 rounded-none ${
+              idx === currentIndex
+                ? 'w-6 bg-white'
+                : 'w-2 bg-white/30'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
 // COMPONENT CAROUSEL CHO ZONE 16 (1:1, ĐỦ 10 TẤM TỪ 1 ĐẾN 10, CUỘN NGANG KHÔNG GAP)
 // ============================================================================
 interface Zone16CarouselProps {
   id?: string;
+  mode?: 'carousel' | 'instagram';
 }
 
-export const Zone16Carousel: React.FC<Zone16CarouselProps> = ({ id = "blvd16-carousel" }) => {
-  const scrollRef = useDragScroll();
-
+export const Zone16Carousel: React.FC<Zone16CarouselProps> = ({ 
+  id = "blvd16-carousel",
+  mode = 'carousel' 
+}) => {
   useEffect(() => {
     preloadBookletImages(BLVD16_PAGES);
   }, []);
 
+  if (mode === 'instagram') {
+    return (
+      <InstagramViewer
+        id={`${id}-instagram`}
+        images={BLVD16_PAGES}
+        aspectRatio="1/1"
+      />
+    );
+  }
+
   return (
-    <div
-      ref={scrollRef}
+    <ZoomableCarouselContainer
       id={id}
-      className="w-full flex items-center justify-start gap-0 overflow-x-auto no-scrollbar py-6 px-6 md:px-12 select-none cursor-grab active:cursor-grabbing touch-pan-x"
-      style={{ WebkitOverflowScrolling: 'touch' }}
+      className="w-full flex items-center justify-start gap-0 px-6 md:px-12"
+      initialZoom={2.3}
     >
-      <div className="flex items-center gap-0 w-max shrink-0">
+      <div 
+        className="flex items-center gap-0 w-max shrink-0"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
         {BLVD16_PAGES.map((url, idx) => (
           <div
             key={idx}
-            className="shrink-0 relative overflow-hidden bg-[#111] border-y border-white/20"
+            className="shrink-0 relative overflow-hidden bg-[#111] border-y border-white/20 transition-all duration-200 ease-out"
             style={{
-              width: 'clamp(140px, 16vw, 220px)',
+              width: 'calc(clamp(130px, 16vw, 190px) * var(--carousel-scale, 2.3))',
               aspectRatio: '1 / 1',
             }}
           >
@@ -202,7 +599,7 @@ export const Zone16Carousel: React.FC<Zone16CarouselProps> = ({ id = "blvd16-car
           </div>
         ))}
       </div>
-    </div>
+    </ZoomableCarouselContainer>
   );
 };
 
@@ -235,25 +632,25 @@ const ZFoldPanel: React.FC<BookletPanelItemProps> = ({
   const page = pages[index];
 
   // Tờ bìa đầu tiên (index 0):
-  // - Khi đóng: 0deg (hướng thẳng ra người xem như cuốn sách gấp gọn)
-  // - Khi mở: -openAngle (ví dụ -24deg)
-  // Các tờ tiếp theo lồng vào bản lề mép phải:
-  // - Khi mở: nếp gấp lẻ xoay +2*openAngle, nếp gấp chẵn xoay -2*openAngle tạo hình z-fold dích dắc hoàn hảo
-  // - Khi thu gọn: nếp gấp lẻ gập -178.5deg (áp lưng vào tờ trước), nếp gấp chẵn gập +178.5deg (áp mặt vào tờ trước)
+  // - Khi đóng: 0deg (hướng thẳng ra người xem như bìa trước)
+  // - Khi mở: -openAngle (nghiêng nhẹ -24deg)
+  // Các tờ tiếp theo lồng vào bản lề mép phải (nếp gấp):
+  // - Khi mở: nếp lẻ xoay +2*openAngle, nếp chẵn xoay -2*openAngle tạo hình dích dắc z-fold đối xứng
+  // - Khi đóng: gập phẳng chính xác 180 độ (-180deg cho nếp lẻ, +180deg cho nếp chẵn)
   const relativeAngle = isFirst
     ? (isOpen ? -openAngle : 0)
-    : isOpen
-      ? (isEven ? -2 * openAngle : 2 * openAngle)
-      : (isEven ? 178.5 : -178.5);
+    : (isOpen ? (isEven ? -2 * openAngle : 2 * openAngle) : (isEven ? 180 : -180));
 
-  // Bù độ dày giấy khi đóng gọn để loại bỏ hoàn toàn hiện tượng z-fighting (nhấp nháy pixel chiều sâu)
-  const zOffset = !isOpen && !isFirst ? -1.2 : 0;
+  // Khi đóng phẳng: mỗi lớp xếp tuần tự lùi ra sau (theo trục Z thế giới) một khoảng dày 1.5px.
+  // Vì các trang lẻ (1, 3, 5) có hệ toạ độ bị lật 180 độ quanh Y nên local translateZ đổi dấu
+  // để đảm bảo mọi trang từ 1 đến 5 luôn nằm ở phía sau trang 0, triệt tiêu 100% z-fighting và lỗi đè bìa!
+  const zOffset = !isOpen && !isFirst ? (isEven ? index * 1.5 : -index * 1.5) : 0;
 
   return (
     <div
       className="absolute top-0 select-none will-change-transform"
       style={{
-        width: `${panelWidth + 0.4}px`,
+        width: `${panelWidth}px`,
         height: `${panelHeight}px`,
         left: isFirst ? 0 : `${panelWidth}px`,
         transformOrigin: 'left center',
@@ -311,8 +708,8 @@ const ZFoldPanel: React.FC<BookletPanelItemProps> = ({
           className="absolute inset-0 pointer-events-none transition-opacity duration-700"
           style={{
             background: isEven
-              ? 'linear-gradient(to left, rgba(0,0,0,0.38) 0%, rgba(255,255,255,0.04) 50%, rgba(0,0,0,0.12) 100%)'
-              : 'linear-gradient(to right, rgba(0,0,0,0.42) 0%, rgba(255,255,255,0.04) 50%, rgba(0,0,0,0.18) 100%)',
+              ? 'linear-gradient(to left, rgba(0,0,0,0.38) 0%, rgba(255,255,255,0.04) 50%, rgba(0,0,0,0.18) 100%)'
+              : 'linear-gradient(to right, rgba(0,0,0,0.42) 0%, rgba(255,255,255,0.04) 50%, rgba(0,0,0,0.12) 100%)',
             opacity: isOpen ? 0.6 : 0.05,
           }}
         />
@@ -333,9 +730,9 @@ const ZFoldPanel: React.FC<BookletPanelItemProps> = ({
   );
 };
 
-interface ZFoldBookletProps {
+export interface ZFoldBookletProps {
   id?: string;
-  mode?: '3d' | 'carousel';
+  mode?: '3d' | 'carousel' | 'instagram';
   pages?: BookletPage[];
   aspectRatio?: '4/5' | '1/1';
   showDualCarousel?: boolean; // Cho Zone 17: hiện cả 2 mặt (mặt trên và mặt dưới)
@@ -355,6 +752,9 @@ export const ZFoldBooklet: React.FC<ZFoldBookletProps> = ({
   const [rotX, setRotX] = useState(10);
   const [rotY, setRotY] = useState(-15);
 
+  // Di chuyển tự do (Pan X, Y) khi di 2 ngón tay hoặc kéo chuột phải
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+
   // Zoom phóng to thu nhỏ
   const [zoom, setZoom] = useState(1);
   const [isInteracting, setIsInteracting] = useState(false);
@@ -363,6 +763,9 @@ export const ZFoldBooklet: React.FC<ZFoldBookletProps> = ({
   const activePointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
   const initialPinchDistRef = useRef<number>(0);
   const initialPinchZoomRef = useRef<number>(1);
+  const lastTwoFingerCenterRef = useRef<{ x: number; y: number } | null>(null);
+  const isPanningMouseRef = useRef<boolean>(false);
+  const lastMousePosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const totalDragDistRef = useRef<number>(0);
 
   const carouselRef = useDragScroll();
@@ -381,10 +784,16 @@ export const ZFoldBooklet: React.FC<ZFoldBookletProps> = ({
     preloadBookletImages(urls);
   }, [pages]);
 
-  // Độ rộng thực tế của mô hình khi mở ra và khi gập lại để căn giữa hoàn hảo
+  // Căn giữa trọng tâm hình học chuẩn xác:
+  // Khối con có kích thước panelWidth x panelHeight và đã được flexbox căn giữa ở (0, 0).
+  // - Khi đóng: toàn bộ các trang gập phẳng xếp lớp khít từ x = 0 đến x = panelWidth,
+  //   trọng tâm của khối nằm đúng ở tâm container -> offsetX = 0, offsetY = 0.
+  // - Khi mở: dải z-fold mở rộng từ x = 0 đến totalOpenWidth,
+  //   trọng tâm X nằm ở totalOpenWidth / 2 -> dịch sang trái -(totalOpenWidth - panelWidth) / 2
+  //   để toàn bộ dải trang mở rộng tỏa đều cân xứng 2 bên từ đúng tâm màn hình.
   const totalOpenWidth = pages.length * panelWidth * Math.cos((openAngle * Math.PI) / 180);
-  const offsetX = isOpen ? -totalOpenWidth / 2 : -panelWidth / 2;
-  const offsetY = -panelHeight / 2;
+  const offsetX = isOpen ? -(totalOpenWidth - panelWidth) / 2 : 0;
+  const offsetY = 0;
 
   // Touchpad & Mouse wheel zoom mượt mà, loại bỏ triệt để xung đột lag 300ms
   useEffect(() => {
@@ -405,13 +814,12 @@ export const ZFoldBooklet: React.FC<ZFoldBookletProps> = ({
 
       if (e.ctrlKey) {
         // Cử chỉ pinch-zoom trên touchpad (Trackpad macOS / Precision Windows)
-        // Dùng hệ số hàm mũ liên tục giúp zoom siêu êm, không bao giờ giật/nháy hình
         const factor = Math.exp(-e.deltaY * 0.012);
-        setZoom((prev) => Math.min(2.8, Math.max(0.35, prev * factor)));
+        setZoom((prev) => Math.min(3.5, Math.max(0.35, prev * factor)));
       } else {
-        // Con lăn chuột tiêu chuẩn hoặc cuộn touchpad 2 ngón
+        // Con lăn chuột tiêu chuẩn hoặc cuộn touchpad
         const delta = -e.deltaY * 0.0015;
-        setZoom((prev) => Math.min(2.8, Math.max(0.35, prev + delta)));
+        setZoom((prev) => Math.min(3.5, Math.max(0.35, prev + delta)));
       }
     };
 
@@ -422,6 +830,18 @@ export const ZFoldBooklet: React.FC<ZFoldBookletProps> = ({
     };
   }, []);
 
+  // Lắng nghe sự kiện reset zoom từ control bar cho 3D model
+  useEffect(() => {
+    const handleReset = () => {
+      setZoom(1);
+      setRotX(10);
+      setRotY(-15);
+      setPan({ x: 0, y: 0 });
+    };
+    window.addEventListener('blvd-reset-zoom', handleReset);
+    return () => window.removeEventListener('blvd-reset-zoom', handleReset);
+  }, []);
+
   // Pointer gestures chuẩn hóa đa nền tảng (Chuột, Touchpad, Touchscreen, Bút cảm ứng)
   const handlePointerDown = (e: React.PointerEvent) => {
     e.stopPropagation();
@@ -429,18 +849,27 @@ export const ZFoldBooklet: React.FC<ZFoldBookletProps> = ({
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     } catch {}
 
+    // Chuột phải (button 2), chuột giữa (button 1) hoặc giữ phím Shift: kích hoạt chế độ Pan di chuyển
+    if (e.button === 2 || e.button === 1 || e.shiftKey) {
+      isPanningMouseRef.current = true;
+      lastMousePosRef.current = { x: e.clientX, y: e.clientY };
+    }
+
     activePointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     setIsInteracting(true);
 
     if (activePointersRef.current.size === 1) {
       totalDragDistRef.current = 0;
     } else if (activePointersRef.current.size === 2) {
-      // Bắt đầu pinch với 2 ngón tay: tính khoảng cách ban đầu và khóa xoay hoàn toàn
-      const pts: { x: number; y: number }[] = [];
-      activePointersRef.current.forEach((val) => pts.push(val));
+      // 2 ngón tay: ghi nhận khoảng cách ban đầu (để zoom) và trọng tâm 2 ngón (để pan di chuyển)
+      const pts = Array.from(activePointersRef.current.values()) as { x: number; y: number }[];
       if (pts.length >= 2) {
         initialPinchDistRef.current = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
         initialPinchZoomRef.current = zoom;
+        lastTwoFingerCenterRef.current = {
+          x: (pts[0].x + pts[1].x) / 2,
+          y: (pts[0].y + pts[1].y) / 2,
+        };
       }
     }
   };
@@ -449,26 +878,48 @@ export const ZFoldBooklet: React.FC<ZFoldBookletProps> = ({
     if (!activePointersRef.current.has(e.pointerId)) return;
     e.stopPropagation();
 
+    // Kéo chuột phải / chuột giữa để di chuyển (Pan) trên desktop
+    if (isPanningMouseRef.current) {
+      const dx = e.clientX - lastMousePosRef.current.x;
+      const dy = e.clientY - lastMousePosRef.current.y;
+      lastMousePosRef.current = { x: e.clientX, y: e.clientY };
+      setPan((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
+      return;
+    }
+
     const prev = activePointersRef.current.get(e.pointerId)!;
     const dx = e.clientX - prev.x;
     const dy = e.clientY - prev.y;
     activePointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (activePointersRef.current.size === 1) {
-      // 1 con trỏ / 1 ngón tay: CHỈ XOAY 360 ĐỘ, mượt mà và không độ trễ
+      // 1 ngón tay / 1 con trỏ: XOAY 360 ĐỘ tự do, mượt mà
       totalDragDistRef.current += Math.hypot(dx, dy);
       setRotY((prevY) => (prevY + dx * 0.55) % 360);
       setRotX((prevX) => Math.max(-85, Math.min(85, prevX - dy * 0.55)));
     } else if (activePointersRef.current.size === 2) {
-      // 2 ngón tay trên màn hình cảm ứng: CHỈ PINCH ZOOM, TUYỆT ĐỐI KHÔNG XOAY MODEL!
-      // Khắc phục 100% hiện tượng giật lắc model khi phóng to thu nhỏ bằng touch
-      const pts: { x: number; y: number }[] = [];
-      activePointersRef.current.forEach((val) => pts.push(val));
+      // 2 ngón tay trên màn hình cảm ứng:
+      // 1) DI 2 NGÓN TAY ĐỂ DI CHUYỂN (TWO-FINGER PAN)
+      // 2) KẸP / MỞ 2 NGÓN TAY ĐỂ ZOOM (PINCH ZOOM)
+      // KHÔNG XOAY MODEL để không làm mất góc nhìn khi xem chi tiết!
+      const pts = Array.from(activePointersRef.current.values()) as { x: number; y: number }[];
       if (pts.length >= 2) {
+        const currentCenter = {
+          x: (pts[0].x + pts[1].x) / 2,
+          y: (pts[0].y + pts[1].y) / 2,
+        };
+
+        if (lastTwoFingerCenterRef.current) {
+          const dCenterX = currentCenter.x - lastTwoFingerCenterRef.current.x;
+          const dCenterY = currentCenter.y - lastTwoFingerCenterRef.current.y;
+          setPan((prev) => ({ x: prev.x + dCenterX, y: prev.y + dCenterY }));
+        }
+        lastTwoFingerCenterRef.current = currentCenter;
+
         const currentDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
         if (initialPinchDistRef.current > 10) {
           const scale = currentDist / initialPinchDistRef.current;
-          setZoom(Math.min(2.8, Math.max(0.35, initialPinchZoomRef.current * scale)));
+          setZoom(Math.min(3.5, Math.max(0.35, initialPinchZoomRef.current * scale)));
         }
       }
     }
@@ -479,20 +930,65 @@ export const ZFoldBooklet: React.FC<ZFoldBookletProps> = ({
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {}
 
+    isPanningMouseRef.current = false;
     const wasActive = activePointersRef.current.has(e.pointerId);
     activePointersRef.current.delete(e.pointerId);
 
+    if (activePointersRef.current.size < 2) {
+      lastTwoFingerCenterRef.current = null;
+    }
+
     if (activePointersRef.current.size === 0) {
       setIsInteracting(false);
-      // Nếu là cú nhấp/chạm dứt khoát không kéo rê (< 6px), kích hoạt đóng/mở mô hình
+      // Nếu là cú chạm dứt khoát không rê kéo (< 6px), kích hoạt đóng/mở mô hình
       if (wasActive && totalDragDistRef.current < 6) {
         setIsOpen((prev) => !prev);
       }
     } else if (activePointersRef.current.size === 1) {
-      // Nhấc 1 ngón sau pinch: tránh kích hoạt nhấp mở gập nhầm
+      // Sau khi nhấc 1 ngón: tránh kích hoạt đóng/mở nhầm
       totalDragDistRef.current = 100;
     }
   };
+
+  // Nhấp đúp (Double click / Double tap) để reset vị trí và góc nhìn về ban đầu
+  const handleDoubleClick = () => {
+    setPan({ x: 0, y: 0 });
+    setZoom(1);
+    setRotX(10);
+    setRotY(-15);
+  };
+
+  // ==========================================================================
+  // RENDER INSTAGRAM MODE (1 KHUNG TỈ LỆ CHUẨN, VUỐT TOUCH / TOUCHPAD HOẶC BẤM NÚT TRÁI PHẢI)
+  // ==========================================================================
+  if (mode === 'instagram') {
+    if (showDualCarousel) {
+      // Zone 17: gồm 4 ảnh mặt trước [2, 4, 6, 8] và 4 ảnh mặt sau [1, 3, 5, 7]
+      const frontPages = pages.map((p) => p.front);
+      const backStoryPages = [
+        'https://raw.githubusercontent.com/boulevardphat/Kho-multimedia-c-a-Blvd/main/blvdarchive/Boulevard1st/Employer/%5B%23BLVD%5D%20%23BLVD17/1.webp',
+        'https://raw.githubusercontent.com/boulevardphat/Kho-multimedia-c-a-Blvd/main/blvdarchive/Boulevard1st/Employer/%5B%23BLVD%5D%20%23BLVD17/3.webp',
+        'https://raw.githubusercontent.com/boulevardphat/Kho-multimedia-c-a-Blvd/main/blvdarchive/Boulevard1st/Employer/%5B%23BLVD%5D%20%23BLVD17/5.webp',
+        'https://raw.githubusercontent.com/boulevardphat/Kho-multimedia-c-a-Blvd/main/blvdarchive/Boulevard1st/Employer/%5B%23BLVD%5D%20%23BLVD17/7.webp',
+      ];
+      return (
+        <InstagramViewer
+          id={`${id}-instagram`}
+          images={[...frontPages, ...backStoryPages]}
+          aspectRatio={aspectRatio}
+        />
+      );
+    }
+
+    // Zone 18 (hoặc booklet chuẩn): 6 trang mặt trước
+    return (
+      <InstagramViewer
+        id={`${id}-instagram`}
+        images={pages.map((p) => p.front)}
+        aspectRatio={aspectRatio}
+      />
+    );
+  }
 
   // ==========================================================================
   // RENDER CAROUSEL MODE
@@ -512,76 +1008,82 @@ export const ZFoldBooklet: React.FC<ZFoldBookletProps> = ({
       ];
 
       return (
-        <div
-          ref={carouselRef}
+        <ZoomableCarouselContainer
           id={`${id}-carousel`}
-          className="w-full max-w-6xl mx-auto flex flex-col items-center justify-center gap-2 overflow-x-auto no-scrollbar py-6 px-4 select-none cursor-grab active:cursor-grabbing touch-pan-x"
-          style={{ WebkitOverflowScrolling: 'touch' }}
+          className="w-full max-w-6xl mx-auto flex items-center justify-center px-4"
         >
-          {/* HÀNG TRÊN: Mặt trước (2, 4, 6, 8) - gap-0 liền mạch */}
-          <div className="flex items-center gap-0 w-max shrink-0">
-            {frontPages.map((url, idx) => (
-              <div
-                key={`front-${idx}`}
-                className="shrink-0 relative overflow-hidden bg-[#111] border-y border-white/20"
-                style={{
-                  width: 'clamp(110px, 16vw, 170px)',
-                  aspectRatio: '1 / 1',
-                }}
-              >
-                <img
-                  src={url}
-                  alt={`BLVD17 Front ${idx + 1}`}
-                  referrerPolicy="no-referrer"
-                  loading="eager"
-                  decoding="async"
-                  className="w-full h-full object-cover select-none pointer-events-none"
-                />
-              </div>
-            ))}
-          </div>
+          <div
+            className="flex flex-col items-center justify-center gap-2"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            {/* HÀNG TRÊN: Mặt trước (2, 4, 6, 8) - gap-0 liền mạch */}
+            <div className="flex items-center gap-0 w-max shrink-0">
+              {frontPages.map((url, idx) => (
+                <div
+                  key={`front-${idx}`}
+                  className="shrink-0 relative overflow-hidden bg-[#111] border-y border-white/20 transition-all duration-200 ease-out"
+                  style={{
+                    width: 'calc(clamp(110px, 16vw, 170px) * var(--carousel-scale, 1))',
+                    aspectRatio: '1 / 1',
+                  }}
+                >
+                  <img
+                    src={url}
+                    alt={`BLVD17 Front ${idx + 1}`}
+                    referrerPolicy="no-referrer"
+                    loading="eager"
+                    decoding="async"
+                    className="w-full h-full object-cover select-none pointer-events-none"
+                  />
+                </div>
+              ))}
+            </div>
 
-          {/* HÀNG DƯỚI: Mặt dưới (7, 5, 3, 1) - nằm ngay dưới hàng trên - gap-0 liền mạch */}
-          <div className="flex items-center gap-0 w-max shrink-0">
-            {backStoryPages.map((url, idx) => (
-              <div
-                key={`back-${idx}`}
-                className="shrink-0 relative overflow-hidden bg-[#111] border-y border-white/20"
-                style={{
-                  width: 'clamp(110px, 16vw, 170px)',
-                  aspectRatio: '1 / 1',
-                }}
-              >
-                <img
-                  src={url}
-                  alt={`BLVD17 Back ${idx + 1}`}
-                  referrerPolicy="no-referrer"
-                  loading="eager"
-                  decoding="async"
-                  className="w-full h-full object-cover select-none pointer-events-none"
-                />
-              </div>
-            ))}
+            {/* HÀNG DƯỚI: Mặt dưới (7, 5, 3, 1) - nằm ngay dưới hàng trên - gap-0 liền mạch */}
+            <div className="flex items-center gap-0 w-max shrink-0">
+              {backStoryPages.map((url, idx) => (
+                <div
+                  key={`back-${idx}`}
+                  className="shrink-0 relative overflow-hidden bg-[#111] border-y border-white/20 transition-all duration-200 ease-out"
+                  style={{
+                    width: 'calc(clamp(110px, 16vw, 170px) * var(--carousel-scale, 1))',
+                    aspectRatio: '1 / 1',
+                  }}
+                >
+                  <img
+                    src={url}
+                    alt={`BLVD17 Back ${idx + 1}`}
+                    referrerPolicy="no-referrer"
+                    loading="eager"
+                    decoding="async"
+                    className="w-full h-full object-cover select-none pointer-events-none"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </ZoomableCarouselContainer>
       );
     }
 
     // Carousel đơn lẻ (Zone 18): 1 hàng 6 tờ gap-0
     return (
-      <div 
-        ref={carouselRef}
+      <ZoomableCarouselContainer
         id={`${id}-carousel`}
-        className="w-full max-w-6xl mx-auto flex items-center justify-center gap-0 overflow-x-auto no-scrollbar py-6 px-4 select-none cursor-grab active:cursor-grabbing touch-pan-x"
-        style={{ WebkitOverflowScrolling: 'touch' }}
+        className="w-full max-w-6xl mx-auto flex items-center justify-center px-4"
       >
-        <div className="flex items-center gap-0 w-max shrink-0">
+        <div 
+          className="flex items-center gap-0 w-max shrink-0"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           {pages.map((p, idx) => (
             <div
               key={idx}
-              className="shrink-0 relative overflow-hidden bg-[#111] border-y border-white/20"
+              className="shrink-0 relative overflow-hidden bg-[#111] border-y border-white/20 transition-all duration-200 ease-out"
               style={{
-                width: isSquare ? 'clamp(140px, 20vw, 220px)' : 'clamp(120px, 16vw, 180px)',
+                width: isSquare 
+                  ? 'calc(clamp(140px, 20vw, 220px) * var(--carousel-scale, 1))' 
+                  : 'calc(clamp(120px, 16vw, 180px) * var(--carousel-scale, 1))',
                 aspectRatio: isSquare ? '1 / 1' : '4 / 5',
               }}
             >
@@ -596,7 +1098,7 @@ export const ZFoldBooklet: React.FC<ZFoldBookletProps> = ({
             </div>
           ))}
         </div>
-      </div>
+      </ZoomableCarouselContainer>
     );
   }
 
@@ -612,16 +1114,18 @@ export const ZFoldBooklet: React.FC<ZFoldBookletProps> = ({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
+      onDoubleClick={handleDoubleClick}
+      onContextMenu={(e) => e.preventDefault()}
       style={{ perspective: '2200px', touchAction: 'none' }}
     >
-      {/* Khối xoay 360 độ và scale zoom */}
+      {/* Khối di chuyển (Pan), xoay 360 độ và scale zoom */}
       <div
         className={`relative flex items-center justify-center will-change-transform ${
           isInteracting ? 'transition-none' : 'transition-transform duration-250 ease-out'
         }`}
         style={{
           transformStyle: 'preserve-3d',
-          transform: `scale(${zoom}) rotateX(${rotX}deg) rotateY(${rotY}deg)`,
+          transform: `translate3d(${pan.x}px, ${pan.y}px, 0px) scale(${zoom}) rotateX(${rotX}deg) rotateY(${rotY}deg)`,
         }}
       >
         {/* Khối căn giữa booklet theo chiều rộng thực tế khi mở ra hoặc khi gập lại */}

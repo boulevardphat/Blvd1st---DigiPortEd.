@@ -11,15 +11,18 @@ import { motion } from 'motion/react';
 import { IntroClock } from './components/IntroClock';
 import { VespertineBackground } from './components/VespertineBackground';
 import { ModeSelector } from './components/ModeSelector';
-import { ZFoldBooklet, BLVD18_PAGES, BLVD17_PAGES, Zone16Carousel } from './components/ZFoldBooklet';
+import { ZFoldBooklet, BLVD18_PAGES, BLVD17_PAGES, BLVD16_PAGES, Zone16Carousel } from './components/ZFoldBooklet';
 import { AppLanguage, PortfolioMode, SceneState } from './types';
 
 export default function App() {
 
   const [scene, setScene] = useState<SceneState>('pre-intro');
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [blvdLoadingProgress, setBlvdLoadingProgress] = useState(0);
   const [activeBlvdZone, setActiveBlvdZone] = useState<'zone-blvd' | 'zone-18' | 'zone-17' | 'zone-16'>('zone-blvd');
-  const [bookletViewMode, setBookletViewMode] = useState<'3d' | 'carousel'>('3d');
+  const [activeZoneIndex, setActiveZoneIndex] = useState<number>(0);
+  const [bookletViewMode, setBookletViewMode] = useState<'3d' | 'carousel' | 'instagram'>('3d');
+  const [zone16ViewMode, setZone16ViewMode] = useState<'carousel' | 'instagram'>('carousel');
   const [portfolioMode, setPortfolioMode] = useState<PortfolioMode>(() => {
     try {
       const saved = localStorage.getItem('blvd_portfolio_mode');
@@ -70,14 +73,92 @@ export default function App() {
   };
 
   const handleBlvdClick = () => {
-    // Pre-decode blvd18 image in GPU memory so scene transition has zero delay
-    const img = new Image();
-    img.src = "https://i.ibb.co/ccfZG4Zk/n-n-blvd18.webp";
-    if (img.decode) {
-      img.decode().catch(() => {});
-    }
-    setScene('blvd-play');
+    // Bắt đầu chuỗi BLVD: hiện màn hình LOADING với tiến trình tải thật từ 0 đến 100%
+    setBlvdLoadingProgress(0);
+    setActiveZoneIndex(0);
+    setActiveBlvdZone('zone-blvd');
+    setBookletViewMode('3d');
+    setZone16ViewMode('carousel');
+    setScene('blvd-loading');
   };
+
+  // Quản lý tiến trình tải toàn bộ hình ảnh & model của BLVD (Zone 18, 17, 16)
+  useEffect(() => {
+    if (scene !== 'blvd-loading') return;
+
+    setBlvdLoadingProgress(0);
+
+    const allBlvdAssets = [
+      // Zone 18: 6 tờ x 2 mặt = 12 ảnh + background
+      ...BLVD18_PAGES.map(p => p.front),
+      ...BLVD18_PAGES.map(p => p.back),
+      "https://i.ibb.co/ccfZG4Zk/n-n-blvd18.webp",
+      // Zone 17: 4 tờ x 2 mặt = 8 ảnh + logo local & fallback
+      ...BLVD17_PAGES.map(p => p.front),
+      ...BLVD17_PAGES.map(p => p.back),
+      "/logo_blvd17.webp",
+      "https://raw.githubusercontent.com/boulevardphat/Kho-multimedia-c-a-Blvd/main/blvdarchive/Boulevard1st/Employer/%5B%23BLVD%5D%20%23BLVD17/logo%20%23blvd17.webp",
+      // Zone 16: 10 ảnh
+      ...BLVD16_PAGES,
+    ];
+
+    const uniqueAssets = Array.from(new Set(allBlvdAssets));
+    const totalAssets = uniqueAssets.length;
+    let loadedCount = 0;
+    let currentDisplayProgress = 0;
+    let isFinished = false;
+
+    // Tween làm mượt tiến trình 0 -> 100% khi tài nguyên tải về
+    const progressInterval = setInterval(() => {
+      const realTarget = Math.round((loadedCount / totalAssets) * 100);
+      if (currentDisplayProgress < realTarget) {
+        currentDisplayProgress += 1;
+        setBlvdLoadingProgress(currentDisplayProgress);
+      }
+      // Phải load hết toàn bộ ảnh và model, đồng thời thanh tiến trình LOADING đã lên đủ 100%
+      if (loadedCount >= totalAssets && currentDisplayProgress >= 100 && !isFinished) {
+        isFinished = true;
+        clearInterval(progressInterval);
+        clearTimeout(safetyTimer);
+        // Dừng lại 400ms để người dùng thấy trọn vẹn 100% chữ LOADING trước khi sang phát
+        setTimeout(() => {
+          setScene('blvd-play');
+        }, 400);
+      }
+    }, 14);
+
+    const onAssetLoaded = () => {
+      loadedCount++;
+    };
+
+    uniqueAssets.forEach(url => {
+      const img = new Image();
+      img.onload = () => {
+        if (img.decode) {
+          img.decode().catch(() => {}).finally(onAssetLoaded);
+        } else {
+          onAssetLoaded();
+        }
+      };
+      img.onerror = onAssetLoaded;
+      img.src = url;
+    });
+
+    // Safety timeout: tối đa 8 giây nếu kết nối mạng của user bị rớt gói tin trên 1 ảnh cụ thể
+    const safetyTimer = setTimeout(() => {
+      loadedCount = totalAssets;
+      currentDisplayProgress = 100;
+      setBlvdLoadingProgress(100);
+      setTimeout(() => {
+        setScene('blvd-play');
+      }, 400);
+    }, 8000);
+
+    return () => {
+      clearInterval(progressInterval);
+      clearTimeout(safetyTimer);
+    };
+  }, [scene]);
 
   useEffect(() => {
     const imageUrls = [
@@ -193,6 +274,144 @@ export default function App() {
     };
   }, [scene]);
 
+  // Quản lý trượt từng zone một trong khu vực #BLVD (chống trượt lố, 1 lần vuốt/cuộn = đúng 1 zone)
+  const BLVD_ZONES: ('zone-blvd' | 'zone-18' | 'zone-17' | 'zone-16')[] = [
+    'zone-blvd',
+    'zone-18',
+    'zone-17',
+    'zone-16',
+  ];
+  const isZoneTransitioningRef = React.useRef(false);
+  const zoneTransitionTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const goToZone = React.useCallback((targetIndex: number) => {
+    const nextIdx = Math.max(0, Math.min(3, targetIndex));
+    setActiveZoneIndex(nextIdx);
+    setActiveBlvdZone(BLVD_ZONES[nextIdx]);
+    isZoneTransitioningRef.current = true;
+    if (zoneTransitionTimeoutRef.current) clearTimeout(zoneTransitionTimeoutRef.current);
+    zoneTransitionTimeoutRef.current = setTimeout(() => {
+      isZoneTransitioningRef.current = false;
+    }, 650);
+  }, []);
+
+  // Xử lý sự kiện cuộn chuột / trackpad - 1 lần cuộn sang đúng 1 zone, khóa lại khi đang chuyển cảnh để triệt tiêu momentum gây trượt lố
+  useEffect(() => {
+    if (scene !== 'blvd-black') return;
+
+    const container = document.getElementById('scene-blvd-pure-black');
+    if (!container) return;
+
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) return;
+
+      if (isZoneTransitioningRef.current) {
+        e.preventDefault();
+        return;
+      }
+
+      if (Math.abs(e.deltaY) < 18) return;
+
+      if (Math.abs(e.deltaY) >= Math.abs(e.deltaX)) {
+        if (e.deltaY > 0) {
+          if (activeZoneIndex < 3) {
+            e.preventDefault();
+            goToZone(activeZoneIndex + 1);
+          }
+        } else {
+          if (activeZoneIndex > 0) {
+            e.preventDefault();
+            goToZone(activeZoneIndex - 1);
+          }
+        }
+      }
+    };
+
+    container.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', onWheel);
+    };
+  }, [scene, activeZoneIndex, goToZone]);
+
+  // Xử lý cử chỉ vuốt cảm ứng trên di động & tablet - 1 lần vuốt sang đúng 1 zone
+  useEffect(() => {
+    if (scene !== 'blvd-black') return;
+
+    const container = document.getElementById('scene-blvd-pure-black');
+    if (!container) return;
+
+    let touchStartY = 0;
+    let touchStartX = 0;
+    let touchStartTime = 0;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        touchStartY = e.touches[0].clientY;
+        touchStartX = e.touches[0].clientX;
+        touchStartTime = Date.now();
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (isZoneTransitioningRef.current) return;
+      if (e.changedTouches.length === 0) return;
+
+      const endY = e.changedTouches[0].clientY;
+      const endX = e.changedTouches[0].clientX;
+      const diffY = touchStartY - endY;
+      const diffX = touchStartX - endX;
+      const duration = Date.now() - touchStartTime;
+
+      const isQuickFlick = duration < 350 && Math.abs(diffY) > 25;
+      const isIntentionalSwipe = Math.abs(diffY) > 40;
+
+      if ((isIntentionalSwipe || isQuickFlick) && Math.abs(diffY) > Math.abs(diffX) * 1.1) {
+        if (diffY > 0) {
+          if (activeZoneIndex < 3) {
+            goToZone(activeZoneIndex + 1);
+          }
+        } else {
+          if (activeZoneIndex > 0) {
+            goToZone(activeZoneIndex - 1);
+          }
+        }
+      }
+    };
+
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
+    container.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      container.removeEventListener('touchstart', onTouchStart);
+      container.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [scene, activeZoneIndex, goToZone]);
+
+  // Phím mũi tên lên/xuống hoặc PageUp/PageDown chuyển zone
+  useEffect(() => {
+    if (scene !== 'blvd-black') return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isZoneTransitioningRef.current) return;
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+        if (activeZoneIndex < 3) {
+          e.preventDefault();
+          goToZone(activeZoneIndex + 1);
+        }
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        if (activeZoneIndex > 0) {
+          e.preventDefault();
+          goToZone(activeZoneIndex - 1);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [scene, activeZoneIndex, goToZone]);
+
   const handleBgAudioEnded = () => {
     setTimeout(() => {
       if (bgAudioRef.current && scene === 'main-app') {
@@ -270,6 +489,7 @@ export default function App() {
     }
 
     // --- Isolated BLVD Sequence Transitions ---
+    // Scene 'blvd-loading' được kiểm soát tự động bởi tiến trình tải tài nguyên thực tế (0% -> 100%)
     if (scene === 'blvd-play') {
       const t = setTimeout(() => {
         setScene('blvd-text');
@@ -427,6 +647,38 @@ export default function App() {
       )}
 
       {/* --- SEPARATE #BLVD SEQUENCE --- */}
+      {/* Màn hình loading LOADING hiện dần từ trái sang phải từ 0% đến 100% theo tiến trình tải ảnh & model */}
+      {scene === 'blvd-loading' && (
+        <div 
+          id="scene-blvd-loading"
+          className="absolute inset-0 flex items-center justify-center bg-black z-50 overflow-hidden select-none w-full h-full px-2 md:px-8"
+        >
+          <svg 
+            viewBox="0 0 1000 120" 
+            className="w-full h-full max-h-[85vh]" 
+            preserveAspectRatio="none"
+          >
+            <text
+              x="50%"
+              y="50%"
+              dominantBaseline="central"
+              textAnchor="middle"
+              className="font-archivo font-black select-none pointer-events-none tracking-tight"
+              fontSize="115"
+              fill="none"
+              stroke="rgba(255, 255, 255, 0.95)"
+              strokeWidth="3.2"
+              style={{
+                clipPath: `inset(0 ${Math.max(0, 100 - blvdLoadingProgress)}% 0 0)`,
+                WebkitClipPath: `inset(0 ${Math.max(0, 100 - blvdLoadingProgress)}% 0 0)`,
+              }}
+            >
+              LOADING
+            </text>
+          </svg>
+        </div>
+      )}
+
       {scene === 'blvd-play' && (
         <div 
           id="scene-blvd-play"
@@ -511,15 +763,21 @@ export default function App() {
         </div>
       )}
 
-      {/* 3. font vespertine: "BLVD17" on #E6E6E6 background */}
+      {/* 3. logo #BLVD17 invert: "BLVD17" on #E6E6E6 background */}
       {scene === 'blvd-color-3' && (
         <div 
           id="scene-blvd-color-3"
           className="absolute inset-0 bg-[#E6E6E6] z-50 select-none flex items-center justify-center overflow-hidden px-4"
         >
-          <div className="font-vespertine text-[clamp(3.5rem,11vw,8rem)] text-black select-none leading-none tracking-normal">
-            BLVD17
-          </div>
+          <img
+            src="/logo_blvd17.webp"
+            alt="Logo #BLVD17"
+            referrerPolicy="no-referrer"
+            className="h-[clamp(4.5rem,14vw,10rem)] w-auto max-w-[85vw] object-contain invert brightness-105 select-none pointer-events-none"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "https://raw.githubusercontent.com/boulevardphat/Kho-multimedia-c-a-Blvd/main/blvdarchive/Boulevard1st/Employer/%5B%23BLVD%5D%20%23BLVD17/logo%20%23blvd17.webp";
+            }}
+          />
         </div>
       )}
 
@@ -549,57 +807,102 @@ export default function App() {
         </div>
       )}
 
-      {/* 5. Giao diện blvd-black: 4 zone cuộn dọc từ trên xuống dưới theo thứ tự giảm dần (#BLVD -> Zone 18 -> Zone 17 -> Zone 16) */}
+      {/* 5. Giao diện blvd-black: 4 zone trượt dọc từng zone một theo thứ tự giảm dần (#BLVD -> Zone 18 -> Zone 17 -> Zone 16) */}
       {scene === 'blvd-black' && (
         <div 
           id="scene-blvd-pure-black"
-          className="absolute inset-0 bg-black z-50 select-none overflow-x-hidden overflow-y-auto no-scrollbar scroll-smooth snap-y snap-mandatory overscroll-none"
-          onScroll={(e) => {
-            const container = e.currentTarget;
-            const scrollY = container.scrollTop;
-            const h = container.clientHeight || window.innerHeight;
-            // Xác định zone hiện tại theo tỉ lệ cuộn để cập nhật sublogo tại chỗ góc trên bên phải
-            const index = Math.round(scrollY / h);
-            if (index === 0 && activeBlvdZone !== 'zone-blvd') setActiveBlvdZone('zone-blvd');
-            else if (index === 1 && activeBlvdZone !== 'zone-18') setActiveBlvdZone('zone-18');
-            else if (index === 2 && activeBlvdZone !== 'zone-17') setActiveBlvdZone('zone-17');
-            else if (index >= 3 && activeBlvdZone !== 'zone-16') setActiveBlvdZone('zone-16');
-          }}
+          className="absolute inset-0 bg-black z-50 select-none overflow-hidden overscroll-none"
         >
-          {/* Sublogo cố định ở góc trên bên trái, đổi hình dạng tại chỗ tương ứng với zone đang xem */}
-          <div 
-            id="blvd-sublogo-fixed-tl"
-            className="fixed top-6 left-6 md:top-8 md:left-8 z-50 pointer-events-none select-none flex items-center justify-start"
-          >
-            {activeBlvdZone === 'zone-18' && (
-              <div className="font-archivo font-normal text-white/90 text-[clamp(1.5rem,3.2vw,2.5rem)] leading-none tracking-normal transition-all duration-300">
-                #BLVD18
+          {/* Nút back: căn riêng độc lập ở zone #BLVD để không bị lệch, ở các zone 18, 17, 16 thì nằm ngay dưới sublogo */}
+          {activeBlvdZone === 'zone-blvd' ? (
+            <button
+              type="button"
+              id="blvd-back-to-toc-button-blvd"
+              onClick={(e) => {
+                e.stopPropagation();
+                setScene('main-app');
+              }}
+              className="fixed top-6 left-6 md:top-8 md:left-8 z-50 font-archivo font-normal normal-case text-xs md:text-sm tracking-normal text-white/60 hover:text-white transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 outline-none select-none rounded-none pointer-events-auto"
+              title="Quay về mục lục"
+            >
+              back
+            </button>
+          ) : (
+            <div 
+              id="blvd-sublogo-fixed-tl"
+              className="fixed top-6 left-6 md:top-8 md:left-8 z-50 select-none flex flex-col items-start justify-start gap-1.5 pointer-events-auto"
+            >
+              <div className="flex items-center justify-start min-h-[36px]">
+                {activeBlvdZone === 'zone-18' && (
+                  <div className="font-archivo font-normal text-white/90 text-[clamp(1.5rem,3.2vw,2.5rem)] leading-none tracking-normal transition-all duration-300">
+                    #BLVD18
+                  </div>
+                )}
+                {activeBlvdZone === 'zone-17' && (
+                  <img
+                    src="/logo_blvd17.webp"
+                    alt="Logo #BLVD17"
+                    referrerPolicy="no-referrer"
+                    className="h-[clamp(1.8rem,3.8vw,2.8rem)] w-auto object-contain brightness-125 select-none pointer-events-none transition-all duration-300"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "https://raw.githubusercontent.com/boulevardphat/Kho-multimedia-c-a-Blvd/main/blvdarchive/Boulevard1st/Employer/%5B%23BLVD%5D%20%23BLVD17/logo%20%23blvd17.webp";
+                    }}
+                  />
+                )}
+                {activeBlvdZone === 'zone-16' && (
+                  <div className="font-arial-custom font-normal text-[#8ace00] text-[clamp(1.5rem,3.2vw,2.5rem)] leading-none tracking-normal transition-all duration-300">
+                    #blvd16
+                  </div>
+                )}
               </div>
-            )}
-            {activeBlvdZone === 'zone-17' && (
-              <div className="font-vespertine text-white/90 text-[clamp(1.5rem,3.2vw,2.5rem)] leading-none tracking-normal transition-all duration-300">
-                BLVD17
-              </div>
-            )}
-            {activeBlvdZone === 'zone-16' && (
-              <div className="font-arial-custom font-normal text-[#8ace00] text-[clamp(1.5rem,3.2vw,2.5rem)] leading-none tracking-normal transition-all duration-300">
-                #blvd16
-              </div>
-            )}
-          </div>
 
-          {/* Ở cạnh dưới màn hình: 18 & 17 có "3d model" và "Carousel". 16 có "Carousel" cố định không bấm ra gì */}
+              {/* Nút chữ back font archivo thường, nằm ngay dưới logo ở các zone 18, 17, 16 */}
+              <button
+                type="button"
+                id="blvd-back-to-toc-button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setScene('main-app');
+                }}
+                className="font-archivo font-normal normal-case text-xs md:text-sm tracking-normal text-white/60 hover:text-white transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 outline-none select-none rounded-none"
+                title="Quay về mục lục"
+              >
+                back
+              </button>
+            </div>
+          )}
+
+          {/* Nút reset zoom nằm ở bên phải cạnh dưới: hiển thị khi ở Zone 18, 17, 16 (ngoại trừ khi xem Instagram) */}
+          {(
+            ((activeBlvdZone === 'zone-18' || activeBlvdZone === 'zone-17') && bookletViewMode !== 'instagram') ||
+            (activeBlvdZone === 'zone-16' && zone16ViewMode === 'carousel')
+          ) && (
+            <button
+              type="button"
+              id="blvd-reset-zoom-desktop"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent('blvd-reset-zoom'));
+              }}
+              className="fixed bottom-6 md:bottom-8 right-6 md:right-8 z-[60] flex items-center font-archivo font-normal normal-case text-xs sm:text-sm md:text-base tracking-normal text-white/40 hover:text-white transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 outline-none select-none rounded-none pointer-events-auto"
+              title="Reset zoom"
+            >
+              reset zoom
+            </button>
+          )}
+
+          {/* Ở cạnh dưới màn hình: 18 & 17 có "3d model", "Carousel" và "Instagram". 16 có "Carousel" và "Instagram" */}
           {(activeBlvdZone === 'zone-18' || activeBlvdZone === 'zone-17' || activeBlvdZone === 'zone-16') && (
             <div 
               id="blvd-bottom-mode-text"
-              className="fixed bottom-6 md:bottom-8 inset-x-0 z-50 flex items-center justify-center gap-8 select-none"
+              className="fixed bottom-6 md:bottom-8 inset-x-0 z-50 flex items-center justify-center gap-6 md:gap-8 select-none pointer-events-none"
             >
               {activeBlvdZone !== 'zone-16' ? (
                 <>
                   <button
                     type="button"
                     onClick={() => setBookletViewMode('3d')}
-                    className={`font-archivo font-normal normal-case text-sm md:text-base tracking-normal transition-colors duration-200 cursor-pointer ${
+                    className={`font-archivo font-normal normal-case text-sm md:text-base tracking-normal transition-colors duration-200 cursor-pointer pointer-events-auto ${
                       bookletViewMode === '3d' ? 'text-white font-medium' : 'text-white/40 hover:text-white/80'
                     }`}
                   >
@@ -608,81 +911,116 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setBookletViewMode('carousel')}
-                    className={`font-archivo font-normal normal-case text-sm md:text-base tracking-normal transition-colors duration-200 cursor-pointer ${
+                    className={`font-archivo font-normal normal-case text-sm md:text-base tracking-normal transition-colors duration-200 cursor-pointer pointer-events-auto ${
                       bookletViewMode === 'carousel' ? 'text-white font-medium' : 'text-white/40 hover:text-white/80'
                     }`}
                   >
                     Carousel
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setBookletViewMode('instagram')}
+                    className={`font-archivo font-normal normal-case text-sm md:text-base tracking-normal transition-colors duration-200 cursor-pointer pointer-events-auto ${
+                      bookletViewMode === 'instagram' ? 'text-white font-medium' : 'text-white/40 hover:text-white/80'
+                    }`}
+                  >
+                    Instagram
+                  </button>
                 </>
               ) : (
-                <span className="font-archivo font-medium normal-case text-sm md:text-base tracking-normal text-white cursor-default select-none pointer-events-none">
-                  Carousel
-                </span>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setZone16ViewMode('carousel')}
+                    className={`font-archivo font-normal normal-case text-sm md:text-base tracking-normal transition-colors duration-200 cursor-pointer pointer-events-auto ${
+                      zone16ViewMode === 'carousel' ? 'text-white font-medium' : 'text-white/40 hover:text-white/80'
+                    }`}
+                  >
+                    Carousel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setZone16ViewMode('instagram')}
+                    className={`font-archivo font-normal normal-case text-sm md:text-base tracking-normal transition-colors duration-200 cursor-pointer pointer-events-auto ${
+                      zone16ViewMode === 'instagram' ? 'text-white font-medium' : 'text-white/40 hover:text-white/80'
+                    }`}
+                  >
+                    Instagram
+                  </button>
+                </>
               )}
             </div>
           )}
 
-          {/* ZONE 1 (Đầu tiên): Chữ #BLVD kéo dãn to tràn màn hình */}
-          <section 
-            id="blvd-zone-main"
-            className="relative w-full h-[calc(var(--vh,1vh)*100)] shrink-0 flex items-center justify-center overflow-hidden snap-start snap-always"
+          {/* Container trượt từng zone một mượt mà, chính xác, 1 lần vuốt = 1 zone, không bao giờ bị lố */}
+          <div 
+            id="blvd-zones-slider"
+            className="w-full h-full will-change-transform transition-transform duration-650 ease-[cubic-bezier(0.2,0.9,0.3,1)] flex flex-col"
+            style={{
+              transform: `translate3d(0, -${activeZoneIndex * 100}%, 0)`,
+            }}
           >
-            <svg 
-              viewBox="0 0 450 100" 
-              className="w-full h-full" 
-              preserveAspectRatio="none"
+            {/* ZONE 1 (Đầu tiên): Chữ #BLVD kéo dãn to tràn màn hình */}
+            <section 
+              id="blvd-zone-main"
+              className="relative w-full h-[calc(var(--vh,1vh)*100)] shrink-0 flex items-center justify-center overflow-hidden"
             >
-              <text
-                x="50%"
-                y="50%"
-                dominantBaseline="central"
-                textAnchor="middle"
-                className="font-archivo font-black select-none pointer-events-none"
-                fontSize="105"
-                fill="none"
-                stroke="rgba(255, 255, 255, 0.85)"
-                strokeWidth="1.2"
+              <svg 
+                viewBox="0 0 450 100" 
+                className="w-full h-full" 
+                preserveAspectRatio="none"
               >
-                #BLVD
-              </text>
-            </svg>
-          </section>
+                <text
+                  x="50%"
+                  y="50%"
+                  dominantBaseline="central"
+                  textAnchor="middle"
+                  className="font-archivo font-black select-none pointer-events-none"
+                  fontSize="105"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.85)"
+                  strokeWidth="1.2"
+                >
+                  #BLVD
+                </text>
+              </svg>
+            </section>
 
-          {/* ZONE 2: Zone 18 với Booklet 3D dạng gấp Z-fold (6 tờ, tỉ lệ 4:5, không gap) */}
-          <section 
-            id="blvd-zone-18"
-            className="relative w-full h-[calc(var(--vh,1vh)*100)] shrink-0 flex flex-col items-center justify-center overflow-hidden snap-start snap-always px-4"
-          >
-            <ZFoldBooklet 
-              id="booklet-zone-18" 
-              mode={bookletViewMode} 
-              pages={BLVD18_PAGES} 
-              aspectRatio="4/5" 
-            />
-          </section>
+            {/* ZONE 2: Zone 18 với Booklet 3D dạng gấp Z-fold (6 tờ, tỉ lệ 4:5, không gap) */}
+            <section 
+              id="blvd-zone-18"
+              className="relative w-full h-[calc(var(--vh,1vh)*100)] shrink-0 flex flex-col items-center justify-center overflow-hidden px-4"
+            >
+              <ZFoldBooklet 
+                id="booklet-zone-18" 
+                mode={bookletViewMode} 
+                pages={BLVD18_PAGES} 
+                aspectRatio="4/5" 
+              />
+            </section>
 
-          {/* ZONE 3: Zone 17 với Booklet 3D tỉ lệ 1:1, 4 tờ (chẵn mặt trước 8, 6, 4, 2; lẻ mặt sau 1, 3, 5, 7; carousel hiện cả 2 mặt trên dưới) */}
-          <section 
-            id="blvd-zone-17"
-            className="relative w-full h-[calc(var(--vh,1vh)*100)] shrink-0 flex flex-col items-center justify-center overflow-hidden snap-start snap-always px-4"
-          >
-            <ZFoldBooklet 
-              id="booklet-zone-17" 
-              mode={bookletViewMode} 
-              pages={BLVD17_PAGES} 
-              aspectRatio="1/1" 
-              showDualCarousel={true}
-            />
-          </section>
+            {/* ZONE 3: Zone 17 với Booklet 3D tỉ lệ 1:1, 4 tờ (chẵn mặt trước 8, 6, 4, 2; lẻ mặt sau 1, 3, 5, 7; carousel hiện cả 2 mặt trên dưới) */}
+            <section 
+              id="blvd-zone-17"
+              className="relative w-full h-[calc(var(--vh,1vh)*100)] shrink-0 flex flex-col items-center justify-center overflow-hidden px-4"
+            >
+              <ZFoldBooklet 
+                id="booklet-zone-17" 
+                mode={bookletViewMode} 
+                pages={BLVD17_PAGES} 
+                aspectRatio="1/1" 
+                showDualCarousel={true}
+              />
+            </section>
 
-          {/* ZONE 4: Zone 16 (Cuối cùng theo thứ tự giảm dần: 1:1, chỉ carousel) */}
-          <section 
-            id="blvd-zone-16"
-            className="relative w-full h-[calc(var(--vh,1vh)*100)] shrink-0 flex flex-col items-center justify-center overflow-hidden snap-start snap-always px-4"
-          >
-            <Zone16Carousel id="booklet-zone-16" />
-          </section>
+            {/* ZONE 4: Zone 16 (Cuối cùng theo thứ tự giảm dần: 1:1, chỉ carousel) */}
+            <section 
+              id="blvd-zone-16"
+              className="relative w-full h-[calc(var(--vh,1vh)*100)] shrink-0 flex flex-col items-center justify-center overflow-hidden px-4"
+            >
+              <Zone16Carousel id="booklet-zone-16" mode={zone16ViewMode} />
+            </section>
+          </div>
         </div>
       )}
 

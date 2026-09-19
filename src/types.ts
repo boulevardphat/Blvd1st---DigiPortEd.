@@ -7,6 +7,7 @@ export type SceneState =
   | 'intro-blvd' 
   | 'intro-clock-multiple' 
   | 'main-app'
+  | 'blvd-loading'
   | 'blvd-play'
   | 'blvd-text'
   | 'blvd-title-1'
